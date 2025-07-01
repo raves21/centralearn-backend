@@ -17,7 +17,6 @@ class RolePermissionSeeder extends Seeder
         $adminOnly = [Role::ADMIN];
         $instructorAndAdmin = [Role::ADMIN, Role::INSTRUCTOR];
         $studentAndAdmin = [Role::STUDENT, Role::ADMIN];
-        $studentAndInstructor = [Role::STUDENT, Role::INSTRUCTOR];
 
         $permissionsAssignedToRoles = [
 
@@ -94,13 +93,13 @@ class RolePermissionSeeder extends Seeder
 
         //create roles
         foreach ($allRoles as $role) {
-            Role::firstOrCreate(['name' => $role]);
+            Role::create(['name' => $role]);
         }
 
         //grant permission to roles
-        foreach ($permissionsAssignedToRoles as $permission => $roles) {
+        foreach ($permissionsAssignedToRoles as $permissionName => $roles) {
             //create permission
-            $permission = Permission::firstOrCreate(['name' => $permission]);
+            $permission = Permission::create(['name' => $permissionName]);
             //grant permission to roles
             $permission->syncRoles($roles);
         }
