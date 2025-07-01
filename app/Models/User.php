@@ -45,6 +45,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(Instructor::class);
     }
 
+    public function program()
+    {
+        return $this->belongsTo(Program::class);
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
