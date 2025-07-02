@@ -5,14 +5,18 @@ namespace App\Filament\Resources\StudentResource\Pages;
 use App\Filament\Resources\StudentResource;
 use App\Models\Department;
 use App\Models\Program;
+use App\Models\Role;
+use App\Models\Student;
 use App\Models\User;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 
 class EditStudent extends EditRecord
@@ -22,6 +26,31 @@ class EditStudent extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('update-password')
+                ->visible(fn() => auth()->user()->hasRole([Role::ADMIN, Role::SUPERADMIN]))
+                ->label('Update Password')
+                ->form([
+                    TextInput::make('new_password')
+                        ->label('New Password')
+                        ->password()
+                        ->required()
+                        ->autocomplete('off')
+                        ->revealable()
+                ])
+                ->modalHeading('Password Update')
+                ->modalWidth('lg')
+                ->action(function ($data) {
+                    $user = User::find($this->record->user->id);
+                    $user->password = $data['new_password'];
+                    $user->save();
+
+                    Notification::make()
+                        ->title('Password updated successfully.')
+                        ->success()
+                        ->send();
+
+                    return redirect(StudentResource::getUrl('index'));
+                }),
             Actions\DeleteAction::make(),
         ];
     }
@@ -35,24 +64,18 @@ class EditStudent extends EditRecord
 
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        $old = [
-            'user' => $this->record->user->only(['first_name', 'last_name', 'email', 'address']),
-            'department_id' => $this->record->program->department->id,
-            'program_id' => $this->record->program->id,
-        ];
-
-        if ($old !== $data) {
-            $user = User::find($this->record->user->id);
-            $user->update($data['user']);
-            $program = Program::find($data['program_id']);
-            $user->program()->associate($program);
-        }
+        $user = $this->record->user;
+        $user->update($data['user']);
+        $selectedProgram = Program::find($data['program_id']);
+        $student = $this->record->user->student;
+        $student->program()->associate($selectedProgram);
+        $student->save();
         return $data;
     }
 
     protected function getRedirectUrl(): string
     {
-        return $this->getResource()::getUrl('index');
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
     }
 
     public function form(Form $form): Form

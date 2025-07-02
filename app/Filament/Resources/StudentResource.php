@@ -14,8 +14,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
-use Filament\Infolists\Components\Grid as ComponentsGrid;
-use Filament\Infolists\Components\Section as ComponentsSection;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Section;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Tables\Actions\ActionGroup;
-use Filament\Tables\Columns\Layout\Grid;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 
@@ -85,9 +84,9 @@ class StudentResource extends Resource
     {
         return $infolist
             ->schema([
-                ComponentsGrid::make(2)
+                Grid::make(2)
                     ->schema([
-                        ComponentsSection::make('User Details')
+                        Section::make('User Details')
                             ->schema([
                                 TextEntry::make('user.first_name')
                                     ->label('First Name'),
@@ -98,7 +97,7 @@ class StudentResource extends Resource
                                 TextEntry::make('user.email')
                                     ->label('Email')
                             ])->columnSpan(1),
-                        ComponentsSection::make('Program Assignment')
+                        Section::make('Program Assignment')
                             ->schema([
                                 TextEntry::make('program.department.name')
                                     ->label('Department'),

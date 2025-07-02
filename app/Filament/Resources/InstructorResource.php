@@ -3,16 +3,21 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\InstructorResource\Pages;
-use App\Filament\Resources\InstructorResource\RelationManagers;
+use App\Models\Department;
 use App\Models\Instructor;
-use Filament\Forms;
+use App\Models\Role;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Grid;
+use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\DB;
 
 class InstructorResource extends Resource
 {
@@ -22,18 +27,7 @@ class InstructorResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('user_id')
-                    ->required()
-                    ->maxLength(36),
-                Forms\Components\TextInput::make('department_id')
-                    ->required()
-                    ->maxLength(36),
-                Forms\Components\TextInput::make('job_title')
-                    ->required()
-                    ->maxLength(255),
-            ]);
+        return $form;
     }
 
     public static function table(Table $table): Table
@@ -41,40 +35,87 @@ class InstructorResource extends Resource
         return $table
             ->query(Instructor::orderBy('created_at', 'desc'))
             ->columns([
-                Tables\Columns\TextColumn::make('user.first_name')
+                TextColumn::make('user.first_name')
                     ->label('First Name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('user.last_name')
+                TextColumn::make('user.last_name')
                     ->label('Last Name')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('department.code')
-                    ->label('Department')
+                TextColumn::make('job_title')
+                    ->label('Job Title')
                     ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('job_title')
-                    ->label('Job Title')
+                TextColumn::make('department.code')
+                    ->label('Department')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('created_at')
+                TextColumn::make('created_at')
+                    ->label('Date Enrolled')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                SelectFilter::make('department_id')
+                    ->label('Department')
+                    ->options(Department::all()
+                        ->mapWithKeys(fn($dept) => [$dept->id => "{$dept->code} ({$dept->name})"]))
+                    ->searchable(),
+                SelectFilter::make('job_title')
+                    ->label('Job Title')
+                    ->options(DB::table('instructors')
+                        ->distinct()
+                        ->pluck('job_title')
+                        ->mapWithKeys(fn($jt) => [$jt => $jt])
+                        ->toArray())
+                    ->searchable()
             ])
             ->actions([
+                Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+            ]);
+    }
+
+    public static function infolist(Infolist $infolist): Infolist
+    {
+        return $infolist
+            ->schema([
+                Grid::make(2)
+                    ->schema([
+                        Section::make('User Details')
+                            ->schema([
+                                TextEntry::make('user.first_name')
+                                    ->label('First Name'),
+                                TextEntry::make('user.last_name')
+                                    ->label('Last Name'),
+                                TextEntry::make('is_admin')
+                                    ->label('Has Admin rights')
+                                    ->badge()
+                                    ->getStateUsing(function ($record) {
+                                        return $record->user->hasRole(Role::ADMIN) ? "Yes" : "No";
+                                    })
+                                    ->color(fn(string $state) => match ($state) {
+                                        'Yes' => 'success',
+                                        'No' => 'warning'
+                                    }),
+                                TextEntry::make('user.address')
+                                    ->label('Address'),
+                                TextEntry::make('job_title')
+                                    ->label('Job Title'),
+                                TextEntry::make('user.email')
+                                    ->label('Email'),
+                            ])->columnSpan(1),
+                        Section::make('Department Assignment')
+                            ->schema([
+                                TextEntry::make('department.name')
+                                    ->label('Department'),
+                            ])->columnSpan(1),
+                    ])
             ]);
     }
 
@@ -91,6 +132,7 @@ class InstructorResource extends Resource
             'index' => Pages\ListInstructors::route('/'),
             'create' => Pages\CreateInstructor::route('/create'),
             'edit' => Pages\EditInstructor::route('/{record}/edit'),
+            'view' => Pages\ViewInstructor::route('/{record}'),
         ];
     }
 }

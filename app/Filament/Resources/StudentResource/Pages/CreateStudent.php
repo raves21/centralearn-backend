@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources\StudentResource\Pages;
 
+use App\Filament\CreateAndRedirectToIndex;
 use App\Filament\Resources\StudentResource;
 use App\Models\User;
-use App\Filament\CreateAndRedirectToIndex;
 use App\Models\Department;
 use App\Models\Program;
+use App\Models\Role;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -14,7 +15,7 @@ use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\Log;
 
-class CreateStudent extends CreateRecord
+class CreateStudent extends CreateAndRedirectToIndex
 {
     use CreateRecord\Concerns\HasWizard;
     protected static string $resource = StudentResource::class;
@@ -76,15 +77,11 @@ class CreateStudent extends CreateRecord
         ];
     }
 
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
-    }
-
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        //create user
-        $data['user_id'] = User::create($data['user'])->id;
+        $user = User::create($data['user']);
+        $user->assignRole(Role::STUDENT);
+        $data['user_id'] = $user->id;
         unset($data['user']);
         return $data;
     }

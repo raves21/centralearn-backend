@@ -6,7 +6,6 @@ use App\Filament\Resources\StudentResource;
 use App\Models\Role;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Support\Facades\Auth;
 
 class ViewStudent extends ViewRecord
 {
