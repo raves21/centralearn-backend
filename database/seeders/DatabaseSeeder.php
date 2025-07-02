@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Admin;
 use App\Models\Department;
 use App\Models\Instructor;
 use App\Models\Program;
@@ -31,6 +32,10 @@ class DatabaseSeeder extends Seeder
         //admin
         $admin = User::factory()->create([
             'email' => 'admin@celms.com'
+        ]);
+        Admin::create([
+            'user_id' => $admin->id,
+            'job_title' => 'University Admin 1'
         ]);
         $admin->assignRole(Role::ADMIN);
 
