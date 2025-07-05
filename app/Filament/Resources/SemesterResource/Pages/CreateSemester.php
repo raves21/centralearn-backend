@@ -7,7 +7,7 @@ use App\Filament\Resources\SemesterResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateSemester extends CreateRecord
+class CreateSemester extends CreateAndRedirectToIndex
 {
     protected static string $resource = SemesterResource::class;
 

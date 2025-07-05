@@ -93,33 +93,31 @@ class EditInstructor extends EditRecord
             ->schema([
                 Wizard::make([
                     Step::make('User Details')
+                        ->columns(2)
                         ->schema([
-                            Grid::make(2)
-                                ->schema([
-                                    TextInput::make('user.first_name')
-                                        ->label('First Name')
-                                        ->required(),
-                                    TextInput::make('user.last_name')
-                                        ->label('Last Name')
-                                        ->required(),
-                                    TextInput::make('user.email')
-                                        ->label('Email')
-                                        ->email()
-                                        ->required(),
-                                    TextInput::make('job_title')
-                                        ->label('Job Title')
-                                        ->required(),
-                                    TextInput::make('user.address')
-                                        ->label('Address')
-                                        ->required()
-                                        ->columnSpan(fn() => auth()->user()->hasRole(Role::SUPERADMIN) ? 1 : 'full'),
-                                    Select::make('user.is_admin')
-                                        ->native(false)
-                                        ->visible(fn() => auth()->user()->hasRole(Role::SUPERADMIN))
-                                        ->label('Give Admin rights')
-                                        ->options([false => 'No', true => 'Yes',])
-                                        ->default(false),
-                                ])
+                            TextInput::make('user.first_name')
+                                ->label('First Name')
+                                ->required(),
+                            TextInput::make('user.last_name')
+                                ->label('Last Name')
+                                ->required(),
+                            TextInput::make('user.email')
+                                ->label('Email')
+                                ->email()
+                                ->required(),
+                            TextInput::make('job_title')
+                                ->label('Job Title')
+                                ->required(),
+                            TextInput::make('user.address')
+                                ->label('Address')
+                                ->required()
+                                ->columnSpan(fn() => auth()->user()->hasRole(Role::SUPERADMIN) ? 1 : 'full'),
+                            Select::make('user.is_admin')
+                                ->native(false)
+                                ->visible(fn() => auth()->user()->hasRole(Role::SUPERADMIN))
+                                ->label('Give Admin rights')
+                                ->options([false => 'No', true => 'Yes',])
+                                ->default(false),
                         ]),
                     Step::make('Department')
                         ->schema([

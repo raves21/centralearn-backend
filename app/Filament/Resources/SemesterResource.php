@@ -27,37 +27,33 @@ class SemesterResource extends Resource
     {
         $latestSemEndDate = Carbon::parse(Semester::latest()->first()->end_date);
         return $form
+            ->columns(2)
             ->schema([
-                Grid::make(2)
-                    ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->required()
-                            ->maxLength(255)
-                            ->columnSpanFull(),
-                        Forms\Components\DatePicker::make('start_date')
-                            ->required()
-                            ->helperText(function () use ($latestSemEndDate) {
-                                return new HtmlString(
-                                    "<div>" .
-                                        "<p>You can only choose dates that come after the latest semester's end date.</p>" .
-                                        '<p style="color: red; margin-top: 4px;">(' . $latestSemEndDate->format('F j, Y') . " and up)</p>" .
-                                        "</div>"
-                                );
-                            })
-                            ->minDate(function () use ($latestSemEndDate) {
-                                return $latestSemEndDate->addDay(1);
-                            })
-                            ->reactive()
-                            ->afterStateUpdated(fn($set) => $set('end_date', null))
-                            ->native(false),
-                        Forms\Components\DatePicker::make('end_date')
-                            ->required()
-                            ->helperText('You can only choose dates that come after start date.')
-                            ->reactive()
-                            ->disabled(fn($get) => empty($get('start_date')))
-                            ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay(1))
-                            ->native(false),
-                    ])
+                Forms\Components\TextInput::make('name')
+                    ->required()
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+                Forms\Components\DatePicker::make('start_date')
+                    ->required()
+                    ->helperText(function () use ($latestSemEndDate) {
+                        return new HtmlString(
+                            "<div>" .
+                                "<p>You can only choose dates that come after the latest semester's end date.</p>" .
+                                '<p style="color: red; margin-top: 4px;">(' . $latestSemEndDate->format('F j, Y') . " onwards)</p>" .
+                                "</div>"
+                        );
+                    })
+                    ->minDate($latestSemEndDate->addDay(1))
+                    ->reactive()
+                    ->afterStateUpdated(fn($set) => $set('end_date', null))
+                    ->native(false),
+                Forms\Components\DatePicker::make('end_date')
+                    ->required()
+                    ->helperText('You can only choose dates that come after start date.')
+                    ->reactive()
+                    ->disabled(fn($get) => empty($get('start_date')))
+                    ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay(1))
+                    ->native(false)
             ]);
     }
 

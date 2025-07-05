@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\InstructorResource\Pages;
 
+use App\Filament\CreateAndRedirectToIndex;
 use App\Filament\Resources\InstructorResource;
 use App\Models\Department;
 use App\Models\Role;
@@ -13,7 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
 
-class CreateInstructor extends CreateRecord
+class CreateInstructor extends CreateAndRedirectToIndex
 {
     use CreateRecord\Concerns\HasWizard;
     protected static string $resource = InstructorResource::class;
@@ -22,38 +23,36 @@ class CreateInstructor extends CreateRecord
     {
         return [
             Step::make('User Details')
+                ->columns(2)
                 ->schema([
-                    Grid::make(2)
-                        ->schema([
-                            TextInput::make('user.first_name')
-                                ->label('First Name')
-                                ->required(),
-                            TextInput::make('user.last_name')
-                                ->label('Last Name')
-                                ->required(),
-                            TextInput::make('user.email')
-                                ->label('Email')
-                                ->email()
-                                ->required(),
-                            TextInput::make('user.password')
-                                ->label('Password')
-                                ->password()
-                                ->revealable()
-                                ->required(),
-                            TextInput::make('job_title')
-                                ->label('Job Title')
-                                ->required(),
-                            Select::make('user.is_admin')
-                                ->native(false)
-                                ->visible(fn() => auth()->user()->hasRole(Role::SUPERADMIN))
-                                ->label('Give Admin rights')
-                                ->options([false => 'No', true => 'Yes',])
-                                ->default(false),
-                            TextInput::make('user.address')
-                                ->label('Address')
-                                ->required()
-                                ->columnSpan(fn() => auth()->user()->hasRole(Role::SUPERADMIN) ? 'full' : 1)
-                        ])
+                    TextInput::make('user.first_name')
+                        ->label('First Name')
+                        ->required(),
+                    TextInput::make('user.last_name')
+                        ->label('Last Name')
+                        ->required(),
+                    TextInput::make('user.email')
+                        ->label('Email')
+                        ->email()
+                        ->required(),
+                    TextInput::make('user.password')
+                        ->label('Password')
+                        ->password()
+                        ->revealable()
+                        ->required(),
+                    TextInput::make('job_title')
+                        ->label('Job Title')
+                        ->required(),
+                    Select::make('user.is_admin')
+                        ->native(false)
+                        ->visible(fn() => auth()->user()->hasRole(Role::SUPERADMIN))
+                        ->label('Give Admin rights')
+                        ->options([false => 'No', true => 'Yes',])
+                        ->default(false),
+                    TextInput::make('user.address')
+                        ->label('Address')
+                        ->required()
+                        ->columnSpan(fn() => auth()->user()->hasRole(Role::SUPERADMIN) ? 'full' : 1)
                 ]),
             Step::make('Department')
                 ->schema([
@@ -64,11 +63,6 @@ class CreateInstructor extends CreateRecord
                         ->required()
                 ])
         ];
-    }
-
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('index');
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

@@ -34,31 +34,29 @@ class AdminResource extends Resource
     public static function form(Form $form): Form
     {
         return $form
+            ->columns(2)
             ->schema([
-                ComponentsGrid::make(2)
-                    ->schema([
-                        TextInput::make('user.first_name')
-                            ->label('First Name')
-                            ->required(),
-                        TextInput::make('user.last_name')
-                            ->label('Last Name')
-                            ->required(),
-                        TextInput::make('user.email')
-                            ->label('Email')
-                            ->email()
-                            ->required(),
-                        TextInput::make('user.password')
-                            ->label('Password')
-                            ->password()
-                            ->revealable()
-                            ->required(),
-                        TextInput::make('job_title')
-                            ->label('Job Title')
-                            ->required(),
-                        TextInput::make('user.address')
-                            ->label('Address')
-                            ->required()
-                    ])
+                TextInput::make('user.first_name')
+                    ->label('First Name')
+                    ->required(),
+                TextInput::make('user.last_name')
+                    ->label('Last Name')
+                    ->required(),
+                TextInput::make('user.email')
+                    ->label('Email')
+                    ->email()
+                    ->required(),
+                TextInput::make('user.password')
+                    ->label('Password')
+                    ->password()
+                    ->revealable()
+                    ->required(),
+                TextInput::make('job_title')
+                    ->label('Job Title')
+                    ->required(),
+                TextInput::make('user.address')
+                    ->label('Address')
+                    ->required()
             ]);
     }
 
@@ -106,11 +104,12 @@ class AdminResource extends Resource
         return $infolist
             ->schema([
                 Section::make()
+                    ->columns(2)
                     ->schema([
                         TextEntry::make('user.first_name')
                             ->label('First Name'),
                         TextEntry::make('user.last_name')
-                            ->label('First Name'),
+                            ->label('Last Name'),
                         TextEntry::make('user.address')
                             ->label('Address'),
                         TextEntry::make('user.email')

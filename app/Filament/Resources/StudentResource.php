@@ -79,28 +79,24 @@ class StudentResource extends Resource
         return $infolist
             ->schema([
                 Section::make()
+                    ->columns(2)
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                TextEntry::make('user.first_name')
-                                    ->label('First Name'),
-                                TextEntry::make('user.last_name')
-                                    ->label('First Name'),
-                                TextEntry::make('user.address')
-                                    ->label('Address'),
-                                TextEntry::make('user.email')
-                                    ->label('Email')
-                            ])
+                        TextEntry::make('user.first_name')
+                            ->label('First Name'),
+                        TextEntry::make('user.last_name')
+                            ->label('First Name'),
+                        TextEntry::make('user.address')
+                            ->label('Address'),
+                        TextEntry::make('user.email')
+                            ->label('Email')
                     ]),
                 Section::make()
+                    ->columns(2)
                     ->schema([
-                        Grid::make(2)
-                            ->schema([
-                                TextEntry::make('department')
-                                    ->getStateUsing(fn($record) => "{$record->program->department->name} ({$record->program->department->code})"),
-                                TextEntry::make('program')
-                                    ->getStateUsing(fn($record) => "{$record->program->name} ({$record->program->code})")
-                            ])
+                        TextEntry::make('department')
+                            ->getStateUsing(fn($record) => "{$record->program->department->name} ({$record->program->department->code})"),
+                        TextEntry::make('program')
+                            ->getStateUsing(fn($record) => "{$record->program->name} ({$record->program->code})")
                     ])
             ]);
     }

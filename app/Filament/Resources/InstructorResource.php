@@ -92,39 +92,35 @@ class InstructorResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
+            ->columns(2)
             ->schema([
-                Grid::make(2)
+                Section::make()
+                    ->columns(2)
                     ->schema([
-                        Section::make()
-                            ->schema([
-                                Grid::make(2)
-                                    ->schema([
-                                        TextEntry::make('user.first_name')
-                                            ->label('First Name'),
-                                        TextEntry::make('user.last_name')
-                                            ->label('Last Name'),
-                                        TextEntry::make('is_admin')
-                                            ->label('Has Admin rights')
-                                            ->badge()
-                                            ->getStateUsing(fn($record) => $record->user->hasRole(Role::ADMIN) ? "Yes" : "No")
-                                            ->color(fn(string $state) => match ($state) {
-                                                'Yes' => 'success',
-                                                'No' => 'warning'
-                                            }),
-                                        TextEntry::make('user.address')
-                                            ->label('Address'),
-                                        TextEntry::make('job_title')
-                                            ->label('Job Title'),
-                                        TextEntry::make('user.email')
-                                            ->label('Email')
-                                    ])
-                            ]),
-                        Section::make()
-                            ->schema([
-                                TextEntry::make('department.name')
-                                    ->label('Department')
-                                    ->getStateUsing(fn($record) => "{$record->department->name} ({$record->department->code})"),
-                            ])
+                        TextEntry::make('user.first_name')
+                            ->label('First Name'),
+                        TextEntry::make('user.last_name')
+                            ->label('Last Name'),
+                        TextEntry::make('is_admin')
+                            ->label('Has Admin rights')
+                            ->badge()
+                            ->getStateUsing(fn($record) => $record->user->hasRole(Role::ADMIN) ? "Yes" : "No")
+                            ->color(fn(string $state) => match ($state) {
+                                'Yes' => 'success',
+                                'No' => 'warning'
+                            }),
+                        TextEntry::make('user.address')
+                            ->label('Address'),
+                        TextEntry::make('job_title')
+                            ->label('Job Title'),
+                        TextEntry::make('user.email')
+                            ->label('Email')
+                    ]),
+                Section::make()
+                    ->schema([
+                        TextEntry::make('department.name')
+                            ->label('Department')
+                            ->getStateUsing(fn($record) => "{$record->department->name} ({$record->department->code})"),
                     ])
             ]);
     }

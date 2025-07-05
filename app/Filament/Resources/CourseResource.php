@@ -62,21 +62,19 @@ class CourseResource extends Resource
     public static function infolist(Infolist $infolist): Infolist
     {
         return $infolist
+            ->columns(2)
             ->schema([
-                Grid::make(2)
+                Section::make()
                     ->schema([
-                        Section::make()
-                            ->schema([
-                                TextEntry::make('name')->color('primary'),
-                                TextEntry::make('code')->badge(),
-                                TextEntry::make('description'),
-                                ImageEntry::make('image_path')->label('Image')
-                            ])->columnSpan(1),
-                        Section::make()->schema([
-                            TextEntry::make('departments')
-                                ->getStateUsing(fn($record) => implode(", ", collect($record->departments)->pluck('code')->toArray()))
-                        ])->columnSpan(1)
-                    ])
+                        TextEntry::make('name')->color('primary'),
+                        TextEntry::make('code')->badge(),
+                        TextEntry::make('departments')
+                            ->getStateUsing(fn($record) => implode(", ", collect($record->departments)->pluck('code')->toArray())),
+                        TextEntry::make('description'),
+                    ])->columnSpan(1),
+                Section::make()->schema([
+                    ImageEntry::make('image_path')->label('Image')
+                ])->columnSpan(1)
             ]);
     }
 

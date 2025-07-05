@@ -85,43 +85,39 @@ class EditStudent extends EditRecord
             ->schema([
                 Wizard::make([
                     Step::make('User Details')
+                        ->columns(2)
                         ->schema([
-                            Grid::make(2)
-                                ->schema([
-                                    TextInput::make('user.first_name')
-                                        ->label('First Name')
-                                        ->required(),
-                                    TextInput::make('user.last_name')
-                                        ->label('Last Name')
-                                        ->required(),
-                                    TextInput::make('user.email')
-                                        ->label('Email')
-                                        ->email()
-                                        ->required(),
-                                    TextInput::make('user.address')
-                                        ->label('Address')
-                                        ->required()
-                                ])
+                            TextInput::make('user.first_name')
+                                ->label('First Name')
+                                ->required(),
+                            TextInput::make('user.last_name')
+                                ->label('Last Name')
+                                ->required(),
+                            TextInput::make('user.email')
+                                ->label('Email')
+                                ->email()
+                                ->required(),
+                            TextInput::make('user.address')
+                                ->label('Address')
+                                ->required()
                         ]),
                     Step::make('Program')
+                        ->columns(2)
                         ->schema([
-                            Grid::make(2)
-                                ->schema([
-                                    Select::make('department_id')
-                                        ->label('Department')
-                                        ->options(Department::all()->mapWithKeys(fn($dept) => [$dept->id => "{$dept->name} ({$dept->code})"]))
-                                        ->native(false)
-                                        ->required()
-                                        ->afterStateUpdated(fn($set) => $set('program_id', null))
-                                        ->reactive(),
-                                    Select::make('program_id')
-                                        ->label('Program')
-                                        ->options(fn($get) => Program::where('department_id', $get('department_id'))->pluck('name', 'id'))
-                                        ->native(false)
-                                        ->disabled(fn($get) => blank($get('department_id')))
-                                        ->required()
-                                        ->reactive()
-                                ])
+                            Select::make('department_id')
+                                ->label('Department')
+                                ->options(Department::all()->mapWithKeys(fn($dept) => [$dept->id => "{$dept->name} ({$dept->code})"]))
+                                ->native(false)
+                                ->required()
+                                ->afterStateUpdated(fn($set) => $set('program_id', null))
+                                ->reactive(),
+                            Select::make('program_id')
+                                ->label('Program')
+                                ->options(fn($get) => Program::where('department_id', $get('department_id'))->pluck('name', 'id'))
+                                ->native(false)
+                                ->disabled(fn($get) => blank($get('department_id')))
+                                ->required()
+                                ->reactive()
                         ])
                 ])->columnSpanFull()
             ]);

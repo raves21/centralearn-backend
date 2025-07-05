@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\CourseResource\Pages;
 
+use App\Filament\CreateAndRedirectToIndex;
 use App\Filament\Resources\CourseResource;
 use App\Models\CourseInstructorAssignment;
 use App\Models\Department;
@@ -16,7 +17,7 @@ use Filament\Forms\Components\Wizard\Step;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Facades\DB;
 
-class CreateCourse extends CreateRecord
+class CreateCourse extends CreateAndRedirectToIndex
 {
     use CreateRecord\Concerns\HasWizard;
     protected static string $resource = CourseResource::class;
@@ -25,23 +26,21 @@ class CreateCourse extends CreateRecord
     {
         return [
             Step::make('Course Details')
+                ->columns(2)
                 ->schema([
-                    Grid::make(2)
-                        ->schema([
-                            TextInput::make('name')
-                                ->required()
-                                ->maxLength(255),
-                            TextInput::make('code')
-                                ->required()
-                                ->maxLength(255),
-                            Textarea::make('description')
-                                ->rows(4)
-                                ->maxLength(255),
-                            FileUpload::make('image_path')
-                                ->label('Image')
-                                ->imageEditor()
-                                ->image(),
-                        ])
+                    TextInput::make('name')
+                        ->required()
+                        ->maxLength(255),
+                    TextInput::make('code')
+                        ->required()
+                        ->maxLength(255),
+                    Textarea::make('description')
+                        ->rows(4)
+                        ->maxLength(255),
+                    FileUpload::make('image_path')
+                        ->label('Image')
+                        ->imageEditor()
+                        ->image()
                 ]),
             Step::make('Department')
                 ->schema([
@@ -55,11 +54,6 @@ class CreateCourse extends CreateRecord
                         ->required(),
                 ]),
         ];
-    }
-
-    protected function getRedirectUrl(): string
-    {
-        return CourseResource::getUrl('index');
     }
 
     protected function afterCreate()

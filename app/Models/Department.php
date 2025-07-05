@@ -35,6 +35,49 @@ class Department extends Model
             }
         });
 
+        static::updating(function ($department) {
+            dd($department->image_path, $department->original['image_path']);
+            $old = $department->original;
+            $new = $department->attributes;
+
+            if (isset($new['image_path']) && empty($old['image_path'])) {
+                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
+                Storage::disk('public')->makeDirectory("departments/{$department->code}");
+
+                $fileName = $new['image_path'];
+                $targetPath = "departments/{$department->code}/{$fileName}";
+
+                Storage::disk('public')->move($fileName, $targetPath);
+
+                $department;
+            }
+        });
+
+        static::updated(function ($department) {
+            $old = $department->original;
+            $new = $department->attributes;
+
+            if ($old['image_path'] === $new['image_path']) return;
+
+            if (isset($old['image_path']) && empty($new['image_path'])) {
+                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
+            }
+
+            if (isset($new['image_path']) && empty($old['image_path'])) {
+                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
+                Storage::disk('public')->makeDirectory("departments/{$department->code}");
+
+                $fileName = $new['image_path'];
+                $targetPath = "departments/{$department->code}/{$fileName}";
+
+                Storage::disk('public')->move($fileName, $targetPath);
+
+                $department->update([
+                    'image_path' => $targetPath
+                ]);
+            }
+        });
+
         static::deleted(function ($department) {
             if (isset($department->image_path)) {
                 Storage::disk('public')->deleteDirectory("departments/{$department->code}");
