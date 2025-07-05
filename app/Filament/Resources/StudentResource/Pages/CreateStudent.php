@@ -49,26 +49,21 @@ class CreateStudent extends CreateAndRedirectToIndex
                                 ->columnSpanFull(),
                         ])
                 ]),
-            Step::make('Program Assignment')
+            Step::make('Program')
                 ->schema([
                     Grid::make(2)
                         ->schema([
                             Select::make('department_id')
+                                ->native(false)
                                 ->label('Department')
-                                ->options(
-                                    Department::all()->pluck('code', 'id')->map(function ($code, $id) {
-                                        $dept = Department::find($id);
-                                        return "{$dept->name} ({$code})";
-                                    })
-                                )
+                                ->options(Department::all()->pluck('code', 'id')->mapWithKeys(fn($dept) => "{$dept->name} ({$dept->code})"))
                                 ->required()
                                 ->afterStateUpdated(fn($set) => $set('program_id', null))
                                 ->reactive(),
                             Select::make('program_id')
+                                ->native(false)
                                 ->label('Program')
-                                ->options(function ($get) {
-                                    return Program::where('department_id', $get('department_id'))->pluck('name', 'id');
-                                })
+                                ->options(fn($get) => Program::where('department_id', $get('department_id'))->pluck('name', 'id'))
                                 ->disabled(fn($get) => blank($get('department_id')))
                                 ->required()
                                 ->reactive()

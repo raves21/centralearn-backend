@@ -7,14 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class CourseInstructorAssignment extends Model
 {
-    use HasUuids;
-
     protected $table = 'course_instructor';
 
     protected $fillable = [
         'instructor_id',
         'course_id',
-        'term_id'
+        'semester_id'
     ];
 
     public function instructor()
@@ -27,8 +25,8 @@ class CourseInstructorAssignment extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function term()
+    public function semester()
     {
-        return $this->belongsTo(Term::class);
+        return $this->belongsTo(Semester::class);
     }
 }

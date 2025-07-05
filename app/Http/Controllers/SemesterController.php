@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Term;
+use App\Models\Semester;
 use Illuminate\Http\Request;
 
-class TermController extends Controller
+class SemesterController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,7 +26,7 @@ class TermController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Term $term)
+    public function show(Semester $semester)
     {
         //
     }
@@ -34,7 +34,7 @@ class TermController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Term $term)
+    public function update(Request $request, Semester $semester)
     {
         //
     }
@@ -42,7 +42,7 @@ class TermController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Term $term)
+    public function destroy(Semester $semester)
     {
         //
     }

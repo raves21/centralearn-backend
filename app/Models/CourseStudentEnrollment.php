@@ -15,7 +15,7 @@ class CourseStudentEnrollment extends Model
     protected $fillable = [
         'student_id',
         'course_id',
-        'term_id',
+        'semester_id',
         'final_grade'
     ];
 
@@ -29,8 +29,8 @@ class CourseStudentEnrollment extends Model
         return $this->belongsTo(Course::class);
     }
 
-    public function term()
+    public function semester()
     {
-        return $this->belongsTo(Term::class);
+        return $this->belongsTo(Semester::class);
     }
 }

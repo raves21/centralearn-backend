@@ -44,9 +44,10 @@ class CreateInstructor extends CreateRecord
                                 ->label('Job Title')
                                 ->required(),
                             Select::make('user.is_admin')
+                                ->native(false)
                                 ->visible(fn() => auth()->user()->hasRole(Role::SUPERADMIN))
                                 ->label('Give Admin rights')
-                                ->options([true => 'Yes', false => 'No'])
+                                ->options([false => 'No', true => 'Yes',])
                                 ->default(false),
                             TextInput::make('user.address')
                                 ->label('Address')
@@ -54,13 +55,12 @@ class CreateInstructor extends CreateRecord
                                 ->columnSpan(fn() => auth()->user()->hasRole(Role::SUPERADMIN) ? 'full' : 1)
                         ])
                 ]),
-            Step::make('Department Assignment')
+            Step::make('Department')
                 ->schema([
                     Select::make('department_id')
+                        ->native(false)
                         ->label('Department')
-                        ->options(
-                            Department::all()->mapWithKeys(fn($dept) => [$dept->id => "{$dept->name} ({$dept->code})"])
-                        )
+                        ->options(Department::all()->mapWithKeys(fn($dept) => [$dept->id => "{$dept->name} ({$dept->code})"]))
                         ->required()
                 ])
         ];

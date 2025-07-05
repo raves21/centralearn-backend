@@ -29,6 +29,8 @@ class AdminResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-building-library';
 
+    protected static ?string $navigationGroup = 'User Management';
+
     public static function form(Form $form): Form
     {
         return $form
@@ -89,11 +91,7 @@ class AdminResource extends Resource
             ->filters([
                 SelectFilter::make('job_title')
                     ->label('Job Title')
-                    ->options(DB::table('admins')
-                        ->distinct()
-                        ->pluck('job_title')
-                        ->mapWithKeys(fn($jt) => [$jt => $jt])
-                        ->toArray())
+                    ->options(Admin::distinct()->pluck('job_title', 'job_title'))
                     ->searchable()
                     ->placeholder('Job Title'),
             ])
@@ -107,7 +105,7 @@ class AdminResource extends Resource
     {
         return $infolist
             ->schema([
-                Section::make('User Details')
+                Section::make()
                     ->schema([
                         TextEntry::make('user.first_name')
                             ->label('First Name'),

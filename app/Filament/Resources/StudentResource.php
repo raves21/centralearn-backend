@@ -4,26 +4,16 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\StudentResource\Pages;
 use App\Filament\Resources\StudentResource\RelationManagers;
-use App\Models\Department;
 use App\Models\Program;
 use App\Models\Student;
-use Filament\Actions\DeleteAction;
-use Filament\Forms;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Wizard;
-use Filament\Forms\Components\Wizard\Step;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Section;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Filament\Infolists\Infolist;
 use Filament\Infolists\Components\TextEntry;
-use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 
@@ -32,6 +22,8 @@ class StudentResource extends Resource
     protected static ?string $model = Student::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-academic-cap';
+
+    protected static ?string $navigationGroup = 'User Management';
 
     public static function form(Form $form): Form
     {
@@ -52,9 +44,11 @@ class StudentResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('program.code')
+                    ->badge()
                     ->label('Program')
                     ->searchable(),
                 TextColumn::make('program.department.code')
+                    ->badge()
                     ->label('Department')
                     ->searchable(),
                 TextColumn::make('created_at')
@@ -84,9 +78,9 @@ class StudentResource extends Resource
     {
         return $infolist
             ->schema([
-                Grid::make(2)
+                Section::make()
                     ->schema([
-                        Section::make('User Details')
+                        Grid::make(2)
                             ->schema([
                                 TextEntry::make('user.first_name')
                                     ->label('First Name'),
@@ -96,14 +90,17 @@ class StudentResource extends Resource
                                     ->label('Address'),
                                 TextEntry::make('user.email')
                                     ->label('Email')
-                            ])->columnSpan(1),
-                        Section::make('Program Assignment')
+                            ])
+                    ]),
+                Section::make()
+                    ->schema([
+                        Grid::make(2)
                             ->schema([
-                                TextEntry::make('program.department.name')
-                                    ->label('Department'),
-                                TextEntry::make('program.name')
-                                    ->label('Program')
-                            ])->columnSpan(1)
+                                TextEntry::make('department')
+                                    ->getStateUsing(fn($record) => "{$record->program->department->name} ({$record->program->department->code})"),
+                                TextEntry::make('program')
+                                    ->getStateUsing(fn($record) => "{$record->program->name} ({$record->program->code})")
+                            ])
                     ])
             ]);
     }

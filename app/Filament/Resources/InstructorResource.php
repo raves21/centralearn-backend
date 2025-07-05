@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\InstructorResource\Pages;
+use App\Filament\Resources\InstructorResource\RelationManagers\CourseAssignmentsRelationManager;
 use App\Models\Department;
 use App\Models\Instructor;
 use App\Models\Role;
@@ -12,6 +13,7 @@ use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -24,6 +26,8 @@ class InstructorResource extends Resource
     protected static ?string $model = Instructor::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-briefcase';
+
+    protected static ?string $navigationGroup = 'User Management';
 
     public static function form(Form $form): Form
     {
@@ -48,7 +52,16 @@ class InstructorResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('department.code')
+                    ->badge()
                     ->label('Department')
+                    ->searchable(),
+                TextColumn::make('user.is_admin')
+                    ->label('Is Admin')
+                    ->getStateUsing(fn($record) => $record->user->hasRole(Role::ADMIN) ? 'Yes' : 'No')
+                    ->color(fn(string $state) => match ($state) {
+                        'Yes' => 'success',
+                        'No' => 'warning'
+                    })
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->label('Date Enrolled')
@@ -63,16 +76,11 @@ class InstructorResource extends Resource
             ->filters([
                 SelectFilter::make('department_id')
                     ->label('Department')
-                    ->options(Department::all()
-                        ->mapWithKeys(fn($dept) => [$dept->id => "{$dept->code} ({$dept->name})"]))
+                    ->options(Department::all()->mapWithKeys(fn($dept) => [$dept->id => "{$dept->code} ({$dept->name})"]))
                     ->searchable(),
                 SelectFilter::make('job_title')
                     ->label('Job Title')
-                    ->options(DB::table('instructors')
-                        ->distinct()
-                        ->pluck('job_title')
-                        ->mapWithKeys(fn($jt) => [$jt => $jt])
-                        ->toArray())
+                    ->options(Instructor::distinct()->pluck('job_title', 'job_title'))
                     ->searchable()
             ])
             ->actions([
@@ -87,34 +95,36 @@ class InstructorResource extends Resource
             ->schema([
                 Grid::make(2)
                     ->schema([
-                        Section::make('User Details')
+                        Section::make()
                             ->schema([
-                                TextEntry::make('user.first_name')
-                                    ->label('First Name'),
-                                TextEntry::make('user.last_name')
-                                    ->label('Last Name'),
-                                TextEntry::make('is_admin')
-                                    ->label('Has Admin rights')
-                                    ->badge()
-                                    ->getStateUsing(function ($record) {
-                                        return $record->user->hasRole(Role::ADMIN) ? "Yes" : "No";
-                                    })
-                                    ->color(fn(string $state) => match ($state) {
-                                        'Yes' => 'success',
-                                        'No' => 'warning'
-                                    }),
-                                TextEntry::make('user.address')
-                                    ->label('Address'),
-                                TextEntry::make('job_title')
-                                    ->label('Job Title'),
-                                TextEntry::make('user.email')
-                                    ->label('Email'),
-                            ])->columnSpan(1),
-                        Section::make('Department Assignment')
+                                Grid::make(2)
+                                    ->schema([
+                                        TextEntry::make('user.first_name')
+                                            ->label('First Name'),
+                                        TextEntry::make('user.last_name')
+                                            ->label('Last Name'),
+                                        TextEntry::make('is_admin')
+                                            ->label('Has Admin rights')
+                                            ->badge()
+                                            ->getStateUsing(fn($record) => $record->user->hasRole(Role::ADMIN) ? "Yes" : "No")
+                                            ->color(fn(string $state) => match ($state) {
+                                                'Yes' => 'success',
+                                                'No' => 'warning'
+                                            }),
+                                        TextEntry::make('user.address')
+                                            ->label('Address'),
+                                        TextEntry::make('job_title')
+                                            ->label('Job Title'),
+                                        TextEntry::make('user.email')
+                                            ->label('Email')
+                                    ])
+                            ]),
+                        Section::make()
                             ->schema([
                                 TextEntry::make('department.name')
-                                    ->label('Department'),
-                            ])->columnSpan(1),
+                                    ->label('Department')
+                                    ->getStateUsing(fn($record) => "{$record->department->name} ({$record->department->code})"),
+                            ])
                     ])
             ]);
     }
@@ -122,7 +132,7 @@ class InstructorResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CourseAssignmentsRelationManager::class
         ];
     }
 

@@ -62,15 +62,16 @@ class EditStudent extends EditRecord
         return $data;
     }
 
-    protected function mutateFormDataBeforeSave(array $data): array
+    protected function beforeSave()
     {
+        $data = $this->data;
         $user = $this->record->user;
+
         $user->update($data['user']);
         $selectedProgram = Program::find($data['program_id']);
         $student = $this->record->user->student;
         $student->program()->associate($selectedProgram);
         $student->save();
-        return $data;
     }
 
     protected function getRedirectUrl(): string
@@ -102,26 +103,21 @@ class EditStudent extends EditRecord
                                         ->required()
                                 ])
                         ]),
-                    Step::make('Program Assignment')
+                    Step::make('Program')
                         ->schema([
                             Grid::make(2)
                                 ->schema([
                                     Select::make('department_id')
                                         ->label('Department')
-                                        ->options(
-                                            Department::all()->pluck('code', 'id')->map(function ($code, $id) {
-                                                $dept = Department::find($id);
-                                                return "{$dept->name} ({$code})";
-                                            })
-                                        )
+                                        ->options(Department::all()->mapWithKeys(fn($dept) => [$dept->id => "{$dept->name} ({$dept->code})"]))
+                                        ->native(false)
                                         ->required()
                                         ->afterStateUpdated(fn($set) => $set('program_id', null))
                                         ->reactive(),
                                     Select::make('program_id')
                                         ->label('Program')
-                                        ->options(function ($get) {
-                                            return Program::where('department_id', $get('department_id'))->pluck('name', 'id');
-                                        })
+                                        ->options(fn($get) => Program::where('department_id', $get('department_id'))->pluck('name', 'id'))
+                                        ->native(false)
                                         ->disabled(fn($get) => blank($get('department_id')))
                                         ->required()
                                         ->reactive()

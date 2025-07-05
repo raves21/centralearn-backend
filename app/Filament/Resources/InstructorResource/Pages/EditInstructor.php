@@ -23,6 +23,11 @@ class EditInstructor extends EditRecord
 {
     protected static string $resource = InstructorResource::class;
 
+    public function getRelationManagers(): array
+    {
+        return [];
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -59,9 +64,11 @@ class EditInstructor extends EditRecord
         return $data;
     }
 
-    protected function mutateFormDataBeforeSave(array $data): array
+    protected function beforeSave()
     {
+
         $user = $this->record->user;
+        $data = $this->data;
 
         if ($data['user']['is_admin']) {
             $user->assignRole([Role::INSTRUCTOR, Role::ADMIN]);
@@ -73,8 +80,6 @@ class EditInstructor extends EditRecord
         $selectedDept = Department::find($data['department_id']);
         $instructor = $this->record->user->instructor;
         $instructor->department()->associate($selectedDept);
-        $instructor->save();
-        return $data;
     }
 
     protected function getRedirectUrl(): string
@@ -109,19 +114,19 @@ class EditInstructor extends EditRecord
                                         ->required()
                                         ->columnSpan(fn() => auth()->user()->hasRole(Role::SUPERADMIN) ? 1 : 'full'),
                                     Select::make('user.is_admin')
+                                        ->native(false)
                                         ->visible(fn() => auth()->user()->hasRole(Role::SUPERADMIN))
                                         ->label('Give Admin rights')
-                                        ->options([true => 'Yes', false => 'No'])
+                                        ->options([false => 'No', true => 'Yes',])
                                         ->default(false),
                                 ])
                         ]),
-                    Step::make('Department Assignment')
+                    Step::make('Department')
                         ->schema([
                             Select::make('department_id')
+                                ->native(false)
                                 ->label('Department')
-                                ->options(
-                                    Department::all()->mapWithKeys(fn($dept) => [$dept->id => "{$dept->code} ({$dept->name})"])
-                                )
+                                ->options(Department::all()->mapWithKeys(fn($dept) => [$dept->id => "{$dept->code} ({$dept->name})"]))
                                 ->required()
                         ])
                 ])->columnSpanFull()

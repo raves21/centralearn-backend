@@ -10,7 +10,7 @@ class Course extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['title', 'description', 'code', 'image_path'];
+    protected $fillable = ['description', 'code', 'image_path', 'name'];
 
     public function studentEnrollments()
     {

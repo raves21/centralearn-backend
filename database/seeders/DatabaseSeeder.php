@@ -7,8 +7,10 @@ use App\Models\Department;
 use App\Models\Instructor;
 use App\Models\Program;
 use App\Models\Role;
+use App\Models\Semester;
 use App\Models\Student;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -160,5 +162,12 @@ class DatabaseSeeder extends Seeder
         $student2->assignRole(Role::STUDENT);
         $student3->assignRole(Role::STUDENT);
         $student4->assignRole(Role::STUDENT);
+
+        //term
+        Semester::create([
+            'name' => 'Default Semester',
+            'start_date' => Carbon::now()->subMonth(2),
+            'end_date' => Carbon::now()->addMonth(2),
+        ]);
     }
 }
