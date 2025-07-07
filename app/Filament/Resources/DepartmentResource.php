@@ -57,7 +57,6 @@ class DepartmentResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('code')
-                    ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
@@ -84,9 +83,8 @@ class DepartmentResource extends Resource
             ->schema([
                 Section::make()
                     ->schema([
-                        TextEntry::make('name')
-                            ->color('primary'),
-                        TextEntry::make('code')->badge(),
+                        TextEntry::make('name'),
+                        TextEntry::make('code'),
                         TextEntry::make('description')
                     ])->columnSpan(1),
                 Section::make()

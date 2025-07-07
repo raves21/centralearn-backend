@@ -72,7 +72,7 @@ class ProgramResource extends Resource
                         TextEntry::make('name'),
                         TextEntry::make('code'),
                         TextEntry::make('department')
-                            ->getStateUsing(fn($record) => "{$record->department->name} ({$record->department->code})"),
+                            ->getStateUsing(fn($record) => "{$record->department->code} ({$record->department->name})"),
                         TextEntry::make('description'),
                     ])
                     ->columnSpan(1),

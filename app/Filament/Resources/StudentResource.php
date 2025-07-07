@@ -44,11 +44,9 @@ class StudentResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('program.code')
-                    ->badge()
                     ->label('Program')
                     ->searchable(),
                 TextColumn::make('program.department.code')
-                    ->badge()
                     ->label('Department')
                     ->searchable(),
                 TextColumn::make('created_at')

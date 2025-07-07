@@ -56,21 +56,21 @@ class EditSemester extends EditRecord
                             return new HtmlString(
                                 "<div>" .
                                     "<p>You can only choose dates between the previous semester's end date (if any) and the next semester's start date (if any).</p>" .
-                                    '<p style="color: red; margin-top: 4px;">(Between ' . $prevSemEndDate->format('F j, Y') . " and " . $nextSemStartDate->format('F j, Y') . ")</p>" .
+                                    '<p style="color: red; margin-top: 4px;">(Between ' . $prevSemEndDate->format('M j, Y') . " and " . $nextSemStartDate->format('M j, Y') . ")</p>" .
                                     "</div>"
                             );
                         } else if ($prevSemEndDate && !$nextSemStartDate) {
                             return new HtmlString(
                                 "<div>" .
                                     "<p>You can only choose dates between the previous semester's end date (if any) and the next semester's start date (if any).</p>" .
-                                    '<p style="color: red; margin-top: 4px;">(' . $prevSemEndDate->format('F j, Y')  . " onwards)</p>" .
+                                    '<p style="color: red; margin-top: 4px;">(' . $prevSemEndDate->format('M j, Y')  . " onwards)</p>" .
                                     "</div>"
                             );
                         } else {
                             return new HtmlString(
                                 "<div>" .
                                     "<p>You can only choose dates between the previous semester's end date (if any) and the next semester's start date (if any).</p>" .
-                                    '<p style="color: red; margin-top: 4px;">(From any date up to ' . $nextSemStartDate->format('F j, Y')  . ")</p>" .
+                                    '<p style="color: red; margin-top: 4px;">(From any date up to ' . $nextSemStartDate->format('M j, Y')  . ")</p>" .
                                     "</div>"
                             );
                         }

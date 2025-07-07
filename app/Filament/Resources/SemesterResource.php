@@ -39,7 +39,7 @@ class SemesterResource extends Resource
                         return new HtmlString(
                             "<div>" .
                                 "<p>You can only choose dates that come after the latest semester's end date.</p>" .
-                                '<p style="color: red; margin-top: 4px;">(' . $latestSemEndDate->format('F j, Y') . " onwards)</p>" .
+                                '<p style="color: red; margin-top: 4px;">(' . $latestSemEndDate->format('M j, Y') . " onwards)</p>" .
                                 "</div>"
                         );
                     })

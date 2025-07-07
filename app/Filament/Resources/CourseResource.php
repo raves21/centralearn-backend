@@ -20,6 +20,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\HtmlString;
 
 class CourseResource extends Resource
 {
@@ -40,10 +41,27 @@ class CourseResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('code')
-                    ->badge()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('departments')
-                    ->getStateUsing(fn($record) => implode(', ', $record->departments->pluck('code')->toArray())),
+                    ->label('Department/s')
+                    ->getStateUsing(function ($record) {
+                        $deptCodes = $record->departments->pluck('code')->toArray();
+                        $allDeptCodes = Department::all()->pluck('code')->toArray();
+                        sort($deptCodes);
+                        sort($allDeptCodes);
+                        $commaSeparated = implode(' / ', $deptCodes);
+
+                        $html = '';
+
+                        if ($allDeptCodes === $deptCodes) {
+                            $html = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-infinity-icon lucide-infinity">
+                            <path d="M6 16c5 0 7-8 12-8a4 4 0 0 1 0 8c-5 0-7-8-12-8a4 4 0 1 0 0 8"/></svg>';
+                        } else {
+                            $html = "<div style='display: flex; place-items: center; gap: 4px; flex-wrap: wrap; max-width: 140px;'>" . $commaSeparated . "</div>";
+                        }
+
+                        return new HtmlString($html);
+                    }),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
@@ -66,10 +84,10 @@ class CourseResource extends Resource
             ->schema([
                 Section::make()
                     ->schema([
-                        TextEntry::make('name')->color('primary'),
-                        TextEntry::make('code')->badge(),
+                        TextEntry::make('name'),
+                        TextEntry::make('code'),
                         TextEntry::make('departments')
-                            ->getStateUsing(fn($record) => implode(", ", collect($record->departments)->pluck('code')->toArray())),
+                            ->getStateUsing(fn($record) => implode(" / ", $record->departments->pluck('code')->toArray())),
                         TextEntry::make('description'),
                     ])->columnSpan(1),
                 Section::make()->schema([

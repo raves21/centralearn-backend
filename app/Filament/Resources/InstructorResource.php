@@ -52,7 +52,6 @@ class InstructorResource extends Resource
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('department.code')
-                    ->badge()
                     ->label('Department')
                     ->searchable(),
                 TextColumn::make('user.is_admin')
@@ -103,7 +102,6 @@ class InstructorResource extends Resource
                             ->label('Last Name'),
                         TextEntry::make('is_admin')
                             ->label('Has Admin rights')
-                            ->badge()
                             ->getStateUsing(fn($record) => $record->user->hasRole(Role::ADMIN) ? "Yes" : "No")
                             ->color(fn(string $state) => match ($state) {
                                 'Yes' => 'success',
