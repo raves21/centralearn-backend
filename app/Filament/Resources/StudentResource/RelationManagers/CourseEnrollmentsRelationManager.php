@@ -1,70 +1,51 @@
 <?php
 
-namespace App\Filament\Resources\InstructorResource\RelationManagers;
+namespace App\Filament\Resources\StudentResource\RelationManagers;
 
 use App\Models\Course;
-use App\Models\CourseInstructorAssignment;
 use App\Models\Department;
 use App\Models\Semester;
 use Carbon\Carbon;
-use Filament\Actions\Action;
 use Filament\Forms;
-use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
-use Filament\Notifications\Notification;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Actions\ActionGroup;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\HtmlString;
-use Throwable;
 
-class CourseAssignmentsRelationManager extends RelationManager
+class CourseEnrollmentsRelationManager extends RelationManager
 {
-    protected static string $relationship = 'courseAssignments';
-
-    public function form(Form $form): Form
-    {
-        return $form;
-    }
-
-    public function isReadOnly(): bool
-    {
-        return false;
-    }
+    protected static string $relationship = 'courseEnrollments';
 
     public function table(Table $table): Table
     {
         return $table
-            ->emptyStateHeading('Not assigned to any course.')
-            ->heading('Courses Assigned')
+            ->recordTitleAttribute('course')
+            ->emptyStateHeading('Not enrolled to any course.')
             ->columns([
                 TextColumn::make('course.name')
-                    ->label('Name'),
+                    ->label('Course'),
                 TextColumn::make('course.code')
                     ->label('Code'),
                 TextColumn::make('semester.name')
                     ->label('Semester')
             ])
             ->filters([
-                SelectFilter::make('semester_id')
-                    ->label('Semester')
-                    ->native(false)
-                    ->relationship('semester', 'name')
+                //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make()
+                Tables\Actions\CreateAction::make('course_enrollment')
+                    ->label('Enroll to Course')
                     ->createAnother(false)
-                    ->label('Assign to Course')
-                    ->modalHeading('Assign to Course')
+                    ->modalHeading('Enroll to Course')
                     ->modalWidth('2xl')
                     ->form([
                         Select::make('semester_id')
@@ -72,68 +53,67 @@ class CourseAssignmentsRelationManager extends RelationManager
                             ->options(Semester::orderBy('end_date')
                                 ->get()
                                 ->mapWithKeys(fn($sem) => [$sem->id => "{$sem->name} " . "(" . Carbon::parse($sem->start_date)->format('M j, Y') . " - " . Carbon::parse($sem->end_date)->format('M j, Y') . ")"]))
-                            ->required()
                             ->reactive()
-                            ->afterStateUpdated(fn($set) => $set('course_id', null))
-                            ->native(false),
+                            ->native(false)
+                            ->required()
+                            ->afterStateUpdated(fn($set) => $set('course_id', null)),
                         Select::make('course_id')
                             ->label('Course')
-                            ->helperText('Only courses under the instructor\'s department ' . "({$this->ownerRecord->department->code})")
                             ->options(function ($get) {
-                                $instructor = $this->ownerRecord;
-                                $assignedCoursesIds = $instructor->courseAssignments()
+                                $student = $this->ownerRecord;
+                                $assignedCoursesIds = $student->courseEnrollments()
                                     ->where('semester_id', $get('semester_id'))
                                     ->pluck('course_id');
 
                                 $availableCourses = Course::whereNotIn('id', $assignedCoursesIds)
                                     ->whereHas('departments', function ($q) {
-                                        $q->where('departments.id', $this->ownerRecord->department_id);
+                                        $q->where('departments.id', $this->ownerRecord->program->department_id);
                                     })
                                     ->get()
                                     ->mapWithKeys(fn($course) => [$course->id => "{$course->name} ({$course->code})"]);
                                 return $availableCourses;
                             })
                             ->reactive()
-                            ->disabled(fn($get) => empty($get('semester_id')))
                             ->native(false)
                             ->required()
+                            ->disabled(fn($get) => empty($get('semester_id')))
                     ])
                     ->mutateFormDataUsing(function ($data) {
-                        $data['instructor_id'] = $this->ownerRecord->id;
+                        $data['student_id'] = $this->ownerRecord->id;
                         return $data;
                     })
                     ->successNotificationTitle(function ($data) {
                         $courseCode = Course::find($data['course_id'])->code;
-                        return "Assigned to {$courseCode}.";
-                    })
+                        return "Enrolled to {$courseCode}.";
+                    }),
             ])
             ->actions([
                 ActionGroup::make([
                     Tables\Actions\ViewAction::make()
-                        ->modalHeading('View Course Assignment'),
+                        ->modalHeading('View Course Enrollment'),
                     Tables\Actions\EditAction::make()
+                        ->modalHeading('Edit Course Enrollment')
                         ->modalWidth('2xl')
-                        ->modalHeading('Edit Course Assignment')
                         ->form([
                             Select::make('semester_id')
                                 ->label('Semester')
-                                ->options(Semester::orderBy('end_date')->get()->pluck('name', 'id'))
-                                ->required()
+                                ->options(Semester::orderByDesc('created_at')->get()
+                                    ->mapWithKeys(fn($sem) => [$sem->id => "{$sem->name} " . "(" . Carbon::parse($sem->start_date)->format('M j, Y') . " - " . Carbon::parse($sem->end_date)->format('M j, Y') . ")"]))
                                 ->reactive()
-                                ->afterStateUpdated(fn($set) => $set('course_id', null))
-                                ->native(false),
+                                ->native(false)
+                                ->required()
+                                ->afterStateUpdated(fn($set) => $set('course_id', null)),
                             Select::make('course_id')
                                 ->label('Course')
-                                ->helperText("Only courses under the instructor's department. ({$this->ownerRecord->department->code})")
                                 ->options(function ($get) {
-                                    $instructor = $this->ownerRecord;
-                                    $assignedCoursesIds = $instructor->courseAssignments()
+                                    $student = $this->ownerRecord;
+                                    $assignedCoursesIds = $student->courseEnrollments()
                                         ->where('semester_id', $get('semester_id'))
                                         ->pluck('course_id');
 
                                     $availableCourses = Course::whereNotIn('id', $assignedCoursesIds)
                                         ->whereHas('departments', function ($q) {
-                                            $q->where('departments.id', $this->ownerRecord->department_id);
+                                            $q->where('departments.id', $this->ownerRecord->program->department_id);
                                         })
                                         ->get()
                                         ->mapWithKeys(fn($course) => [$course->id => "{$course->name} ({$course->code})"]);
@@ -144,16 +124,13 @@ class CourseAssignmentsRelationManager extends RelationManager
                                     return "{$course->name} ({$course->code})";
                                 })
                                 ->reactive()
-                                ->disabled(fn($get) => empty($get('semester_id')))
                                 ->native(false)
                                 ->required()
+                                ->disabled(fn($get) => empty($get('semester_id')))
                         ]),
                     Tables\Actions\DeleteAction::make()
                         ->label('Delete')
-                        ->modalHeading('Delete course assignment')
-                        ->successNotification(function () {
-                            return Notification::make()->success()->title('Course unassiged.')->send();
-                        })
+                        ->modalHeading('Delete course enrollment'),
                 ])
             ])
             ->bulkActions([
@@ -169,6 +146,7 @@ class CourseAssignmentsRelationManager extends RelationManager
             ->columns(2)
             ->schema([
                 Section::make('Course')
+                    ->columnSpan(1)
                     ->schema([
                         TextEntry::make('course.name')
                             ->label('Name'),
@@ -176,10 +154,10 @@ class CourseAssignmentsRelationManager extends RelationManager
                             ->label('Code'),
                         TextEntry::make('departments')
                             ->label('Department/s')
-                            ->getStateUsing(fn($record) => implode(' / ', $record->course->departments->pluck('code')->toArray()))
-                    ])
-                    ->columnSpan(1),
+                            ->getStateUsing(fn($record) => implode(' / ', $record->course->departments()->pluck('code')->toArray())),
+                    ]),
                 Section::make('Semester')
+                    ->columnSpan(1)
                     ->schema([
                         TextEntry::make('semester.name')
                             ->label('Name'),
@@ -190,7 +168,11 @@ class CourseAssignmentsRelationManager extends RelationManager
                             ->label('End Date')
                             ->formatStateUsing(fn($state) => Carbon::parse($state)->format('M j, Y')),
                     ])
-                    ->columnSpan(1)
             ]);
+    }
+
+    public function isReadOnly(): bool
+    {
+        return false;
     }
 }

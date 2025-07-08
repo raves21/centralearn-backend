@@ -71,8 +71,8 @@ class ProgramResource extends Resource
                     ->schema([
                         TextEntry::make('name'),
                         TextEntry::make('code'),
-                        TextEntry::make('department')
-                            ->getStateUsing(fn($record) => "{$record->department->code} ({$record->department->name})"),
+                        TextEntry::make('department.name')
+                            ->formatStateUsing(fn($record) => "{$record->department->code} ({$record->department->name})"),
                         TextEntry::make('description'),
                     ])
                     ->columnSpan(1),

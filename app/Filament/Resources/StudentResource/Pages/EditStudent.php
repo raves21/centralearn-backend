@@ -58,7 +58,7 @@ class EditStudent extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $data['user'] = $this->record->user->toArray();
-        $data['department_id'] = $this->record->program->department->id;
+        $data['department_id'] = $this->record->program->department_id;
         return $data;
     }
 

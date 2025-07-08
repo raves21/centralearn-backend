@@ -87,7 +87,7 @@ class CourseResource extends Resource
                         TextEntry::make('name'),
                         TextEntry::make('code'),
                         TextEntry::make('departments')
-                            ->getStateUsing(fn($record) => implode(" / ", $record->departments->pluck('code')->toArray())),
+                            ->formatStateUsing(fn($record) => implode(" / ", $record->departments->pluck('code')->toArray())),
                         TextEntry::make('description'),
                     ])->columnSpan(1),
                 Section::make()->schema([

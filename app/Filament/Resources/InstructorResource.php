@@ -118,7 +118,7 @@ class InstructorResource extends Resource
                     ->schema([
                         TextEntry::make('department.name')
                             ->label('Department')
-                            ->getStateUsing(fn($record) => "{$record->department->name} ({$record->department->code})"),
+                            ->formatStateUsing(fn($record) => "{$record->department->name} ({$record->department->code})"),
                     ])
             ]);
     }

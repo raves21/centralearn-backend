@@ -8,8 +8,6 @@ use PDO;
 
 class CourseStudentEnrollment extends Model
 {
-    use HasUuids;
-
     protected $table = 'course_student';
 
     protected $fillable = [

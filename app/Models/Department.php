@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Observers\DepartmentObserver;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Support\Facades\Storage;
@@ -17,74 +19,6 @@ class Department extends Model
         'code'
     ];
 
-    protected static function booted()
-    {
-        static::created(function ($department) {
-            if (isset($department->image_path)) {
-                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
-                Storage::disk('public')->makeDirectory("departments/{$department->code}");
-
-                $fileName = $department->image_path;
-                $targetPath = "departments/{$department->code}/{$fileName}";
-
-                Storage::disk('public')->move($fileName, $targetPath);
-
-                $department->update([
-                    'image_path' => $targetPath
-                ]);
-            }
-        });
-
-        static::updating(function ($department) {
-            dd($department->image_path, $department->original['image_path']);
-            $old = $department->original;
-            $new = $department->attributes;
-
-            if (isset($new['image_path']) && empty($old['image_path'])) {
-                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
-                Storage::disk('public')->makeDirectory("departments/{$department->code}");
-
-                $fileName = $new['image_path'];
-                $targetPath = "departments/{$department->code}/{$fileName}";
-
-                Storage::disk('public')->move($fileName, $targetPath);
-
-                $department;
-            }
-        });
-
-        static::updated(function ($department) {
-            $old = $department->original;
-            $new = $department->attributes;
-
-            if ($old['image_path'] === $new['image_path']) return;
-
-            if (isset($old['image_path']) && empty($new['image_path'])) {
-                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
-            }
-
-            if (isset($new['image_path']) && empty($old['image_path'])) {
-                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
-                Storage::disk('public')->makeDirectory("departments/{$department->code}");
-
-                $fileName = $new['image_path'];
-                $targetPath = "departments/{$department->code}/{$fileName}";
-
-                Storage::disk('public')->move($fileName, $targetPath);
-
-                $department->update([
-                    'image_path' => $targetPath
-                ]);
-            }
-        });
-
-        static::deleted(function ($department) {
-            if (isset($department->image_path)) {
-                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
-            }
-        });
-    }
-
     public function programs()
     {
         return $this->hasMany(Program::class);
@@ -98,5 +32,40 @@ class Department extends Model
     public function courses()
     {
         return $this->belongsToMany(Course::class);
+    }
+
+    protected function handleImageUpload(string $imagePath)
+    {
+        Storage::disk('public')->deleteDirectory("departments/{$this->code}");
+        Storage::disk('public')->makeDirectory("departments/{$this->code}");
+        $finalImagePath = "departments/{$this->code}/{$imagePath}";
+        Storage::disk('public')->move($imagePath, $finalImagePath);
+
+        return $finalImagePath;
+    }
+
+    protected static function booted()
+    {
+        static::creating(function ($department) {
+            if (isset($department->image_path)) {
+                $department->image_path = $department->handleImageUpload($department->image_path);
+            }
+        });
+
+        static::updating(function ($department) {
+            $new = $department->attributes;
+
+            if (empty($new['image_path'])) {
+                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
+            } else {
+                $department->image_path = $department->handleImageUpload($new['image_path']);
+            }
+        });
+
+        static::deleted(function ($department) {
+            if (isset($department->image_path)) {
+                Storage::disk('public')->deleteDirectory("departments/{$department->code}");
+            }
+        });
     }
 }

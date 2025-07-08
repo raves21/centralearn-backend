@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\StudentResource\Pages;
 use App\Filament\Resources\StudentResource\RelationManagers;
+use App\Filament\Resources\StudentResource\RelationManagers\CourseEnrollmentsRelationManager;
 use App\Models\Program;
 use App\Models\Student;
 use Filament\Forms\Form;
@@ -91,10 +92,10 @@ class StudentResource extends Resource
                 Section::make()
                     ->columns(2)
                     ->schema([
-                        TextEntry::make('department')
-                            ->getStateUsing(fn($record) => "{$record->program->department->name} ({$record->program->department->code})"),
-                        TextEntry::make('program')
-                            ->getStateUsing(fn($record) => "{$record->program->name} ({$record->program->code})")
+                        TextEntry::make('program.department_id')
+                            ->formatStateUsing(fn($record) => "{$record->program->department->name} ({$record->program->department->code})"),
+                        TextEntry::make('program.name')
+                            ->formatStateUsing(fn($record) => "{$record->program->name} ({$record->program->code})")
                     ])
             ]);
     }
@@ -102,7 +103,7 @@ class StudentResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            CourseEnrollmentsRelationManager::class
         ];
     }
 
