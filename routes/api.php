@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\InstructorController;
@@ -32,6 +33,6 @@ Route::middleware('auth:sanctum')->group(function () {
         'students' => StudentController::class,
         'departments' => DepartmentController::class,
         'programs' => ProgramController::class,
-        'semesters' => SemesterController::class
+        'semesters' => SemesterController::class,
     ]);
 });
