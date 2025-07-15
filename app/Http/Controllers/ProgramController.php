@@ -2,17 +2,25 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\ProgramResource;
+use App\Http\Services\ProgramService;
 use App\Models\Program;
 use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
+    protected $programService;
+
+    public function __construct(ProgramService $programService)
+    {
+        $this->programService = $programService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return $this->programService->getAll();
     }
 
     /**
@@ -26,9 +34,9 @@ class ProgramController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Program $program)
+    public function show(string $programId)
     {
-        //
+        return $this->programService->findById($programId);
     }
 
     /**

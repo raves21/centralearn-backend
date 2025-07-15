@@ -2,17 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\InstructorResource;
+use App\Http\Services\InstructorService;
 use App\Models\Instructor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class InstructorController extends Controller
 {
+    protected $instructorService;
+
+    public function __construct(InstructorService $instructorService)
+    {
+        $this->instructorService = $instructorService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return $this->instructorService->getAll();
+    }
+
+    public function currentUserInstructorProfile()
+    {
+        return $this->instructorService->currentUserInstructorProfile();
     }
 
     /**
@@ -26,9 +40,9 @@ class InstructorController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Instructor $instructor)
+    public function show(string $instructorId)
     {
-        //
+        return $this->instructorService->findById($instructorId);
     }
 
     /**

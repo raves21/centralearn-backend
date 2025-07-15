@@ -11,6 +11,8 @@ class Admin extends Model
 
     protected $fillable = ['user_id', 'job_title'];
 
+    protected $with = ['user'];
+
     public function user()
     {
         return $this->belongsTo(User::class);

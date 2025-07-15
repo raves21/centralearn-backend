@@ -36,7 +36,15 @@ class CourseEnrollmentsRelationManager extends RelationManager
                 TextColumn::make('course.code')
                     ->label('Code'),
                 TextColumn::make('semester.name')
-                    ->label('Semester')
+                    ->label('Semester'),
+                TextColumn::make('created_at')
+                    ->label('Date Enrolled')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -77,6 +85,7 @@ class CourseEnrollmentsRelationManager extends RelationManager
                             ->native(false)
                             ->required()
                             ->disabled(fn($get) => empty($get('semester_id')))
+                            ->helperText(fn () => "Only courses under the student's department ({$this->ownerRecord->program->department->code})")
                     ])
                     ->mutateFormDataUsing(function ($data) {
                         $data['student_id'] = $this->ownerRecord->id;
