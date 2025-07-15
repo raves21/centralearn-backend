@@ -7,6 +7,7 @@ use App\Filament\Resources\CourseResource\RelationManagers;
 use App\Models\Course;
 use App\Models\Department;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Infolists\Components\Grid;
 use Filament\Infolists\Components\ImageEntry;
@@ -16,6 +17,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -44,8 +46,8 @@ class CourseResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('departments')
                     ->label('Department/s')
-                    ->getStateUsing(function ($record) {
-                        $deptCodes = $record->departments->pluck('code')->toArray();
+                    ->formatStateUsing(function ($record) {
+                        $deptCodes = $record->departments()->pluck('code')->toArray();
                         $allDeptCodes = Department::all()->pluck('code')->toArray();
                         sort($deptCodes);
                         sort($allDeptCodes);
@@ -70,6 +72,28 @@ class CourseResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->filters([
+                Filter::make('departments')
+                    ->form([
+                        Select::make('departments_codes')
+                            ->multiple()
+                            ->label('Departments')
+                            ->native(false)
+                            ->options(Department::all()->pluck('code', 'code'))
+                    ])
+                    ->query(function ($query, $data) {
+                        return $query
+                            ->when(
+                                $data['departments_codes'],
+                                function ($query, $deptCodes) {
+                                    return $query->whereHas('departments', function ($q) use ($deptCodes) {
+                                        $q->whereIn('departments.code', $deptCodes);
+                                    }, '=', count($deptCodes));
+                                }
+                            );
+                    })
+                    ->indicateUsing(fn($data) => $data['departments_codes'])
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),

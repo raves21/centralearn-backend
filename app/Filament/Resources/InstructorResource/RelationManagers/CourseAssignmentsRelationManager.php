@@ -52,7 +52,15 @@ class CourseAssignmentsRelationManager extends RelationManager
                 TextColumn::make('course.code')
                     ->label('Code'),
                 TextColumn::make('semester.name')
-                    ->label('Semester')
+                    ->label('Semester'),
+                TextColumn::make('created_at')
+                    ->label('Date Assigned')
+                    ->dateTime()
+                    ->sortable(),
+                TextColumn::make('updated_at')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('semester_id')

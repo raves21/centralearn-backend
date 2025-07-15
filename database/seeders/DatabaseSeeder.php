@@ -50,9 +50,9 @@ class DatabaseSeeder extends Seeder
             'name' => 'College of Computer and Information Science',
             'code' => 'CCIS'
         ]);
-        $atycb = Department::create([
-            'name' => 'Alfonso T. Yuchengco College of Business',
-            'code' => 'ATYCB'
+        $cb = Department::create([
+            'name' => 'College of Business',
+            'code' => 'CB'
         ]);
         $cas = Department::create([
             'name' => 'College of Art and Sciences',
@@ -71,7 +71,7 @@ class DatabaseSeeder extends Seeder
             'code' => 'CS'
         ]);
         $businessAd = Program::create([
-            'department_id' => $atycb->id,
+            'department_id' => $cb->id,
             'name' => 'Bachelor of Science in Business Administration',
             'code' => 'BA'
         ]);
@@ -115,7 +115,7 @@ class DatabaseSeeder extends Seeder
         ]);
         Instructor::create([
             'user_id' => $instructor_user_4->id,
-            'department_id' => $atycb->id,
+            'department_id' => $cb->id,
             'job_title' => 'Professor'
         ]);
 

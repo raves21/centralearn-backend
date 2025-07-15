@@ -2,17 +2,33 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\StudentResource;
+use App\Http\Resources\UserResource;
 use App\Models\Student;
+use App\Http\Services\StudentService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
+
+    protected $studentService;
+
+    public function __construct(StudentService $studentService)
+    {
+        $this->studentService = $studentService;
+    }
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
+        return $this->studentService->getAll();
+    }
+
+    public function currentUserStudentProfile()
+    {
+        return $this->studentService->currentUserStudentProfile();
     }
 
     /**
@@ -26,9 +42,9 @@ class StudentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Student $student)
+    public function show(string $studentId)
     {
-        //
+        return $this->studentService->findById($studentId);
     }
 
     /**
