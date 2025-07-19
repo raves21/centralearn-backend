@@ -4,6 +4,7 @@ namespace App\Filament\Resources\CourseResource\Pages;
 
 use App\Filament\Resources\CourseResource;
 use Filament\Actions;
+use Filament\Actions\ActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Resources\Pages\ViewRecord;
@@ -15,8 +16,12 @@ class ViewCourse extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
-            DeleteAction::make()
+            ActionGroup::make([
+                EditAction::make(),
+                DeleteAction::make()
+            ])
+                ->label('Actions')
+                ->button()
         ];
     }
 }

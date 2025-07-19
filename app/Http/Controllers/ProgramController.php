@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Program\Index;
 use App\Http\Resources\ProgramResource;
 use App\Http\Services\ProgramService;
 use App\Models\Program;
@@ -18,9 +19,9 @@ class ProgramController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Index $request)
     {
-        return $this->programService->getAll();
+        return $this->programService->getAll(filters: $request->validated());
     }
 
     /**

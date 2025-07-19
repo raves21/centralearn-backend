@@ -22,6 +22,30 @@ class Course extends Model
         return $this->hasMany(CourseInstructorAssignment::class);
     }
 
+    public function instructors()
+    {
+        return $this->hasManyThrough(
+            Instructor::class,
+            CourseInstructorAssignment::class,
+            'course_id',
+            'id',
+            'id',
+            'instructor_id'
+        );
+    }
+
+    public function students()
+    {
+        return $this->hasManyThrough(
+            Student::class,
+            CourseStudentEnrollment::class,
+            'course_id',
+            'id',
+            'id',
+            'student_id'
+        );
+    }
+
     public function departments()
     {
         return $this->belongsToMany(Department::class);

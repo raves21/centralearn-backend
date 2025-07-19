@@ -45,6 +45,7 @@ class CourseAssignmentsRelationManager extends RelationManager
     {
         return $table
             ->emptyStateHeading('Not assigned to any course.')
+            ->emptyStateDescription(null)
             ->heading('Courses Assigned')
             ->columns([
                 TextColumn::make('course.name')

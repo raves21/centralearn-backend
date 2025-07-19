@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\InstructorResource\Pages;
 
 use App\Filament\Resources\InstructorResource;
+use App\Models\Admin;
 use App\Models\Department;
 use App\Models\Instructor;
 use App\Models\Role;
@@ -70,10 +71,13 @@ class EditInstructor extends EditRecord
         $user = $this->record->user;
         $data = $this->data;
 
-        if ($data['user']['is_admin']) {
-            $user->assignRole([Role::INSTRUCTOR, Role::ADMIN]);
-        } else {
+        if ($user->hasRole(Role::ADMIN) && empty($data['user']['is_admin'])) {
             $user->removeRole(Role::ADMIN);
+            Admin::where('user_id', $user->id)->delete();
+        }
+        if (!$user->hasRole(Role::ADMIN) && !empty($data['user']['is_admin'])) {
+            $user->assignRole(Role::ADMIN);
+            Admin::create(['user_id' => $user->id, 'job_title' => $data['job_title']]);
         }
 
         $user->update($data['user']);

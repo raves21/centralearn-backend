@@ -4,6 +4,7 @@ namespace App\Filament\Resources\InstructorResource\Pages;
 
 use App\Filament\CreateAndRedirectToIndex;
 use App\Filament\Resources\InstructorResource;
+use App\Models\Admin;
 use App\Models\Department;
 use App\Models\Role;
 use App\Models\User;
@@ -71,6 +72,7 @@ class CreateInstructor extends CreateAndRedirectToIndex
         $data['user_id'] = $user->id;
         if ($data['user']['is_admin']) {
             $user->assignRole([Role::INSTRUCTOR, Role::ADMIN]);
+            Admin::create(['user_id' => $user->id, 'job_title' => $data['job_title']]);
         }
         unset($data['user']);
         return $data;

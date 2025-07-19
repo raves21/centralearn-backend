@@ -6,8 +6,10 @@ use App\Filament\Resources\SemesterResource\Pages;
 use App\Models\Semester;
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Form;
+use Filament\Infolists\Components\Actions\Action as ActionsAction;
 use Filament\Infolists\Components\Section;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Infolist;
@@ -31,6 +33,7 @@ class SemesterResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Forms\Components\DatePicker::make('start_date')
@@ -49,7 +52,7 @@ class SemesterResource extends Resource
                     ->native(false),
                 Forms\Components\DatePicker::make('end_date')
                     ->required()
-                    ->helperText('You can only choose dates that come after start date.')
+                    ->helperText('You can only choose dates that come after the start date.')
                     ->reactive()
                     ->disabled(fn($get) => empty($get('start_date')))
                     ->minDate(fn($get) => Carbon::parse($get('start_date'))->addDay(1))
@@ -95,7 +98,7 @@ class SemesterResource extends Resource
             ->schema([
                 Section::make()
                     ->schema([
-                        TextEntry::make('name'),
+                        TextEntry::make('name')->hintAction(ActionsAction::make('bruh')->action(function ($record) {})),
                         TextEntry::make('start_date')->date(),
                         TextEntry::make('end_date')->date(),
                     ])

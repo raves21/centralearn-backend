@@ -29,6 +29,7 @@ class CourseEnrollmentsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('course')
+            ->heading('Courses Enrolled')
             ->emptyStateHeading('Not enrolled to any course.')
             ->columns([
                 TextColumn::make('course.name')
@@ -52,7 +53,6 @@ class CourseEnrollmentsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make('course_enrollment')
                     ->label('Enroll to Course')
-                    ->createAnother(false)
                     ->modalHeading('Enroll to Course')
                     ->modalWidth('2xl')
                     ->form([
@@ -85,7 +85,7 @@ class CourseEnrollmentsRelationManager extends RelationManager
                             ->native(false)
                             ->required()
                             ->disabled(fn($get) => empty($get('semester_id')))
-                            ->helperText(fn () => "Only courses under the student's department ({$this->ownerRecord->program->department->code})")
+                            ->helperText(fn() => "Only courses under the student's department ({$this->ownerRecord->program->department->code})")
                     ])
                     ->mutateFormDataUsing(function ($data) {
                         $data['student_id'] = $this->ownerRecord->id;

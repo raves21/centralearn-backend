@@ -21,17 +21,15 @@ class StudentResource extends JsonResource
                 return [
                     'id' => $this->program->id,
                     'name' => $this->program->name,
-                    'code' => $this->program->code
+                    'code' => $this->program->code,
+                    'department' => [
+                        'id' => $this->program->department->id,
+                        'name' => $this->program->department->name,
+                        'code' => $this->program->department->code
+                    ]
                 ];
             }),
-            'department' => $this->whenLoaded('program', function () {
-                $department = optional($this->program->department);
-                return [
-                    'id' => $department->id,
-                    'name' => $department->name,
-                    'code' => $department->code
-                ];
-            })
+
         ];
     }
 }

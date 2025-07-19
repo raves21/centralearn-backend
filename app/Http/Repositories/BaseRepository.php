@@ -26,6 +26,27 @@ class BaseRepository
         return $record->fresh();
     }
 
+    public function create(array $formData)
+    {
+        $modelClass = get_class($this->model);
+        $record = $modelClass::create($formData);
+        return $record;
+    }
+
+    public function deleteById(string $id)
+    {
+        $record = $this->model->findOrFail($id);
+        $record->delete();
+        return true;
+    }
+
+    public function deleteManyById(array $ids)
+    {
+        $modelClass = get_class($this->model);
+        $modelClass::destroy($ids);
+        return true;
+    }
+
     public function getAll(array $relationships = [], array $filters = [], string $orderBy = 'created_at', string $sortDirection = 'desc')
     {
         return $this->model->with($relationships)

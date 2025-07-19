@@ -120,7 +120,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $instructor_user_1->assignRole(Role::INSTRUCTOR);
-        $instructor_user_2->syncRoles([Role::INSTRUCTOR, Role::ADMIN]);
+        $instructor_user_2->syncRoles([Role::INSTRUCTOR]);
         $instructor_user_3->assignRole(Role::INSTRUCTOR);
         $instructor_user_4->assignRole(Role::INSTRUCTOR);
 

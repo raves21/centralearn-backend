@@ -47,11 +47,14 @@ class EditSemester extends EditRecord
             ->schema([
                 TextInput::make('name')
                     ->required()
+                    ->unique(ignoreRecord: true)
                     ->maxLength(255)
                     ->columnSpanFull(),
                 DatePicker::make('start_date')
                     ->required()
                     ->helperText(function () use ($prevSemEndDate, $nextSemStartDate) {
+                        if (!$prevSemEndDate && !$nextSemStartDate) return null;
+
                         if ($prevSemEndDate && $nextSemStartDate) {
                             return new HtmlString(
                                 "<div>" .

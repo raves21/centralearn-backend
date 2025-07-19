@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('semesters', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('name');
+            $table->string('name')->unique();
             $table->timestamp('start_date');
             $table->timestamp('end_date');
             $table->timestamps();

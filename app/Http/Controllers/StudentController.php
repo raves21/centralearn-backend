@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Student\GetCoursesFilters;
+use App\Http\Requests\Student\GetEnrolledCoursesFilters;
 use App\Http\Resources\StudentResource;
 use App\Http\Resources\UserResource;
 use App\Models\Student;
@@ -29,6 +31,15 @@ class StudentController extends Controller
     public function currentUserStudentProfile()
     {
         return $this->studentService->currentUserStudentProfile();
+    }
+
+    public function getEnrolledCourses(string $studentId, GetEnrolledCoursesFilters $request)
+    {
+        $validated = $request->validated();
+        return $this->studentService->getEnrolledCourses(
+            studentId: $studentId,
+            filters: $validated
+        );
     }
 
     /**

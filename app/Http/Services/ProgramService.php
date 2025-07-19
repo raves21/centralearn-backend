@@ -14,9 +14,9 @@ class ProgramService
         $this->programRepo = $programRepo;
     }
 
-    public function getAll()
+    public function getAll(array $filters)
     {
-        return ProgramResource::collection($this->programRepo->getAll(relationships: ['department']));
+        return ProgramResource::collection($this->programRepo->getAll(relationships: ['department'], filters: $filters));
     }
 
     public function findById(string $id)

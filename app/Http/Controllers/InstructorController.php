@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Instructor\GetAssignedCoursesFilters;
 use App\Http\Resources\InstructorResource;
 use App\Http\Services\InstructorService;
 use App\Models\Instructor;
@@ -27,6 +28,15 @@ class InstructorController extends Controller
     public function currentUserInstructorProfile()
     {
         return $this->instructorService->currentUserInstructorProfile();
+    }
+
+    public function getAssignedCourses(string $instructorId, GetAssignedCoursesFilters $request)
+    {
+        $validated = $request->validated();
+        return $this->instructorService->getAssignedCourses(
+            instructorId: $instructorId,
+            filters: $validated
+        );
     }
 
     /**
