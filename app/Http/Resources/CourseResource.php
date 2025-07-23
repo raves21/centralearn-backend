@@ -18,20 +18,8 @@ class CourseResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
-            'instructors' => $this->whenLoaded('instructors', function () {
-                return $this->instructors->map(function ($instructor) {
-                    return [
-                        'id' => $instructor->id,
-                        'name' => $instructor->name,
-                    ];
-                });
-            }),
             'departments' => $this->whenLoaded('departments', function () {
-                return $this->departments->map(fn($dept) => [
-                    'id' => $dept->id,
-                    'name' => $dept->name,
-                    'code' => $dept->code
-                ]);
+                return $this->departments->map(fn($dept) => $dept->code);
             }),
             'imagePath' => $this->image_path,
             'description' => $this->description

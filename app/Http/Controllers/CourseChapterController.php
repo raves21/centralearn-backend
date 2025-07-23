@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CourseChapterController\Create;
-use App\Http\Requests\CourseChapterController\Update;
+use App\Http\Requests\CourseChapter\Store;
+use App\Http\Requests\CourseChapter\Update;
 use App\Http\Services\CourseChapterService;
-use App\Models\CourseChapter;
-use Illuminate\Http\Request;
 
 class CourseChapterController extends Controller
 {
@@ -17,10 +15,12 @@ class CourseChapterController extends Controller
         $this->courseChapterService = $courseChapterService;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Create $request)
+    public function getContents(string $courseChapterId)
+    {
+        return $this->courseChapterService->getContents($courseChapterId);
+    }
+
+    public function store(Store $request)
     {
         return $this->courseChapterService->create($request->validated());
     }

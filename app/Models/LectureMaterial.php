@@ -12,6 +12,8 @@ class LectureMaterial extends Model
 
     protected $fillable = [
         'lecture_id',
+        'materialable_id',
+        'materialable_type',
         'order'
     ];
 

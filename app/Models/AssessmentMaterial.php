@@ -11,8 +11,12 @@ class AssessmentMaterial extends Model
 
     protected $fillable = [
         'assessment_id',
+        'materialable_id',
+        'materialable_type',
         'order'
     ];
+
+    protected $with = ['materialable'];
 
     public function assessment()
     {

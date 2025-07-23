@@ -16,8 +16,8 @@ return new class extends Migration
             $table->foreignUuid('course_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->integer('order');
-            $table->string('description');
-            $table->timestamp('published_at');
+            $table->string('description')->nullable();
+            $table->timestamp('published_at')->nullable();
             $table->timestamps();
         });
     }

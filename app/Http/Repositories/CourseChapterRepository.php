@@ -10,9 +10,4 @@ class CourseChapterRepository extends BaseRepository
     {
         parent::__construct($courseChapter);
     }
-
-    public function getCourseChaptersByCourseId(string $courseId)
-    {
-        return CourseChapter::where('course_id', $courseId)->with('course')->get();
-    }
 }

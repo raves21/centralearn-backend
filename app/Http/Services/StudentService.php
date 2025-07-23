@@ -50,7 +50,7 @@ class StudentService
 
     public function getEnrolledCourses(string $studentId, array $filters)
     {
-        Student::findOrFail($studentId);
+        $this->studentRepo->ensureExists($studentId);
         $studentEnrolledSemesters = $this->semesterRepo->getStudentEnrolledSemesters(studentId: $studentId);
         return CourseResource::collection(
             $this->courseRepo->getStudentEnrolledCourses(

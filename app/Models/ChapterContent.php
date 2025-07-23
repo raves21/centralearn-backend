@@ -15,8 +15,12 @@ class ChapterContent extends Model
         'name',
         'is_published',
         'publishes_at',
+        'contentable_id',
+        'contentable_type',
         'order'
     ];
+
+    protected $with = ['contentable'];
 
     public function chapter()
     {

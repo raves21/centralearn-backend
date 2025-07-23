@@ -17,9 +17,11 @@ return new class extends Migration
             $table->timestamp('opens_at')->nullable();
             $table->timestamp('closes_at')->nullable();
             $table->integer('time_limit')->nullable();
-            $table->integer('max_score');
-            $table->boolean('is_score_viewable_on_suibmit');
-            $table->integer('max_attempts');
+            $table->float('max_score');
+            $table->boolean('is_answers_viewable_after_submit');
+            $table->boolean('is_score_viewable_after_submit');
+            $table->boolean('is_multi_attempts')->boolean();
+            $table->integer('max_attempts')->nullable();
             $table->enum('multi_attempt_grading_type', ['avg_score', 'highest_score'])->nullable();
             $table->timestamps();
         });

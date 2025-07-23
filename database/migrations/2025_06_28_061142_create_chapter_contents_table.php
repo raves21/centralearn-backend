@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('course_chapter_id')->constrained()->cascadeOnDelete();
             $table->string('name');
+            $table->string('description')->nullable();
             $table->boolean('is_published');
             $table->timestamp('publishes_at')->nullable();
             $table->morphs('contentable');

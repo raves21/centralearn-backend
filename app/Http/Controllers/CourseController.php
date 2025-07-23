@@ -20,12 +20,12 @@ class CourseController extends Controller
      */
     public function index(Index $request)
     {
-        $this->courseService->getAll(filters: $request->validated());
+        return $this->courseService->getAll(filters: $request->validated());
     }
 
     public function getChapters(string $courseId)
     {
-        $this->courseService->getChapters($courseId);
+        return $this->courseService->getChapters($courseId);
     }
 
     /**
@@ -39,9 +39,9 @@ class CourseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Course $course)
+    public function show(string $courseId)
     {
-        //
+        return $this->courseService->findById($courseId);
     }
 
     /**

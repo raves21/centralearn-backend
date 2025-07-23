@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Http\Services;
+
+{{repository}}
+use App\Http\Resources\{{ model }}Resource;
+
+class {{serviceName}}
+{
+    protected {{ repoVarName }};
+
+    public function __construct({{ model }} {{ repoVarName }}){
+        $this->{{ repoVarName }} = {{ $repoVarName }};
+    }
+
+    public function getAll(){
+        return {{ model }}Resource::collection($this->{{ repoVarName }}->getAll());
+    }
+
+    public function findById(string $id){
+        return new {{ model }}Resource($this->{{ repoVarName }}->findById($id));
+    }
+
+    public function create(array $formData){
+        return new {{ model }}Resource($this->{{ repoVarName }}->create($formData));
+    }
+
+    public function updateById(string $id, array $formData){
+        return new {{ model }}Resource($this->{{ repoVarName }}->update($id, $formData));
+    }
+
+    public function deleteById(string $id){
+        return $this->{{ repoVarName }}->deleteById($id);
+    }
+}

@@ -19,6 +19,11 @@ class BaseRepository
         return $this->model->with($relationships)->findOrFail($id);
     }
 
+    public function ensureExists(string $id)
+    {
+        $this->model->findOrFail($id);
+    }
+
     public function updateById(string $id, array $formData)
     {
         $record = $this->model->findOrFail($id);
@@ -47,15 +52,22 @@ class BaseRepository
         return true;
     }
 
-    public function getAll(array $relationships = [], array $filters = [], string $orderBy = 'created_at', string $sortDirection = 'desc')
-    {
-        return $this->model->with($relationships)
+    public function getAll(
+        array $relationships = [],
+        array $filters = [],
+        string $orderBy = 'created_at',
+        string $sortDirection = 'desc',
+        bool $paginate = true
+    ) {
+        $query = $this->model->with($relationships)
             ->when(!empty($filters), function ($query) use ($filters) {
                 foreach ($filters as $key => $value) {
                     $query->where($key, $value);
                 }
             })
-            ->orderBy($orderBy, $sortDirection)
-            ->paginate();
+            ->orderBy($orderBy, $sortDirection);
+
+        if ($paginate) return $query->paginate();
+        return $query->get();
     }
 }

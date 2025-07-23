@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\CourseChapterController;
+namespace App\Http\Requests\CourseChapter;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class Create extends FormRequest
+class Store extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -25,8 +25,7 @@ class Create extends FormRequest
             'name' => ['required', 'string'],
             'course_id' => ['required', 'exists:courses,id'],
             'description' => ['sometimes', 'string'],
-            'order' => ['required', 'integer'],
-
+            'order' => ['required', 'integer', 'min:1'],
         ];
     }
 }

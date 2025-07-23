@@ -36,11 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::prefix('courses')->group(function () {
-        Route::get('{course}/chapters', [CourseController::class, 'getChapters']);
-    });
-
-    Route::prefix('chapters')->group(function () {
-        Route::get('{chapter}/contents', [CourseChapterController::class, 'getContents']);
+        Route::get('{course}/course-chapters', [CourseController::class, 'getChapters']);
     });
 
     Route::apiResources([
@@ -51,6 +47,11 @@ Route::middleware('auth:sanctum')->group(function () {
         'semesters' => SemesterController::class,
         'courses' => CourseController::class,
     ]);
-    Route::apiResource('chapters', CourseChapterController::class)->except(['index']);
-    Route::apiResource('contents', ChapterContentController::class)->except(['index']);
+
+    Route::apiResource('course-chapters', CourseChapterController::class)->except(['index']);
+    Route::prefix('course-chapters')->group(function () {
+        Route::get('{chapter}/chapter-contents', [CourseChapterController::class, 'getContents']);
+    });
+
+    Route::apiResource('chapter-contents', ChapterContentController::class)->except(['index']);
 });

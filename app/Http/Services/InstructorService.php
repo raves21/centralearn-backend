@@ -47,7 +47,7 @@ class InstructorService
 
     public function getAssignedCourses(string $instructorId, array $filters)
     {
-        Instructor::findOrFail($instructorId);
+        $this->instructorRepo->ensureExists($instructorId);
         $instructorAssignedSemesters = $this->semesterRepo->getInstructorAssignedSemesters($instructorId);
         return CourseResource::collection(
             $this->courseRepo->getInstructorAssignedCourses(

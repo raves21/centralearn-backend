@@ -75,6 +75,12 @@ class MakeRepository extends Command
                 $serviceTemplate
             );
 
+            // $serviceTemplate = str_replace(
+            //     ['{{ serviceName }}', '{{ repository }}', '{{ model }}', '{{ repoVarName }}'],
+            //     [$serviceName, "use App\\Http\\Repositories\\{$repositoryName};", $model, strtolower($model[0], substr($model, 1)) . "repo"],
+            //     $serviceTemplate
+            // );
+
             if (!File::isDirectory(app_path('Http/Services'))) {
                 File::makeDirectory(app_path('Http/Services'));
             }
