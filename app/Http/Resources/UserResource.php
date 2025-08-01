@@ -20,7 +20,12 @@ class UserResource extends JsonResource
             'lastName' => $this->last_name,
             'email' => $this->email,
             'address' => $this->address,
-            'roles' => $this->getRoleNames()
+            'roles' => $this->getRoleNames(),
+
+            $this->mergeWhen(
+                $this->additional && $this->additional['with_permissions'],
+                fn() => ['permissions' => $this->getAllPermissions()->pluck('name')]
+            )
         ];
     }
 }

@@ -2,11 +2,11 @@
 
 namespace App\Http\Services;
 
-use App\Filament\Resources\SemesterResource;
 use App\Http\Repositories\InstructorRepository;
 use App\Http\Repositories\SemesterRepository;
 use App\Http\Resources\CourseSemesterResource;
 use App\Http\Resources\InstructorResource;
+use App\Http\Resources\SemesterResource;
 use App\Models\CourseSemester;
 use App\Models\Instructor;
 
@@ -33,12 +33,27 @@ class InstructorService
         ]));
     }
 
+    public function create(array $formData)
+    {
+        return new InstructorResource($this->instructorRepo->create($formData));
+    }
+
     public function findById(string $id)
     {
         $instructor = $this->instructorRepo->findById(id: $id, relationships: [
             'department:id,name,code'
         ]);
         return new InstructorResource($instructor);
+    }
+
+    public function updateById(string $id, array $formData)
+    {
+        return new InstructorResource($this->instructorRepo->updateById($id, $formData));
+    }
+
+    public function deleteById(string $id)
+    {
+        return $this->instructorRepo->deleteById($id);
     }
 
     public function currentUserInstructorProfile()

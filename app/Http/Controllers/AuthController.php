@@ -28,6 +28,6 @@ class AuthController extends Controller
 
     public function me(Request $request)
     {
-        return new UserResource($request->user());
+        return new UserResource($request->user())->additional(['with_permissions' => true]);
     }
 }

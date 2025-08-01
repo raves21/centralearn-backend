@@ -2,7 +2,6 @@
 
 namespace App\Http\Repositories;
 
-use App\Models\CourseSemester;
 use App\Models\Semester;
 
 class SemesterRepository extends BaseRepository
@@ -27,7 +26,7 @@ class SemesterRepository extends BaseRepository
         return Semester::whereHas('courseSemesters.instructorAssignments', function ($q) use ($instructorId) {
             $q->where('instructor_id', $instructorId);
         })
-            ->orderByDESC('start_date')
+            ->orderByDesc('start_date')
             ->get();
     }
 }

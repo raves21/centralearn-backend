@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChapterContentController;
 use App\Http\Controllers\ChapterController;
@@ -39,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::apiResources([
         'instructors' => InstructorController::class,
         'students' => StudentController::class,
+        'admins' => AdminController::class,
         'departments' => DepartmentController::class,
         'programs' => ProgramController::class,
         'semesters' => SemesterController::class,

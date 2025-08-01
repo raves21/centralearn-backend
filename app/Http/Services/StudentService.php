@@ -2,11 +2,11 @@
 
 namespace App\Http\Services;
 
-use App\Filament\Resources\SemesterResource;
 use App\Http\Repositories\CourseSemesterRepository;
 use App\Http\Repositories\SemesterRepository;
 use App\Http\Repositories\StudentRepository;
 use App\Http\Resources\CourseSemesterResource;
+use App\Http\Resources\SemesterResource;
 use App\Http\Resources\StudentResource;
 
 class StudentService
@@ -34,6 +34,11 @@ class StudentService
         ]));
     }
 
+    public function create(array $formData)
+    {
+        return new StudentResource($this->studentRepo->create($formData));
+    }
+
     public function findById(string $id)
     {
         $student = $this->studentRepo->findById(id: $id, relationships: [
@@ -41,6 +46,16 @@ class StudentService
             'program.department:id,name,code'
         ]);
         return new StudentResource($student);
+    }
+
+    public function updateById(string $id, array $formData)
+    {
+        return new StudentResource($this->studentRepo->updateById($id, $formData));
+    }
+
+    public function deleteById(string $id)
+    {
+        return $this->studentRepo->deleteById($id);
     }
 
     public function currentUserStudentProfile()

@@ -68,6 +68,7 @@ class MakeRepository extends Command
 
             if ($this->option('all')) {
                 Artisan::call('make:resource ' . "{$model}Resource");
+                $this->info("{$model}Resource created successfully.");
                 $serviceTemplate = file_get_contents(__DIR__ . '/stubs/service-generate-all.stub');
                 $repoVarName = strtolower($model[0]) . substr($model, 1) . "Repo";
                 // Replace placeholders in the stub
