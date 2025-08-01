@@ -2,18 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
-use PDO;
 
 class CourseStudentEnrollment extends Model
 {
-    protected $table = 'course_student';
+    protected $table = 'course_student_enrollment';
 
     protected $fillable = [
         'student_id',
-        'course_id',
-        'semester_id',
+        'course_semester_id',
         'final_grade'
     ];
 
@@ -22,13 +19,8 @@ class CourseStudentEnrollment extends Model
         return $this->belongsTo(Student::class);
     }
 
-    public function course()
+    public function courseSemester()
     {
-        return $this->belongsTo(Course::class);
-    }
-
-    public function semester()
-    {
-        return $this->belongsTo(Semester::class);
+        return $this->belongsTo(CourseSemester::class);
     }
 }

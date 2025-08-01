@@ -7,7 +7,7 @@ use App\Http\Resources\ProgramResource;
 
 class ProgramService
 {
-    protected $programRepo;
+    private $programRepo;
 
     public function __construct(ProgramRepository $programRepo)
     {
@@ -16,7 +16,9 @@ class ProgramService
 
     public function getAll(array $filters)
     {
-        return ProgramResource::collection($this->programRepo->getAll(relationships: ['department'], filters: $filters));
+        return ProgramResource::collection(
+            $this->programRepo->getAll(relationships: ['department'], filters: $filters)
+        );
     }
 
     public function findById(string $id)

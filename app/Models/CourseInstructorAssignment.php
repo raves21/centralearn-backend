@@ -7,11 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class CourseInstructorAssignment extends Model
 {
-    protected $table = 'course_instructor';
+    protected $table = 'course_instructor_assignment';
 
     protected $fillable = [
         'instructor_id',
-        'course_id',
+        'course_semester_id',
         'semester_id'
     ];
 
@@ -20,13 +20,8 @@ class CourseInstructorAssignment extends Model
         return $this->belongsTo(Instructor::class);
     }
 
-    public function course()
+    public function courseSemester()
     {
-        return $this->belongsTo(Course::class);
-    }
-
-    public function semester()
-    {
-        return $this->belongsTo(Semester::class);
+        return $this->belongsTo(CourseSemester::class);
     }
 }

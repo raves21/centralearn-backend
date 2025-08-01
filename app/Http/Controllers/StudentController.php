@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Student\GetCoursesFilters;
-use App\Http\Requests\Student\GetEnrolledCoursesFilters;
+use App\Http\Requests\Student\GetEnrolledCourses;
 use App\Http\Resources\StudentResource;
 use App\Http\Resources\UserResource;
 use App\Models\Student;
@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 class StudentController extends Controller
 {
 
-    protected $studentService;
+    private $studentService;
 
     public function __construct(StudentService $studentService)
     {
@@ -33,7 +33,12 @@ class StudentController extends Controller
         return $this->studentService->currentUserStudentProfile();
     }
 
-    public function getEnrolledCourses(string $studentId, GetEnrolledCoursesFilters $request)
+    public function getEnrolledSemesters(string $studentId)
+    {
+        return $this->studentService->getEnrolledSemesters($studentId);
+    }
+
+    public function getEnrolledCourses(string $studentId, GetEnrolledCourses $request)
     {
         $validated = $request->validated();
         return $this->studentService->getEnrolledCourses(

@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Course\Index;
+use App\Http\Requests\Course\Store;
+use App\Http\Requests\Course\Update;
 use App\Http\Services\CourseService;
 use App\Models\Course;
 use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    protected $courseService;
+    private $courseService;
 
     public function __construct(CourseService $courseService)
     {
@@ -23,17 +25,12 @@ class CourseController extends Controller
         return $this->courseService->getAll(filters: $request->validated());
     }
 
-    public function getChapters(string $courseId)
-    {
-        return $this->courseService->getChapters($courseId);
-    }
-
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Store $request)
     {
-        //
+        return $this->courseService->create($request->validated());
     }
 
     /**
@@ -47,16 +44,16 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Course $course)
+    public function update(Update $request, string $courseId)
     {
-        //
+        return $this->courseService->updateById($courseId, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Course $course)
+    public function destroy(string $courseId)
     {
-        //
+        return $this->courseService->deleteById($courseId);
     }
 }

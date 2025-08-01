@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Instructor\GetAssignedCoursesFilters;
+use App\Http\Requests\Instructor\GetAssignedCourses;
 use App\Http\Resources\InstructorResource;
 use App\Http\Services\InstructorService;
 use App\Models\Instructor;
@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Auth;
 
 class InstructorController extends Controller
 {
-    protected $instructorService;
+    private $instructorService;
 
     public function __construct(InstructorService $instructorService)
     {
@@ -30,7 +30,12 @@ class InstructorController extends Controller
         return $this->instructorService->currentUserInstructorProfile();
     }
 
-    public function getAssignedCourses(string $instructorId, GetAssignedCoursesFilters $request)
+    public function getAssignedSemesters(string $instructorId)
+    {
+        return $this->instructorService->getAssignedSemesters($instructorId);
+    }
+
+    public function getAssignedCourses(string $instructorId, GetAssignedCourses $request)
     {
         $validated = $request->validated();
         return $this->instructorService->getAssignedCourses(

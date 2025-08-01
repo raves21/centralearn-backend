@@ -8,7 +8,7 @@ use App\Http\Resources\SemesterResource;
 class SemesterService
 {
 
-    protected $semesterRepo;
+    private $semesterRepo;
 
     public function __construct(SemesterRepository $semesterRepo)
     {

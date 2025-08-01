@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('lecture_materials', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('lecture_id')->constrained()->cascadeOnDelete();
-            $table->morphs('materialable');
+            $table->string('materialable_type');
+            $table->string('materialable_id');
             $table->integer('order');
             $table->timestamps();
         });

@@ -2,19 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChapterContent\Index;
 use App\Http\Requests\ChapterContent\Store;
 use App\Http\Requests\ChapterContent\Update;
 use App\Http\Services\ChapterContentService;
-use App\Models\ChapterContent;
-use Illuminate\Http\Request;
 
 class ChapterContentController extends Controller
 {
-    protected $chapterContentService;
+    private $chapterContentService;
 
     public function __construct(ChapterContentService $chapterContentService)
     {
         $this->chapterContentService = $chapterContentService;
+    }
+
+    public function index(Index $request)
+    {
+        return $this->chapterContentService->getAll($request->validated());
     }
 
     public function store(Store $request)

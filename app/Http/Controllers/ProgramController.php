@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
-    protected $programService;
+    private $programService;
 
     public function __construct(ProgramService $programService)
     {

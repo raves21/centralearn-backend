@@ -17,6 +17,8 @@ class LectureMaterial extends Model
         'order'
     ];
 
+    protected $with = ['materialable'];
+
     public function lecture()
     {
         return $this->belongsTo(Lecture::class);

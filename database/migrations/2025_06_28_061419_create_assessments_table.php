@@ -13,9 +13,6 @@ return new class extends Migration
     {
         Schema::create('assessments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->boolean('is_open');
-            $table->timestamp('opens_at')->nullable();
-            $table->timestamp('closes_at')->nullable();
             $table->integer('time_limit')->nullable();
             $table->float('max_score');
             $table->boolean('is_answers_viewable_after_submit');

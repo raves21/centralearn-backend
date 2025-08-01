@@ -17,6 +17,10 @@ class ChapterContent extends Model
         'publishes_at',
         'contentable_id',
         'contentable_type',
+        'is_open',
+        'opens_at',
+        'closes_at',
+        'description',
         'order'
     ];
 
@@ -24,7 +28,7 @@ class ChapterContent extends Model
 
     public function chapter()
     {
-        return $this->belongsTo(CourseChapter::class);
+        return $this->belongsTo(Chapter::class);
     }
 
     public function contentable()

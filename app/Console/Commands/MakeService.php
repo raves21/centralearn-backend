@@ -28,7 +28,7 @@ class MakeService extends Command
 
         // Replace placeholders in the stub
         $template = str_replace(
-            ['{{serviceName}}'],
+            ['{{ serviceName }}'],
             [$serviceName],
             $template
         );

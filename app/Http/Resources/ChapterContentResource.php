@@ -16,13 +16,18 @@ class ChapterContentResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'name' => $this->name,
+            'description' => $this->description,
+            'isOpen' => $this->is_open,
+            'opensAt' => $this->opens_at,
+            'closesAt' => $this->closes_at,
             'chapterId' => $this->chapter_id,
             'isPublished' => $this->is_published,
             'publishesAt' => $this->publishes_at,
             'order' => $this->order,
-            'content' => $this->whenLoaded('contentable', function () {
-                return $this->contentable->toArray();
-            })
+            'contentId' => $this->contentable_id,
+            'contentType' => $this->contentable_type,
+            'content' => $this->whenLoaded('contentable', fn() => $this->contentable->toArray())
         ];
     }
 }

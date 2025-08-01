@@ -3,23 +3,22 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 
 class MakeRepository extends Command
 {
-    protected $signature = 'make:repository {name} {--model= : The model class to use} {--no-service= : Skip service} {--base : Extend base repository}';
+    protected $signature = 'make:repository {name} {--no-service : Skip service} {--all : Generate all basic crud in service}';
 
     protected $description = 'Create a new repository class';
 
     public function handle()
     {
-        $model = $this->option('model');
-
-        if (!$model) {
-            $this->error('Please provide model name.');
+        if ($this->option('no-service') && $this->option('all')) {
+            $this->error('Cannot have options: --no-service and --all at the same time');
             return;
         }
-
+        $model = explode('Repository', $this->argument('name'))[0];
         $modelClass = "App\\Models\\{$model}";
 
         if (!class_exists($modelClass)) {
@@ -39,12 +38,12 @@ class MakeRepository extends Command
         }
 
         $template = file_get_contents(__DIR__ . '/stubs/repository.stub');
-        $extendsBase = $this->option('base') ? "extends BaseRepository" : "";
 
         // Replace placeholders in the stub
+        $modelVarName = strtolower($model[0]) . substr($model, 1);
         $template = str_replace(
-            ['{{repository}}', '{{modelName}}', '{{extendsBase}}'],
-            [$repositoryName, $model, $extendsBase],
+            ['{{ repository }}', '{{ modelName }}', '{{ modelVarName }}'],
+            [$repositoryName, $model, $modelVarName],
             $template
         );
 
@@ -58,7 +57,7 @@ class MakeRepository extends Command
 
         $noService = $this->option('no-service');
 
-        if (empty($noService)) {
+        if (!$noService) {
             $serviceName = "{$model}Service";
             $servicePath = app_path("Http/Services/{$serviceName}.php");
 
@@ -67,19 +66,25 @@ class MakeRepository extends Command
                 return;
             }
 
-            $serviceTemplate = file_get_contents(__DIR__ . '/stubs/service.stub');
-            // Replace placeholders in the stub
-            $serviceTemplate = str_replace(
-                ['{{serviceName}}', '{{repository}}'],
-                [$serviceName, "use App\\Http\\Repositories\\{$repositoryName};"],
-                $serviceTemplate
-            );
-
-            // $serviceTemplate = str_replace(
-            //     ['{{ serviceName }}', '{{ repository }}', '{{ model }}', '{{ repoVarName }}'],
-            //     [$serviceName, "use App\\Http\\Repositories\\{$repositoryName};", $model, strtolower($model[0], substr($model, 1)) . "repo"],
-            //     $serviceTemplate
-            // );
+            if ($this->option('all')) {
+                Artisan::call('make:resource ' . "{$model}Resource");
+                $serviceTemplate = file_get_contents(__DIR__ . '/stubs/service-generate-all.stub');
+                $repoVarName = strtolower($model[0]) . substr($model, 1) . "Repo";
+                // Replace placeholders in the stub
+                $serviceTemplate = str_replace(
+                    ['{{ serviceName }}', '{{ repository }}', '{{ model }}', '{{ repoVarName }}'],
+                    [$serviceName, "use App\\Http\\Repositories\\{$repositoryName};", $model, $repoVarName],
+                    $serviceTemplate
+                );
+            } else {
+                $serviceTemplate = file_get_contents(__DIR__ . '/stubs/service.stub');
+                // Replace placeholders in the stub
+                $serviceTemplate = str_replace(
+                    ['{{ serviceName }}', '{{ repository }}'],
+                    [$serviceName, "use App\\Http\\Repositories\\{$repositoryName};"],
+                    $serviceTemplate
+                );
+            }
 
             if (!File::isDirectory(app_path('Http/Services'))) {
                 File::makeDirectory(app_path('Http/Services'));

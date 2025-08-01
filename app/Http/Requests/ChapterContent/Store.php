@@ -22,26 +22,65 @@ class Store extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'chapter_id' => ['required', 'exists:course_chapters,id'],
+        $rules = [
+
+            //general info
+            'chapter_id' => ['required', 'exists:chapters,id'],
             'name' => ['required', 'string'],
             'description' => ['nullable', 'string'],
             'order' => ['required', 'integer'],
-            'is_published' => ['required', 'boolean'],
-            'publishes_at' => ['nullable', 'date'],
             'content_type' => ['required', 'in:lecture,assessment'],
             'content' => ['required_if:content_type,assessment'],
 
-            'content.is_open' => ['required', 'boolean'],
-            'content.opens_at' => ['missing_if:content.is_open,true', 'nullable', Rule::date()->afterOrEqual(today())],
-            'content.closes_at' => ['nullable', 'date', 'after:content.opens_at'],
-            'content.time_limit' => ['nullable', 'integer'],
-            'content.max_score' => ['nullable', 'numeric'],
-            'content.is_answers_viewable_after_submit' => ['required', 'boolean'],
-            'content.is_score_viewable_after_submit' => ['required', 'boolean'],
-            'content.is_multi_attempts' => ['required', 'boolean'],
-            'content.max_attempts' => ['required_if:content.is_multi_attempts,true', 'integer'],
-            'content.multi_attempt_grading_type' => ['required_if:content.is_multi_attempts,true', 'in:avg_score,highest_score']
+            //visibility
+            'is_published' => ['required', 'boolean'],
+            'publishes_at' => ['nullable', 'date'],
+
+            //accessibility
+            'is_open' => ['required', 'boolean'],
+            'opens_at' => ['nullable', 'date', Rule::date()->afterOrEqual(today())],
+            'closes_at' => ['nullable', 'date', 'after:opens_at'],
         ];
+
+        // Only apply assessment rules if content_type is assessment
+        if ($this->input('content_type') === 'assessment') {
+            $rules = array_merge($rules, [
+                'content.time_limit' => ['nullable', 'integer'],
+                'content.max_score' => ['nullable', 'numeric'],
+                'content.is_answers_viewable_after_submit' => ['required', 'boolean'],
+                'content.is_score_viewable_after_submit' => ['required', 'boolean'],
+                'content.is_multi_attempts' => ['required', 'boolean'],
+                'content.max_attempts' => ['required_if:content.is_multi_attempts,true', 'integer'],
+                'content.multi_attempt_grading_type' => ['required_if:content.is_multi_attempts,true', 'in:avg_score,highest_score'],
+            ]);
+        }
+
+        return $rules;
+    }
+
+    public function withValidator($validator)
+    {
+        $validator->after(function ($validator) {
+            $isPublished = $this->boolean('is_published');
+            $publishesAt = $this->input('publishes_at');
+            $isOpen = $this->boolean('content.is_open');
+            $opensAt = $this->input('content.opens_at');
+            $closesAt = $this->input('content.closes_at');
+
+            //publishes_at must only be set if not published
+            if ($isPublished && $publishesAt !== null) {
+                $validator->errors()->add('publishes_at', 'publishes_at can only be set if the content is not yet published.');
+            }
+
+            //opens_at must only be set if is_open is false
+            if ($isOpen && $opensAt !== null) {
+                $validator->errors()->add('content.opens_at', 'opens_at can only be set if the content is not already open.');
+            }
+
+            //closes_at must only be set if is_open is true or opens_at has value
+            if ((!$isOpen || $opensAt === null) && $closesAt !== null) {
+                $validator->errors()->add('content.closes_at', 'closes_at must only be set if content is already open, or if opens_at has value.');
+            }
+        });
     }
 }

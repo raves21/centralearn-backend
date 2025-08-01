@@ -12,13 +12,8 @@ class Semester extends Model
 
     protected $fillable = ['name', 'start_date', 'end_date'];
 
-    public function courseStudentEnrollments()
+    public function courseSemesters()
     {
-        return $this->hasMany(CourseStudentEnrollment::class);
-    }
-
-    public function courseInstructorAssignments()
-    {
-        return $this->hasMany(CourseInstructorAssignment::class);
+        return $this->hasMany(CourseSemester::class);
     }
 }

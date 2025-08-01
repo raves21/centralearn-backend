@@ -2,27 +2,28 @@
 
 namespace App\Http\Services;
 
-use App\Http\Repositories\CourseRepository;
+use App\Filament\Resources\SemesterResource;
 use App\Http\Repositories\InstructorRepository;
 use App\Http\Repositories\SemesterRepository;
-use App\Http\Resources\CourseResource;
+use App\Http\Resources\CourseSemesterResource;
 use App\Http\Resources\InstructorResource;
+use App\Models\CourseSemester;
 use App\Models\Instructor;
 
 class InstructorService
 {
-    protected $instructorRepo;
-    protected $semesterRepo;
-    protected $courseRepo;
+    private $instructorRepo;
+    private $semesterRepo;
+    private $courseSemesterRepo;
 
     public function __construct(
         InstructorRepository $instructorRepo,
         SemesterRepository $semesterRepo,
-        CourseRepository $courseRepo
+        CourseSemester $courseSemesterRepo
     ) {
         $this->instructorRepo = $instructorRepo;
         $this->semesterRepo = $semesterRepo;
-        $this->courseRepo = $courseRepo;
+        $this->courseSemesterRepo = $courseSemesterRepo;
     }
 
     public function getAll()
@@ -45,12 +46,18 @@ class InstructorService
         return new InstructorResource($this->instructorRepo->currentUserInstructorProfile());
     }
 
+    public function getAssignedSemesters(string $instructorId)
+    {
+        $this->instructorRepo->ensureExists($instructorId);
+        return SemesterResource::collection($this->semesterRepo->getInstructorAssignedSemesters($instructorId));
+    }
+
     public function getAssignedCourses(string $instructorId, array $filters)
     {
         $this->instructorRepo->ensureExists($instructorId);
         $instructorAssignedSemesters = $this->semesterRepo->getInstructorAssignedSemesters($instructorId);
-        return CourseResource::collection(
-            $this->courseRepo->getInstructorAssignedCourses(
+        return CourseSemesterResource::collection(
+            $this->courseSemesterRepo->getInstructorAssignedCourses(
                 instructorId: $instructorId,
                 instructorAssignedSemesters: $instructorAssignedSemesters,
                 filters: $filters

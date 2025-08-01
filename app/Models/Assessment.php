@@ -15,7 +15,9 @@ class Assessment extends Model
         'closes_at',
         'time_limit',
         'max_score',
-        'is_score_viewable_on_submit',
+        'is_answers_viewable_after_submit',
+        'is_score_viewable_after_submit',
+        'is_multi_attempts',
         'max_attempts',
         'multi_attempt_grading_type'
     ];

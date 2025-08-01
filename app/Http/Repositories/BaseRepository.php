@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class BaseRepository
 {
 
-    protected Model $model;
+    private Model $model;
 
     public function __construct(Model $model)
     {
@@ -19,22 +19,34 @@ class BaseRepository
         return $this->model->with($relationships)->findOrFail($id);
     }
 
+    public function findByFilter(array $filters)
+    {
+        return get_class($this->model)::where(function ($q) use ($filters) {
+            foreach ($filters as $key => $value) {
+                $q->where($key, $value);
+            }
+        })
+            ->first();
+    }
+
     public function ensureExists(string $id)
     {
         $this->model->findOrFail($id);
     }
 
-    public function updateById(string $id, array $formData)
+    public function updateById(string $id, array $formData, array $relationships = [])
     {
         $record = $this->model->findOrFail($id);
         $record->update($formData);
-        return $record->fresh();
+        $record->fresh()->load($relationships);
+        return $record;
     }
 
-    public function create(array $formData)
+    public function create(array $formData, array $relationships = [])
     {
         $modelClass = get_class($this->model);
         $record = $modelClass::create($formData);
+        $record->load($relationships);
         return $record;
     }
 

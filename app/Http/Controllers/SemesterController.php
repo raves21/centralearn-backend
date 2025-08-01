@@ -9,12 +9,13 @@ use Illuminate\Http\Request;
 
 class SemesterController extends Controller
 {
-    protected $semesterService;
+    private $semesterService;
 
     public function __construct(SemesterService $semesterService)
     {
         $this->semesterService = $semesterService;
     }
+
     /**
      * Display a listing of the resource.
      */

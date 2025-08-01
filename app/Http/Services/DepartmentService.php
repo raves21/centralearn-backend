@@ -8,7 +8,7 @@ use App\Http\Resources\DepartmentResource;
 
 class DepartmentService
 {
-    protected $departmentRepo;
+    private $departmentRepo;
 
     public function __construct(DepartmentRepository $departmentRepo)
     {

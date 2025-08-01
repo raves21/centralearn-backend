@@ -2,28 +2,28 @@
 
 namespace App\Http\Services;
 
-use App\Http\Repositories\CourseRepository;
+use App\Filament\Resources\SemesterResource;
+use App\Http\Repositories\CourseSemesterRepository;
 use App\Http\Repositories\SemesterRepository;
 use App\Http\Repositories\StudentRepository;
-use App\Http\Resources\CourseResource;
+use App\Http\Resources\CourseSemesterResource;
 use App\Http\Resources\StudentResource;
-use App\Models\Student;
 
 class StudentService
 {
 
-    protected $studentRepo;
-    protected $semesterRepo;
-    protected $courseRepo;
+    private $studentRepo;
+    private $semesterRepo;
+    private $courseSemesterRepo;
 
     public function __construct(
         StudentRepository $studentRepo,
         SemesterRepository $semesterRepo,
-        CourseRepository $courseRepo
+        CourseSemesterRepository $courseSemesterRepo
     ) {
         $this->studentRepo = $studentRepo;
         $this->semesterRepo = $semesterRepo;
-        $this->courseRepo = $courseRepo;
+        $this->courseSemesterRepo = $courseSemesterRepo;
     }
 
     public function getAll()
@@ -48,12 +48,18 @@ class StudentService
         return new StudentResource($this->studentRepo->currentUserStudentProfile());
     }
 
+    public function getEnrolledSemesters(string $studentId)
+    {
+        $this->studentRepo->ensureExists($studentId);
+        return SemesterResource::collection($this->semesterRepo->getStudentEnrolledSemesters($studentId));
+    }
+
     public function getEnrolledCourses(string $studentId, array $filters)
     {
         $this->studentRepo->ensureExists($studentId);
         $studentEnrolledSemesters = $this->semesterRepo->getStudentEnrolledSemesters(studentId: $studentId);
-        return CourseResource::collection(
-            $this->courseRepo->getStudentEnrolledCourses(
+        return CourseSemesterResource::collection(
+            $this->courseSemesterRepo->getStudentEnrolledCourses(
                 studentId: $studentId,
                 filters: $filters,
                 studentEnrolledSemesters: $studentEnrolledSemesters
