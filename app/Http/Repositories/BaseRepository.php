@@ -38,8 +38,7 @@ class BaseRepository
     {
         $record = $this->model->findOrFail($id);
         $record->update($formData);
-        $record->fresh()->load($relationships);
-        return $record;
+        return $record->load($relationships);
     }
 
     public function create(array $formData, array $relationships = [])

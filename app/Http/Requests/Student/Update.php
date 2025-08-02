@@ -25,6 +25,7 @@ class Update extends FormRequest
             'first_name' => ['sometimes', 'string'],
             'last_name' => ['sometimes', 'string'],
             'address' => ['sometimes', 'string'],
+            //can only update program_id if not enrolled to any coursesemester
             'program_id' => ['sometimes', 'exists:programs,id'],
             'email' => ['sometimes', 'email'],
             'password' => ['sometimes', 'string', 'min:8'],

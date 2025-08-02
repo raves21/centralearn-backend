@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Program\Index;
+use App\Http\Requests\Program\Store;
+use App\Http\Requests\Program\Update;
 use App\Http\Resources\ProgramResource;
 use App\Http\Services\ProgramService;
 use App\Models\Program;
@@ -27,9 +29,9 @@ class ProgramController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Store $request)
     {
-        //
+        return $this->programService->create($request->validated());
     }
 
     /**
@@ -43,16 +45,17 @@ class ProgramController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Program $program)
+    public function update(string $id, Update $request)
     {
-        //
+        return $this->programService->updateById($id, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Program $program)
+    public function destroy(string $id)
     {
-        //
+        //can only delete program if this program has no students
+        return $this->programService->deleteById($id);
     }
 }

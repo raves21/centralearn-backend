@@ -23,17 +23,17 @@ class ProgramService
 
     public function create(array $formData)
     {
-        return new ProgramResource($this->programRepo->create($formData));
+        return new ProgramResource($this->programRepo->create($formData, relationships: ['department']));
     }
 
     public function findById(string $id)
     {
-        return new ProgramResource($this->programRepo->findById($id));
+        return new ProgramResource($this->programRepo->findById($id, relationships: ['department']));
     }
 
     public function updateById(string $id, array $formData)
     {
-        return new ProgramResource($this->programRepo->updateById($id, $formData));
+        return new ProgramResource($this->programRepo->updateById($id, $formData, relationships: ['department']));
     }
 
     public function deleteById(string $id)
