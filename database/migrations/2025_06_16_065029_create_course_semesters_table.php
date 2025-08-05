@@ -15,6 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('course_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('semester_id')->constrained()->cascadeOnDelete();
+            $table->string('image_url')->nullable();
             $table->string('section_name')->nullable();
             $table->enum('status', ['open', 'close']);
             $table->timestamps();

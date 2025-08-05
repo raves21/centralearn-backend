@@ -56,6 +56,21 @@ class BaseRepository
         return true;
     }
 
+    public function deleteByFilter(array $filters)
+    {
+        $query = $this->model->query();
+        foreach ($filters as $key => $value) {
+            $query->where($key, $value);
+        }
+        $model = $query->first();
+
+        if ($model) {
+            return $model->delete();
+        }
+
+        return false;
+    }
+
     public function deleteManyById(array $ids)
     {
         $modelClass = get_class($this->model);

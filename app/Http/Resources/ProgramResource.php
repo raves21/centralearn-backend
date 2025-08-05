@@ -19,7 +19,7 @@ class ProgramResource extends JsonResource
             'name' => $this->name,
             'code' => $this->code,
             'description' => $this->description,
-            'imagePath' => $this->image_path,
+            'imageUrl' => $this->image_url,
             'department' => $this->whenLoaded('department', function () {
                 return [
                     'id' => $this->department->id,

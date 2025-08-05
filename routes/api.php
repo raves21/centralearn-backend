@@ -41,13 +41,21 @@ Route::middleware('auth')->group(function () {
         'instructors' => InstructorController::class,
         'students' => StudentController::class,
         'admins' => AdminController::class,
-        'departments' => DepartmentController::class,
-        'programs' => ProgramController::class,
         'semesters' => SemesterController::class,
-        'courses' => CourseController::class,
         'chapters' => ChapterController::class,
         'contents' => ChapterContentController::class,
         'lecture-materials' => LectureMaterialController::class,
-        'course-semesters' => CourseSemesterController::class,
     ]);
+
+    Route::apiResource('departments', DepartmentController::class)->except(['update']);
+    Route::post('departments/{department}', [DepartmentController::class, 'update']);
+
+    Route::apiResource('programs', ProgramController::class)->except('update');
+    Route::post('programs/{program}', [ProgramController::class, 'update']);
+
+    Route::apiResource('courses', CourseController::class)->except(['update']);
+    Route::post('courses/{course}', [CourseController::class, 'update']);
+
+    Route::apiResource('course-semesters', CourseSemesterController::class)->except(['update']);
+    Route::post('course-semesters/{course-semester}', [CourseSemesterController::class, 'update']);
 });

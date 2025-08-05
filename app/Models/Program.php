@@ -15,7 +15,7 @@ class Program extends Model
         'department_id',
         'name',
         'description',
-        'image_path',
+        'image_url',
         'code'
     ];
 

@@ -25,6 +25,7 @@ class Store extends FormRequest
             'department_id' => ['required', 'exists:departments,id'],
             'name' => ['required', 'string'],
             'description' => ['nullable', 'string'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:15000'],
             'code' => ['required', 'string']
         ];
     }

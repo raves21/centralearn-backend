@@ -22,14 +22,14 @@ class CourseSemesterRepository extends BaseRepository
 
         return CourseSemester::whereHas('studentEnrollments', function ($q) use ($semesterId, $studentEnrolledSemesters, $studentId) {
             $q->where('student_id', $studentId);
-            $q->when($semesterId || !$studentEnrolledSemesters->isEmpty(), function ($q) use ($semesterId, $studentEnrolledSemesters) {
+            $q->when($semesterId || $studentEnrolledSemesters->isNotEmpty(), function ($q) use ($semesterId, $studentEnrolledSemesters) {
                 $q->where('semester_id', $semesterId ?? $studentEnrolledSemesters->first()->id);
             });
         })
             ->when($courseName, function ($q) use ($courseName) {
                 $q->whereHas('course', function ($q) use ($courseName) {
-                    $q->where('name', 'LIKE', "{$courseName}%")
-                        ->orWhere('code', 'LIKE', "{$courseName}%");
+                    $q->whereRaw('LOWER(name) LIKE ?', ["{$courseName}%"])
+                        ->orWhereRaw('LOWER(code) LIKE ?', ["{$courseName}%"]);
                 });
             })
             ->with(['course.departments:id,name,code'])
@@ -46,14 +46,14 @@ class CourseSemesterRepository extends BaseRepository
 
         return CourseSemester::whereHas('instructorAssignments', function ($q) use ($semesterId, $instructorAssignedSemesters, $instructorId) {
             $q->where('student_id', $instructorId);
-            $q->when($semesterId || !$instructorAssignedSemesters->isEmpty(), function ($q) use ($semesterId, $instructorAssignedSemesters) {
+            $q->when($semesterId || $instructorAssignedSemesters->isNotEmpty(), function ($q) use ($semesterId, $instructorAssignedSemesters) {
                 $q->where('semester_id', $semesterId ?? $instructorAssignedSemesters->first()->id);
             });
         })
             ->when($courseName, function ($q) use ($courseName) {
                 $q->whereHas('course', function ($q) use ($courseName) {
-                    $q->where('name', 'LIKE', "{$courseName}%")
-                        ->orWhere('code', 'LIKE', "{$courseName}%");
+                    $q->whereRaw('LOWER(name) LIKE ?', ["{$courseName}%"])
+                        ->orWhereRaw('LOWER(code) LIKE ?', ["{$courseName}%"]);
                 });
             })
             ->with(['course.departments:id,name,code'])

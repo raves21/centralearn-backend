@@ -3,18 +3,20 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\CourseRepository;
-use App\Http\Resources\ChapterResource;
+use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Resources\CourseResource;
-use App\Models\Course;
 
 class CourseService
 {
     private $courseRepo;
+    private $fileAttachmentRepo;
 
     public function __construct(
         CourseRepository $courseRepo,
+        FileAttachmentRepository $fileAttachmentRepo
     ) {
         $this->courseRepo = $courseRepo;
+        $this->fileAttachmentRepo = $fileAttachmentRepo;
     }
 
     public function getAll(array $filters)
@@ -27,17 +29,42 @@ class CourseService
 
     public function create(array $formData)
     {
-        return new CourseResource($this->courseRepo->create($formData));
+        if (isset($formData['image'])) {
+            $image = $this->fileAttachmentRepo->uploadAndCreate($formData['image'], 'image');
+            return new CourseResource($this->courseRepo->create(
+                [...$formData, 'image_url' => $image->url],
+                relationships: ['departments:id,code']
+            ));
+        }
+        return new CourseResource($this->courseRepo->create($formData, relationships: ['departments:id,code']));
     }
 
     public function updateById(string $id, array $formData)
     {
-        return new CourseResource($this->courseRepo->updateById($id, $formData));
+        $course = $this->courseRepo->findById($id);
+
+        if (isset($formData['image'])) {
+            //delete previous image
+            $this->fileAttachmentRepo->deleteByFilter(['url' => $course->image_url]);
+
+            //upload new image
+            $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image'], 'image');
+            return new CourseResource($this->courseRepo->updateById(
+                id: $id,
+                formData: [...$formData, 'image_url' => $newImage->url],
+                relationships: ['departments:id,code']
+            ));
+        }
+        return new CourseResource($this->courseRepo->updateById(
+            id: $id,
+            formData: $formData,
+            relationships: ['departments:id,code']
+        ));
     }
 
     public function findById(string $id)
     {
-        return new CourseResource($this->courseRepo->findById($id, relationships: ['departments:id,code']));
+        return new CourseResource($this->courseRepo->findById(id: $id, relationships: ['departments:id,code']));
     }
 
     public function deleteById(string $id)

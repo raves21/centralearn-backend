@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('department_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->string('image_path')->nullable();
+            $table->string('image_url')->nullable();
             $table->string('code')->unique();
             $table->timestamps();
         });

@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('file_attachments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('path');
+            $table->string('path')->unique();
+            $table->string('url')->unique();
             $table->enum('type', ['video', 'document', 'image']);
             $table->string('extension');
             $table->string('mime')->nullable();

@@ -17,7 +17,7 @@ class MakeService extends Command
         $name = $this->argument('name');
         $serviceName = "{$name}Service";
         $serviceName = str_contains($name, 'Service') ? $name  : "{$name}Service";
-        $servicePath = app_path("Services/{$serviceName}.php");
+        $servicePath = app_path("Http/Services/{$serviceName}.php");
 
         if (File::exists($servicePath)) {
             $this->error("Service already exists!");

@@ -18,7 +18,8 @@ class DepartmentResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
-            'imagePath' => $this->image_path,
+            'description' => $this->description,
+            'imageUrl' => $this->image_url,
         ];
     }
 }

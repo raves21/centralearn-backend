@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\File;
 
 class MakeRepository extends Command
 {
-    protected $signature = 'make:repository {name} {--no-service : Skip service} {--all : Generate all basic crud in service}';
+    protected $signature = 'make:repository {name} {--no-service : Skip service and resource} {--all : Generate all basic crud in service}';
 
     protected $description = 'Create a new repository class';
 

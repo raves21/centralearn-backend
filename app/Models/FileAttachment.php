@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
-
+use Illuminate\Support\Facades\Storage;
 
 class FileAttachment extends Model
 {
@@ -12,6 +12,7 @@ class FileAttachment extends Model
 
     protected $fillable = [
         'path',
+        'url',
         'type',
         'extension',
         'name',
@@ -32,5 +33,12 @@ class FileAttachment extends Model
     public function questionOption()
     {
         return $this->morphOne(QuestionOption::class, 'optionable');
+    }
+
+    protected static function booted()
+    {
+        static::deleting(function ($file) {
+            Storage::disk('public')->delete($file->path);
+        });
     }
 }

@@ -29,7 +29,7 @@ class Store extends FormRequest
 
             'material.content' => ['required_if:material_type,text'],
             'material.name' => ['required_if:material_type,file', 'string'],
-            'material.file' => ['required_if:material_type,file', 'file', 'mimes:pdf,doc,docx,xslx,mkv,mp4,jpg,jpeg,png'],
+            'material.file' => ['required_if:material_type,file', 'file', 'mimes:pdf,doc,docx,xslx,mkv,mp4,jpg,jpeg,png', 'max:300000'],
             'material.type' => ['required_if:material_type,file', 'in:video,document,image']
         ];
     }

@@ -24,7 +24,6 @@ class Update extends FormRequest
         return [
             'name' => ['sometimes', 'string'],
             'code' => ['sometimes', 'string'],
-            'image_path' => ['nullable', 'string'],
             'description' => ['nullable', 'string']
         ];
     }

@@ -21,7 +21,7 @@ class CourseResource extends JsonResource
             'departments' => $this->whenLoaded('departments', function () {
                 return $this->departments->map(fn($dept) => $dept->code);
             }),
-            'imagePath' => $this->image_path,
+            'imageUrl' => $this->image_url,
             'description' => $this->description
         ];
     }

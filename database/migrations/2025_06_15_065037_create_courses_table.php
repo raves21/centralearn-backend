@@ -15,7 +15,6 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->string('image_path')->nullable();
             $table->boolean('is_open')->default(false);
             $table->string('code')->unique();
             $table->timestamps();

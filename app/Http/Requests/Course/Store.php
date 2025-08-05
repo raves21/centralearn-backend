@@ -24,7 +24,6 @@ class Store extends FormRequest
         return [
             'name' => ['required', 'string'],
             'code' => ['required', 'string'],
-            'image_path' => ['nullable', 'string'],
             'description' => ['nullable', 'string']
         ];
     }
