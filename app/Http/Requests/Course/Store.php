@@ -24,7 +24,10 @@ class Store extends FormRequest
         return [
             'name' => ['required', 'string'],
             'code' => ['required', 'string'],
-            'description' => ['nullable', 'string']
+            'description' => ['nullable', 'string'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
+            'departments' => ['required', 'array'],
+            'departments.*' => ['exists:departments,id']
         ];
     }
 }

@@ -9,7 +9,7 @@ class CourseSemester extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['course_id', 'semester_id', 'section_name', 'status'];
+    protected $fillable = ['course_id', 'semester_id', 'section_name', 'status', 'image_url'];
 
     public function course()
     {

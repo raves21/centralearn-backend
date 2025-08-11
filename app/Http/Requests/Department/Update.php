@@ -24,7 +24,7 @@ class Update extends FormRequest
         return [
             'name' => ['sometimes', 'string'],
             'code' => ['sometimes', 'string'],
-            'image' => ['sometimes', 'file', 'mimes:jpeg,jpg,png,webp', 'max:15000'],
+            'image' => ['sometimes', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
             'description' => ['sometimes', 'string']
         ];
     }

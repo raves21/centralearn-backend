@@ -43,8 +43,7 @@ class BaseRepository
 
     public function create(array $formData, array $relationships = [])
     {
-        $modelClass = get_class($this->model);
-        $record = $modelClass::create($formData);
+        $record = $this->model->create($formData);
         $record->load($relationships);
         return $record;
     }
@@ -73,8 +72,7 @@ class BaseRepository
 
     public function deleteManyById(array $ids)
     {
-        $modelClass = get_class($this->model);
-        $modelClass::destroy($ids);
+        $this->model->destroy($ids);
         return true;
     }
 
@@ -95,5 +93,15 @@ class BaseRepository
 
         if ($paginate) return $query->paginate();
         return $query->get();
+    }
+
+    public function getFresh(Model $record)
+    {
+        return $record->fresh();
+    }
+
+    public function loadRelationships(Model $record, array $relationships = [])
+    {
+        return $record->load($relationships);
     }
 }

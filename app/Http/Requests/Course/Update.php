@@ -24,7 +24,10 @@ class Update extends FormRequest
         return [
             'name' => ['sometimes', 'string'],
             'code' => ['sometimes', 'string'],
-            'description' => ['nullable', 'string']
+            'description' => ['sometimes', 'string'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
+            'departments' => ['sometimes', 'array'],
+            'departments.*' => ['exists:departments,id']
         ];
     }
 }

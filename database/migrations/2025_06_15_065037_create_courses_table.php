@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('courses', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->string('image_url')->nullable();
             $table->string('description')->nullable();
-            $table->boolean('is_open')->default(false);
             $table->string('code')->unique();
             $table->timestamps();
         });

@@ -24,7 +24,7 @@ class Update extends FormRequest
         return [
             'section_name' => ['sometimes', 'string'],
             'status' => ['sometimes', 'in:open,close'],
-            'image' => ['sometimes', 'file', 'mimes:jpeg,jpg,png,webp', 'max:15000'],
+            'image' => ['sometimes', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
         ];
     }
 }

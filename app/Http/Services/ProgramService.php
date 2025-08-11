@@ -30,50 +30,58 @@ class ProgramService
     {
         if (isset($formData['image'])) {
             $image = $this->fileAttachmentRepo->uploadAndCreate($formData['image'], 'image');
-            return new ProgramResource($this->programRepo->create(
-                [...$formData, 'image_url' => $image->url],
-                relationships: ['department']
-            ));
+            $newProgram = $this->programRepo->create(
+                formData: [...$formData, 'image_url' => $image->url],
+                relationships: ['departments']
+            );
+        } else {
+            $newProgram = $this->programRepo->create(
+                formData: $formData,
+                relationships: ['departments']
+            );
         }
-        return new ProgramResource($this->programRepo->create(
-            $formData,
-            relationships: ['department']
-        ));
+        return new ProgramResource($newProgram);
     }
 
     public function findById(string $id)
     {
         return new ProgramResource($this->programRepo->findById(
             $id,
-            relationships: ['department']
+            relationships: ['departments']
         ));
     }
 
     public function updateById(string $id, array $formData)
     {
         $program = $this->programRepo->findById($id);
-
         if (isset($formData['image'])) {
             //delete previous image
-            $this->fileAttachmentRepo->deleteByFilter(['url' => $program->image_url]);
-
+            if ($program->image_url) {
+                $this->fileAttachmentRepo->deleteByFilter(['url' => $program->image_url]);
+            }
             //upload new image
             $newImage = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image'], type: 'image');
-            return new ProgramResource($this->programRepo->updateById(
+            $updatedProgram = $this->programRepo->updateById(
                 id: $id,
                 formData: [...$formData, 'image_url' => $newImage->url],
                 relationships: ['department']
-            ));
+            );
+        } else {
+            $updatedProgram = $this->programRepo->updateById(
+                id: $id,
+                formData: $formData,
+                relationships: ['department']
+            );
         }
-        return new ProgramResource($this->programRepo->updateById(
-            id: $id,
-            formData: $formData,
-            relationships: ['department']
-        ));
+        return new ProgramResource($updatedProgram);
     }
 
     public function deleteById(string $id)
     {
+        $program = $this->programRepo->findById($id);
+        if ($program->image_url) {
+            $this->fileAttachmentRepo->deleteByFilter(['url' => $program->image_url]);
+        }
         return $this->programRepo->deleteById($id);
     }
 }

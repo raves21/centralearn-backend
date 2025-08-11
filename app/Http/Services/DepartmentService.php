@@ -29,12 +29,14 @@ class DepartmentService
     {
         if (isset($formData['image'])) {
             $file = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image'], type: 'image');
-            return new DepartmentResource($this->departmentRepo->create([
+            $newDepartment = $this->departmentRepo->create([
                 ...$formData,
                 'image_url' => $file->url
-            ]));
+            ]);
+        } else {
+            $newDepartment = $this->departmentRepo->create($formData);
         }
-        return new DepartmentResource($this->departmentRepo->create($formData));
+        return new DepartmentResource($newDepartment);
     }
 
     public function findById(string $id)
@@ -52,13 +54,19 @@ class DepartmentService
             }
             //upload new image
             $newImage = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image'], type: 'image');
-            return new DepartmentResource($this->departmentRepo->updateById($id, [...$formData, 'image_url' => $newImage->url]));
+            $updatedDepartment = $this->departmentRepo->updateById($id, [...$formData, 'image_url' => $newImage->url]);
+        } else {
+            $updatedDepartment = $this->departmentRepo->updateById($id, $formData);
         }
-        return new DepartmentResource($this->departmentRepo->updateById($id, $formData));
+        return new DepartmentResource($updatedDepartment);
     }
 
     public function deleteById(string $id)
     {
+        $department = $this->departmentRepo->findById($id);
+        if ($department->image_url) {
+            $this->fileAttachmentRepo->deleteByFilter(['url' => $department->image_url]);
+        }
         return $this->departmentRepo->deleteById($id);
     }
 }

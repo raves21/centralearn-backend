@@ -11,6 +11,11 @@ class CourseRepository extends BaseRepository
         parent::__construct($course);
     }
 
+    public function syncToDepartments(Course $course, array $departmentIds)
+    {
+        $course->departments()->sync($departmentIds);
+    }
+
     public function getAll(
         array $filters = [],
         array $relationships = [],

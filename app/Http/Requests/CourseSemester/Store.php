@@ -26,7 +26,7 @@ class Store extends FormRequest
             'semester_id' => ['required', 'string'],
             'section_name' => ['required', 'string'],
             'status' => ['required', 'in:open,close'],
-            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:15000'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
         ];
     }
 }

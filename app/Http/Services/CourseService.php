@@ -31,33 +31,52 @@ class CourseService
     {
         if (isset($formData['image'])) {
             $image = $this->fileAttachmentRepo->uploadAndCreate($formData['image'], 'image');
-            return new CourseResource($this->courseRepo->create(
-                [...$formData, 'image_url' => $image->url],
-                relationships: ['departments:id,code']
-            ));
+            $newCourse = $this->courseRepo->create([...$formData, 'image_url' => $image->url]);
+        } else {
+            $newCourse = $this->courseRepo->create($formData);
         }
-        return new CourseResource($this->courseRepo->create($formData, relationships: ['departments:id,code']));
+        $this->courseRepo->syncToDepartments(course: $newCourse, departmentIds: $formData['departments']);
+        return new CourseResource($this->courseRepo->loadRelationships(
+            record: $newCourse,
+            relationships: ['departments:id,code']
+        ));
     }
 
     public function updateById(string $id, array $formData)
     {
         $course = $this->courseRepo->findById($id);
 
-        if (isset($formData['image'])) {
-            //delete previous image
-            $this->fileAttachmentRepo->deleteByFilter(['url' => $course->image_url]);
+        if (isset($formData['departments'])) {
+            $hasStudentEnrollment = $course->whereHas('courseSemesters.studentEnrollments')->exists();
+            if ($hasStudentEnrollment) {
+                return response()->json([
+                    'error' => 'cannot update this Course\'s Department/s because it has a student enrollment/s.'
+                ], 409);
+            }
+        }
 
+        if (isset($formData['image'])) {
+            if ($course->image_url) {
+                //delete previous image
+                $this->fileAttachmentRepo->deleteByFilter(['url' => $course->image_url]);
+            }
             //upload new image
             $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image'], 'image');
-            return new CourseResource($this->courseRepo->updateById(
+            $updatedCourse = $this->courseRepo->updateById(
                 id: $id,
                 formData: [...$formData, 'image_url' => $newImage->url],
-                relationships: ['departments:id,code']
-            ));
+            );
+        } else {
+            $updatedCourse = $this->courseRepo->updateById(
+                id: $id,
+                formData: $formData,
+            );
         }
-        return new CourseResource($this->courseRepo->updateById(
-            id: $id,
-            formData: $formData,
+        if (isset($formData['departments'])) {
+            $this->courseRepo->syncToDepartments($updatedCourse, $formData['departments']);
+        }
+        return new CourseResource($this->courseRepo->loadRelationships(
+            record: $updatedCourse,
             relationships: ['departments:id,code']
         ));
     }
@@ -69,6 +88,10 @@ class CourseService
 
     public function deleteById(string $id)
     {
+        $course = $this->courseRepo->findById($id);
+        if ($course->image_url) {
+            $this->fileAttachmentRepo->deleteByFilter(['url' => $course->image_url]);
+        }
         return $this->courseRepo->deleteById($id);
     }
 }
