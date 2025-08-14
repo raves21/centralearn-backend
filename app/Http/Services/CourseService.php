@@ -46,15 +46,6 @@ class CourseService
     {
         $course = $this->courseRepo->findById($id);
 
-        if (isset($formData['departments'])) {
-            $hasStudentEnrollment = $course->whereHas('courseSemesters.studentEnrollments')->exists();
-            if ($hasStudentEnrollment) {
-                return response()->json([
-                    'error' => 'cannot update this Course\'s Department/s because it has a student enrollment/s.'
-                ], 409);
-            }
-        }
-
         if (isset($formData['image'])) {
             if ($course->image_url) {
                 //delete previous image
@@ -72,8 +63,16 @@ class CourseService
                 formData: $formData,
             );
         }
+
         if (isset($formData['departments'])) {
-            $this->courseRepo->syncToDepartments($updatedCourse, $formData['departments']);
+            $hasStudentEnrollment = $course->whereHas('courseSemesters.studentEnrollments')->exists();
+            if ($hasStudentEnrollment) {
+                return response()->json([
+                    'error' => 'cannot update this Course\'s Department/s because it has a student enrollment/s.'
+                ], 409);
+            } else {
+                $this->courseRepo->syncToDepartments($updatedCourse, $formData['departments']);
+            }
         }
         return new CourseResource($this->courseRepo->loadRelationships(
             record: $updatedCourse,
