@@ -22,7 +22,8 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'chapter_id' => ['required', 'exists:chapters,id']
+            'chapter_id' => ['required', 'exists:chapters,id'],
+            'paginate' => ['required', 'boolean']
         ];
     }
 }

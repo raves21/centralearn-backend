@@ -3,34 +3,47 @@
 namespace App\Http\Requests\LectureMaterial;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class Store extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
-        return [
-            'lecture_id' => ['required', 'exists:lectures,id'],
+        $rules = [
+            // general info
+            'lecture_id'    => ['required', 'exists:lectures,id'],
             'material_type' => ['required', 'in:text,file'],
-            'order' => ['required', 'integer'],
-            'material' => ['required'],
-
-            'material.content' => ['required_if:material_type,text'],
-            'material.name' => ['required_if:material_type,file', 'string'],
-            'material.file' => ['required_if:material_type,file', 'file', 'mimes:pdf,doc,docx,xslx,mkv,mp4,jpg,jpeg,png', 'max:300000'],
-            'material.type' => ['required_if:material_type,file', 'in:video,document,image']
+            'order'         => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('lecture_materials')->where(fn($q) => $q->where('lecture_id', $this->lecture_id))
+            ],
+            'material'      => ['required'],
         ];
+
+        if ($this->input('material_type') === 'text') {
+            $rules = [
+                ...$rules,
+                'material.content' => ['required', 'string'],
+            ];
+        } else {
+            $rules = [
+                ...$rules,
+                'material.file' => [
+                    'required',
+                    'file',
+                    'mimes:pdf,doc,docx,xlsx,mkv,mp4,jpg,jpeg,png',
+                    'max:307200',
+                ],
+            ];
+        }
+
+        return $rules;
     }
 }

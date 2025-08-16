@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('materialable_id');
             $table->integer('order');
             $table->timestamps();
+
+            $table->unique(['order', 'lecture_id']);
         });
     }
 

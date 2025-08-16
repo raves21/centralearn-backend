@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\CourseSemester\Index;
 use App\Http\Requests\CourseSemester\Store;
+use App\Http\Requests\CourseSemester\Update;
 use App\Http\Services\CourseSemesterService;
 use Illuminate\Http\Request;
 
@@ -35,6 +36,11 @@ class CourseSemesterController extends Controller
     public function show(string $id)
     {
         return $this->courseSemesterService->findById($id);
+    }
+
+    public function update(Update $request, string $id)
+    {
+        return $this->courseSemesterService->updateById($id, $request->validated());
     }
 
     /**

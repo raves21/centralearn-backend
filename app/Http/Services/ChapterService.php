@@ -2,22 +2,17 @@
 
 namespace App\Http\Services;
 
-use App\Http\Repositories\ChapterContentRepository;
 use App\Http\Repositories\ChapterRepository;
-use App\Http\Resources\ChapterContentResource;
 use App\Http\Resources\ChapterResource;
 
 class ChapterService
 {
     private $chapterRepo;
-    private $chapterContentRepo;
 
     public function __construct(
         ChapterRepository $chapterRepo,
-        ChapterContentRepository $chapterContentRepo
     ) {
         $this->chapterRepo = $chapterRepo;
-        $this->chapterContentRepo = $chapterContentRepo;
     }
 
     public function getAll(array $filters)

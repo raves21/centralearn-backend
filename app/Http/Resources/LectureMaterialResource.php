@@ -17,9 +17,10 @@ class LectureMaterialResource extends JsonResource
         return [
             'id' => $this->id,
             'lectureId' => $this->lecture_id,
+            'order' => (int)$this->order,
             'materialId' => $this->materialable_id,
             'materialType' => $this->materialable_type,
-            'material' => $this->whenLoaded('materialable', fn() => $this->materialable->toArary())
+            'material' => $this->whenLoaded('materialable', fn() => $this->materialable->toArray())
         ];
     }
 }

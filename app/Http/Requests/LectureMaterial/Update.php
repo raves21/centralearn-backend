@@ -21,16 +21,30 @@ class Update extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'lecture_id' => ['required', 'exists:lectures,id'],
+        $rules = [
+            //general info
             'material_type' => ['required', 'in:text,file'],
-            'order' => ['required', 'integer'],
-            'material' => ['required'],
-
-            'material.content' => ['required_if:material_type,text'],
-            'material.name' => ['required_if:material_type,file', 'string'],
-            'material.file' => ['required_if:material_type,file', 'file', 'mimes:pdf,doc,docx,xslx,mkv,mp4,jpg,jpeg,png'],
-            'material.type' => ['required_if:material_type,file', 'in:video,document,image']
+            'order' => ['sometimes', 'integer'],
+            'is_material_updated' => ['required', 'boolean'],
+            'material' => ['sometimes'],
         ];
+        if ($this->input('material_type') === 'text') {
+            $rules = [
+                ...$rules,
+                'material.content' => ['sometimes', 'string']
+            ];
+        } else {
+            $rules = [
+                ...$rules,
+                'material.file' => [
+                    'sometimes',
+                    'file',
+                    'mimes:pdf,doc,docx,xlsx,mkv,mp4,jpg,jpeg,png',
+                    'max:307200'
+                ],
+            ];
+        }
+
+        return $rules;
     }
 }

@@ -44,18 +44,20 @@ Route::middleware('auth')->group(function () {
         'semesters' => SemesterController::class,
         'chapters' => ChapterController::class,
         'contents' => ChapterContentController::class,
-        'lecture-materials' => LectureMaterialController::class,
     ]);
 
-    Route::apiResource('departments', DepartmentController::class)->except(['update']);
+    Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::post('departments/{department}', [DepartmentController::class, 'update']);
 
     Route::apiResource('programs', ProgramController::class)->except('update');
     Route::post('programs/{program}', [ProgramController::class, 'update']);
 
-    Route::apiResource('courses', CourseController::class)->except(['update']);
+    Route::apiResource('courses', CourseController::class)->except('update');
     Route::post('courses/{course}', [CourseController::class, 'update']);
 
-    Route::apiResource('course-semesters', CourseSemesterController::class)->except(['update']);
-    Route::post('course-semesters/{course-semester}', [CourseSemesterController::class, 'update']);
+    Route::apiResource('course-semesters', CourseSemesterController::class)->except('update');
+    Route::post('course-semesters/{course_semester}', [CourseSemesterController::class, 'update']);
+
+    Route::apiResource('lecture-materials', LectureMaterialController::class)->except('update');
+    Route::post('lecture-materials/{lecture_material}', [LectureMaterialController::class, 'update']);
 });

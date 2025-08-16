@@ -28,16 +28,21 @@ class Store extends FormRequest
             'chapter_id' => ['required', 'exists:chapters,id'],
             'name' => ['required', 'string'],
             'description' => ['nullable', 'string'],
-            'order' => ['required', 'integer'],
+            'order' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('chapter_contents')->where(fn($q) => $q->where('chapter_id', $this->chapter_id))
+            ],
             'content_type' => ['required', 'in:lecture,assessment'],
             'content' => ['required_if:content_type,assessment'],
 
             //visibility
-            'is_published' => ['required', 'boolean'],
+            'is_published' => ['required', 'boolean:strict'],
             'publishes_at' => ['nullable', 'date'],
 
             //accessibility
-            'is_open' => ['required', 'boolean'],
+            'is_open' => ['required', 'boolean:strict'],
             'opens_at' => ['nullable', 'date', Rule::date()->afterOrEqual(today())],
             'closes_at' => ['nullable', 'date', 'after:opens_at'],
         ];
@@ -47,9 +52,9 @@ class Store extends FormRequest
             $rules = array_merge($rules, [
                 'content.time_limit' => ['nullable', 'integer'],
                 'content.max_score' => ['nullable', 'numeric'],
-                'content.is_answers_viewable_after_submit' => ['required', 'boolean'],
-                'content.is_score_viewable_after_submit' => ['required', 'boolean'],
-                'content.is_multi_attempts' => ['required', 'boolean'],
+                'content.is_answers_viewable_after_submit' => ['required', 'boolean:strict'],
+                'content.is_score_viewable_after_submit' => ['required', 'boolean:strict'],
+                'content.is_multi_attempts' => ['required', 'boolean:strict'],
                 'content.max_attempts' => ['required_if:content.is_multi_attempts,true', 'integer'],
                 'content.multi_attempt_grading_type' => ['required_if:content.is_multi_attempts,true', 'in:avg_score,highest_score'],
             ]);

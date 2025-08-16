@@ -30,7 +30,7 @@ class CourseService
     public function create(array $formData)
     {
         if (isset($formData['image'])) {
-            $image = $this->fileAttachmentRepo->uploadAndCreate($formData['image'], 'image');
+            $image = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
             $newCourse = $this->courseRepo->create([...$formData, 'image_url' => $image->url]);
         } else {
             $newCourse = $this->courseRepo->create($formData);
@@ -52,7 +52,7 @@ class CourseService
                 $this->fileAttachmentRepo->deleteByFilter(['url' => $course->image_url]);
             }
             //upload new image
-            $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image'], 'image');
+            $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
             $updatedCourse = $this->courseRepo->updateById(
                 id: $id,
                 formData: [...$formData, 'image_url' => $newImage->url],

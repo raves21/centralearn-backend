@@ -20,16 +20,16 @@ class Update extends FormRequest
             'chapter_id' => ['sometimes', 'exists:chapters,id'],
             'name' => ['sometimes', 'string'],
             'description' => ['nullable', 'string'],
-            'order' => ['sometimes', 'integer'],
+            'order' => ['sometimes', 'integer', 'unique:chapter_contents,order'],
             'content_type' => ['sometimes', 'in:lecture,assessment'],
             'content' => ['required_if:content_type,assessment'],
 
             // Visibility
-            'is_published' => ['sometimes', 'boolean'],
+            'is_published' => ['sometimes', 'boolean:strict'],
             'publishes_at' => ['nullable', 'date'],
 
             // Accessibility
-            'is_open' => ['sometimes', 'boolean'],
+            'is_open' => ['sometimes', 'boolean:strict'],
             'opens_at' => ['nullable', 'date', Rule::afterOrEqual(today())],
             'closes_at' => ['nullable', 'date', 'after:opens_at'],
         ];
@@ -39,9 +39,9 @@ class Update extends FormRequest
             $rules = array_merge($rules, [
                 'content.time_limit' => ['nullable', 'integer'],
                 'content.max_score' => ['nullable', 'numeric'],
-                'content.is_answers_viewable_after_submit' => ['sometimes', 'boolean'],
-                'content.is_score_viewable_after_submit' => ['sometimes', 'boolean'],
-                'content.is_multi_attempts' => ['sometimes', 'boolean'],
+                'content.is_answers_viewable_after_submit' => ['sometimes', 'boolean:strict'],
+                'content.is_score_viewable_after_submit' => ['sometimes', 'boolean:strict'],
+                'content.is_multi_attempts' => ['sometimes', 'boolean:strict'],
                 'content.max_attempts' => ['required_if:content.is_multi_attempts,true', 'integer'],
                 'content.multi_attempt_grading_type' => ['required_if:content.is_multi_attempts,true', 'in:avg_score,highest_score'],
             ]);

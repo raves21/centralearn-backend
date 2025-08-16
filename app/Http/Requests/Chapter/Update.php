@@ -25,6 +25,7 @@ class Update extends FormRequest
             'name' => ['sometimes', 'string'],
             'description' => ['sometimes', 'string'],
             'order' => ['sometimes', 'integer'],
+            'published_at' => ['sometimes', 'date']
         ];
     }
 }

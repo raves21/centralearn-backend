@@ -28,27 +28,32 @@ class ChapterContentService
 
     public function getAll(array $filters)
     {
-        return ChapterContentResource::collection($this->chapterContentRepo->getAll(filters: $filters));
+        return ChapterContentResource::collection($this->chapterContentRepo->getAll(
+            filters: $filters,
+            orderBy: 'order',
+            sortDirection: 'asc',
+            paginate: $filters['paginate']
+        ));
     }
 
     public function create(array $formData)
     {
         if ($formData['content_type'] === 'lecture') {
             $newLecture = $this->lectureRepo->create([]);
-            return new ChapterContentResource($this->chapterContentRepo->create([
+            $newChapterContent = $this->chapterContentRepo->create([
                 ...$formData,
                 'contentable_type' => Lecture::class,
                 'contentable_id' => $newLecture->id,
-            ]));
+            ]);
+            return new ChapterContentResource($this->chapterContentRepo->getFresh($newChapterContent));
         } else {
-            $newAssessment = $this->assessmentRepo->create(Arr::only($formData, 'content'));
-            return new ChapterContentResource(
-                $this->chapterContentRepo->create([
-                    ...$formData,
-                    'contentable_type' => Assessment::class,
-                    'contentable_id' => $newAssessment->id
-                ])
-            );
+            $newAssessment = $this->assessmentRepo->create($formData['content']);
+            $newChapterContent = $this->chapterContentRepo->create([
+                ...$formData,
+                'contentable_type' => Assessment::class,
+                'contentable_id' => $newAssessment->id
+            ]);
+            return new ChapterContentResource($this->chapterContentRepo->getFresh($newChapterContent));
         }
     }
 
@@ -62,7 +67,7 @@ class ChapterContentService
                 $formData['content']
             );
         }
-        return new ChapterContentResource($chapterContent->fresh());
+        return new ChapterContentResource($this->chapterContentRepo->getFresh($chapterContent));
     }
 
     public function findById(string $id)

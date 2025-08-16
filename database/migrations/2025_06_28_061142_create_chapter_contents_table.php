@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('contentable_id');
             $table->integer('order');
             $table->timestamps();
+
+            $table->unique(['order', 'chapter_id']);
         });
     }
 

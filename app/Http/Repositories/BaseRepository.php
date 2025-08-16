@@ -3,6 +3,7 @@
 namespace App\Http\Repositories;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class BaseRepository
 {
@@ -85,8 +86,10 @@ class BaseRepository
     ) {
         $query = $this->model->with($relationships)
             ->when(!empty($filters), function ($query) use ($filters) {
-                foreach ($filters as $key => $value) {
-                    $query->where($key, $value);
+                foreach ($filters as $column => $value) {
+                    if (Schema::hasColumn($this->model->getTable(), $column)) {
+                        $query->where($column, $value);
+                    }
                 }
             })
             ->orderBy($orderBy, $sortDirection);

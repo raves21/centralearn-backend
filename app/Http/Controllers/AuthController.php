@@ -11,6 +11,9 @@ class AuthController extends Controller
 {
     public function login(Login $request)
     {
+        if ($request->user()) {
+            abort(409, ['message' => 'logout first before logging in.']);
+        }
         if (Auth::attempt($request->validated(), true)) {
             $request->session()->regenerate();
             return ['message' => 'ur logged in'];

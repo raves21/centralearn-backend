@@ -28,7 +28,7 @@ class DepartmentService
     public function create(array $formData)
     {
         if (isset($formData['image'])) {
-            $file = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image'], type: 'image');
+            $file = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image']);
             $newDepartment = $this->departmentRepo->create([
                 ...$formData,
                 'image_url' => $file->url
@@ -53,7 +53,7 @@ class DepartmentService
                 $this->fileAttachmentRepo->deleteByFilter(['url' => $department->image_url]);
             }
             //upload new image
-            $newImage = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image'], type: 'image');
+            $newImage = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image']);
             $updatedDepartment = $this->departmentRepo->updateById($id, [...$formData, 'image_url' => $newImage->url]);
         } else {
             $updatedDepartment = $this->departmentRepo->updateById($id, $formData);

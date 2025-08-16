@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -19,7 +20,7 @@ class ChapterResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'order' => $this->order,
-            'publishedAt' => $this->published_at,
+            'isPublished' => (bool)Carbon::parse($this->published_at)->lessThanOrEqualTo(Carbon::now())
         ];
     }
 }

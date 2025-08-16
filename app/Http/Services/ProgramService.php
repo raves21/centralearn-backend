@@ -29,7 +29,7 @@ class ProgramService
     public function create(array $formData)
     {
         if (isset($formData['image'])) {
-            $image = $this->fileAttachmentRepo->uploadAndCreate($formData['image'], 'image');
+            $image = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
             $newProgram = $this->programRepo->create(
                 formData: [...$formData, 'image_url' => $image->url],
                 relationships: ['departments']
@@ -60,7 +60,7 @@ class ProgramService
                 $this->fileAttachmentRepo->deleteByFilter(['url' => $program->image_url]);
             }
             //upload new image
-            $newImage = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image'], type: 'image');
+            $newImage = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image']);
             $updatedProgram = $this->programRepo->updateById(
                 id: $id,
                 formData: [...$formData, 'image_url' => $newImage->url],

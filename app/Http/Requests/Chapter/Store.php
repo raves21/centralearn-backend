@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Chapter;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class Store extends FormRequest
 {
@@ -25,7 +26,13 @@ class Store extends FormRequest
             'name' => ['required', 'string'],
             'course_semester_id' => ['required', 'exists:course_semesters,id'],
             'description' => ['nullable', 'string'],
-            'order' => ['required', 'integer', 'min:1'],
+            'order' => [
+                'required',
+                'integer',
+                'min:1',
+                Rule::unique('chapters')->where(fn($q) => $q->where('course_semester_id', $this->course_semester_id))
+            ],
+            'published_at' => ['required', 'date']
         ];
     }
 }
