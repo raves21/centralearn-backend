@@ -45,7 +45,7 @@ class CourseSemesterRepository extends BaseRepository
         $courseName = $filters['course_name'] ?? null;
 
         return CourseSemester::whereHas('instructorAssignments', function ($q) use ($semesterId, $instructorAssignedSemesters, $instructorId) {
-            $q->where('student_id', $instructorId);
+            $q->where('instructor_id', $instructorId);
             $q->when($semesterId || $instructorAssignedSemesters->isNotEmpty(), function ($q) use ($semesterId, $instructorAssignedSemesters) {
                 $q->where('semester_id', $semesterId ?? $instructorAssignedSemesters->first()->id);
             });

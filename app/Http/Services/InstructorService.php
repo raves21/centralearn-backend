@@ -2,13 +2,12 @@
 
 namespace App\Http\Services;
 
+use App\Http\Repositories\CourseSemesterRepository;
 use App\Http\Repositories\InstructorRepository;
 use App\Http\Repositories\SemesterRepository;
 use App\Http\Resources\CourseSemesterResource;
 use App\Http\Resources\InstructorResource;
 use App\Http\Resources\SemesterResource;
-use App\Models\CourseSemester;
-use App\Models\Instructor;
 
 class InstructorService
 {
@@ -19,7 +18,7 @@ class InstructorService
     public function __construct(
         InstructorRepository $instructorRepo,
         SemesterRepository $semesterRepo,
-        CourseSemester $courseSemesterRepo
+        CourseSemesterRepository $courseSemesterRepo
     ) {
         $this->instructorRepo = $instructorRepo;
         $this->semesterRepo = $semesterRepo;
