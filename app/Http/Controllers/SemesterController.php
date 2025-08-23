@@ -4,10 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Semester\Store;
 use App\Http\Requests\Semester\Update;
-use App\Http\Resources\SemesterResource;
+use App\Http\Requests\Semester\UpdateSemesterGetMinMaxTimestamps;
 use App\Http\Services\SemesterService;
-use App\Models\Semester;
-use Illuminate\Http\Request;
 
 class SemesterController extends Controller
 {
@@ -56,5 +54,15 @@ class SemesterController extends Controller
     public function destroy(string $semesterId)
     {
         return $this->semesterService->deleteById($semesterId);
+    }
+
+    public function updateSemesterGetMinMaxTimestamps(UpdateSemesterGetMinMaxTimestamps $request)
+    {
+        return $this->semesterService->updateSemesterGetMinMaxTimestamps(id: $request->validated()['semester_id']);
+    }
+
+    public function createSemesterGetMinMaxTimestamps()
+    {
+        return $this->semesterService->createSemesterGetMinMaxTimestamps();
     }
 }

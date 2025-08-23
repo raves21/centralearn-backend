@@ -40,9 +40,14 @@ class SemesterService
         return $this->semesterRepo->deleteById($id);
     }
 
-    public function getSemesterMinStartDateMaxEndDate(string $id)
+    public function updateSemesterGetMinMaxTimestamps(string $id)
     {
         $semester = $this->semesterRepo->findById($id);
-        return $this->semesterRepo->getSemesterMinStartDateMaxEndDate($semester);
+        return $this->semesterRepo->updateSemesterGetMinMaxTimestamps($semester);
+    }
+
+    public function createSemesterGetMinMaxTimestamps()
+    {
+        return $this->semesterRepo->createSemesterGetMinMaxTimestamps();
     }
 }

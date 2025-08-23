@@ -31,40 +31,43 @@ class SemesterRepository extends BaseRepository
             ->get();
     }
 
-    public function getSemesterMinStartDateMaxEndDate(?Semester $semester = null)
+    public function updateSemesterGetMinMaxTimestamps(Semester $semester)
     {
-        //if has semester, this means user wants to update the semester
-        if ($semester) {
-            $prevSemEndDateQuery = Semester::orderByDesc('end_date')->where('end_date', '<', $semester->start_date)->first() ?? null;
-            $prevSemEndDate = $prevSemEndDateQuery ? Carbon::parse($prevSemEndDateQuery->end_date) : null;
+        $prevSemEndDateQuery = Semester::orderByDesc('end_date')->where('end_date', '<', $semester->start_date)->first() ?? null;
+        $prevSemEndDate = $prevSemEndDateQuery ? Carbon::parse($prevSemEndDateQuery->end_date) : null;
 
-            $nextSemStartDateQuery = Semester::orderBy('end_date')->where('start_date', '>', $semester->end_date)->first() ?? null;
-            $nextSemStartDate = $nextSemStartDateQuery ? Carbon::parse($nextSemStartDateQuery->start_date) : null;
+        $nextSemStartDateQuery = Semester::orderBy('end_date')->where('start_date', '>', $semester->end_date)->first() ?? null;
+        $nextSemStartDate = $nextSemStartDateQuery ? Carbon::parse($nextSemStartDateQuery->start_date) : null;
 
-            if ($prevSemEndDate && $nextSemStartDate) {
-                return [
-                    'startDateMin' => self::formatDate($prevSemEndDate->addDay(1)),
-                    'endDateMax' => self::formatDate($nextSemStartDate->addDay(1))
-                ];
-            } else if ($prevSemEndDate && !$nextSemStartDate) {
-                return [
-                    'startDateMin' => self::formatDate($prevSemEndDate->addDay(1)),
-                    'endDateMax' => null
-                ];
-            } else {
-                return [
-                    'startDateMin' => null,
-                    'endDateMax' => self::formatDate($nextSemStartDate->addDay(1))
-                ];
-            }
-        }
-        //if no semester, this means user wants to create a semester
-        else {
+        if ($prevSemEndDate && $nextSemStartDate) {
             return [
-                'startDateMin' => self::formatDate(Carbon::parse(Semester::latest()->first()->end_date)->addDay(1)),
+                'startDateMin' => self::formatDate($prevSemEndDate->addDay(1)),
+                'endDateMax' => self::formatDate($nextSemStartDate->addDay(1))
+            ];
+        } else if ($prevSemEndDate && !$nextSemStartDate) {
+            return [
+                'startDateMin' => self::formatDate($prevSemEndDate->addDay(1)),
+                'endDateMax' => null
+            ];
+        } else if (!$prevSemEndDate && $nextSemStartDate) {
+            return [
+                'startDateMin' => null,
+                'endDateMax' => self::formatDate($nextSemStartDate->addDay(1))
+            ];
+        } else {
+            return [
+                'startDateMin' => null,
                 'endDateMax' => null
             ];
         }
+    }
+
+    public function createSemesterGetMinMaxTimestamps()
+    {
+        return [
+            'startDateMin' => self::formatDate(Carbon::parse(Semester::latest()->first()->end_date)->addDay(1)),
+            'endDateMax' => null
+        ];
     }
 
     private function formatDate($date)

@@ -37,6 +37,9 @@ Route::middleware('auth')->group(function () {
         Route::get('{instructor}/semesters-assigned', [InstructorController::class, 'getAssignedSemesters']);
     });
 
+    Route::get('semesters/updateSemesterGetMinMaxTimestamps', [SemesterController::class, 'updateSemesterGetMinMaxTimestamps']);
+    Route::get('semesters/createSemesterGetMinMaxTimestamps', [SemesterController::class, 'createSemesterGetMinMaxTimestamps']);
+
     Route::apiResources([
         'instructors' => InstructorController::class,
         'students' => StudentController::class,
@@ -45,6 +48,7 @@ Route::middleware('auth')->group(function () {
         'chapters' => ChapterController::class,
         'contents' => ChapterContentController::class,
     ]);
+
 
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::post('departments/{department}', [DepartmentController::class, 'update']);
