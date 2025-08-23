@@ -2,6 +2,8 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Assessment;
+use App\Models\Lecture;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -27,7 +29,15 @@ class ChapterContentResource extends JsonResource
             'order' => $this->order,
             'contentId' => $this->contentable_id,
             'contentType' => $this->contentable_type,
-            'content' => $this->whenLoaded('contentable', fn() => $this->contentable->toArray())
+            'content' => $this->whenLoaded('contentable', function () {
+                $content = $this->contentable;
+                switch ($this->contentable_type) {
+                    case Lecture::class:
+                        return new LectureResource($content);
+                    case Assessment::class:
+                        return new AssessmentResource($content);
+                }
+            })
         ];
     }
 }

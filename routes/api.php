@@ -12,8 +12,8 @@ use App\Http\Controllers\LectureMaterialController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StudentController;
-use App\Models\Instructor;
-use Illuminate\Http\Request;
+use App\Http\Controllers\AssesementMaterialController;
+use App\Http\Controllers\QuestionOptionController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -58,6 +58,12 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('course-semesters', CourseSemesterController::class)->except('update');
     Route::post('course-semesters/{course_semester}', [CourseSemesterController::class, 'update']);
 
-    Route::apiResource('lecture-materials', LectureMaterialController::class)->except('update');
+    Route::apiResource('lecture-materials', LectureMaterialController::class)->except(['update', 'show']);
     Route::post('lecture-materials/{lecture_material}', [LectureMaterialController::class, 'update']);
+
+    Route::apiResource('assessment-materials', AssesementMaterialController::class)->except(['update', 'show']);
+    Route::post('assessment-materials/{assessment_material}', [AssesementMaterialController::class, 'update']);
+
+    Route::apiResource('question-options', QuestionOptionController::class)->except(['update', 'show']);
+    Route::post('question-options/{question_option}', [QuestionOptionController::class, 'update']);
 });

@@ -107,4 +107,9 @@ class BaseRepository
     {
         return $record->load($relationships);
     }
+
+    public function deleteMorph($morphType, $morphId)
+    {
+        $morphType::destroy($morphId);
+    }
 }

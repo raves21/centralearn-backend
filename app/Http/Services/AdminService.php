@@ -25,7 +25,7 @@ class AdminService
 
     public function findById(string $id)
     {
-        return new AdminResource($this->adminRepo->findById($id))->additional(['with_permissions' => true]);
+        return new AdminResource($this->adminRepo->findById($id));
     }
 
     public function create(array $formData)

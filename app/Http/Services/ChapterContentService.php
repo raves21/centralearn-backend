@@ -38,23 +38,25 @@ class ChapterContentService
 
     public function create(array $formData)
     {
-        if ($formData['content_type'] === 'lecture') {
-            $newLecture = $this->lectureRepo->create([]);
-            $newChapterContent = $this->chapterContentRepo->create([
-                ...$formData,
-                'contentable_type' => Lecture::class,
-                'contentable_id' => $newLecture->id,
-            ]);
-            return new ChapterContentResource($this->chapterContentRepo->getFresh($newChapterContent));
-        } else {
-            $newAssessment = $this->assessmentRepo->create($formData['content']);
-            $newChapterContent = $this->chapterContentRepo->create([
-                ...$formData,
-                'contentable_type' => Assessment::class,
-                'contentable_id' => $newAssessment->id
-            ]);
-            return new ChapterContentResource($this->chapterContentRepo->getFresh($newChapterContent));
+        switch ($formData['content_type']) {
+            case 'lecture':
+                $newLecture = $this->lectureRepo->create([]);
+                $newChapterContent = $this->chapterContentRepo->create([
+                    ...$formData,
+                    'contentable_type' => Lecture::class,
+                    'contentable_id' => $newLecture->id,
+                ]);
+                break;
+            case 'assessment':
+                $newAssessment = $this->assessmentRepo->create($formData['content']);
+                $newChapterContent = $this->chapterContentRepo->create([
+                    ...$formData,
+                    'contentable_type' => Assessment::class,
+                    'contentable_id' => $newAssessment->id
+                ]);
+                break;
         }
+        return new ChapterContentResource($this->chapterContentRepo->getFresh($newChapterContent));
     }
 
     public function updateById(string $id, array $formData)

@@ -8,14 +8,19 @@ use Illuminate\Support\Facades\File;
 
 class MakeRepository extends Command
 {
-    protected $signature = 'make:repository {name} {--no-service : Skip service and resource} {--all : Generate all basic crud in service}';
+    protected $signature = 'make:repository {name} {--repo-only : Skip service and resource} {--all : Generate all basic crud in service and make resource}';
 
     protected $description = 'Create a new repository class';
 
     public function handle()
     {
-        if ($this->option('no-service') && $this->option('all')) {
-            $this->error('Cannot have options: --no-service and --all at the same time');
+        if (!$this->option('repo-only') && !$this->option('all')) {
+            $this->error('Required option: --repo-only (Skip service and resource) or --all (Generate all basic crud in service and make resource)');
+            return;
+        }
+
+        if ($this->option('repo-only') && $this->option('all')) {
+            $this->error('Cannot have options: --repo-only and --all at the same time');
             return;
         }
         $model = explode('Repository', $this->argument('name'))[0];
@@ -55,7 +60,7 @@ class MakeRepository extends Command
 
         $this->info("Repository {$repositoryName} created successfully.");
 
-        $noService = $this->option('no-service');
+        $noService = $this->option('repo-only');
 
         if (!$noService) {
             $serviceName = "{$model}Service";

@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\ChapterRepository;
 use App\Http\Resources\ChapterResource;
+use Illuminate\Support\Arr;
 
 class ChapterService
 {
@@ -19,6 +20,8 @@ class ChapterService
     {
         return ChapterResource::collection($this->chapterRepo->getAll(
             filters: $filters,
+            orderBy: 'order',
+            sortDirection: 'asc',
             paginate: false
         ));
     }

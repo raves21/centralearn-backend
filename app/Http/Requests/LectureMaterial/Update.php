@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\LectureMaterial;
 
+use App\Models\LectureMaterial;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class Update extends FormRequest
 {
@@ -21,10 +23,18 @@ class Update extends FormRequest
      */
     public function rules(): array
     {
+        $lectureId = LectureMaterial::find($this->route('lecture_material'))->lecture_id;
         $rules = [
             //general info
             'material_type' => ['required', 'in:text,file'],
-            'order' => ['sometimes', 'integer'],
+            'order' => [
+                'sometimes',
+                'integer',
+                'min:1',
+                Rule::unique('lecture_materials')
+                    ->where(fn($q) => $q->where('lecture_id', $lectureId))
+                    ->ignore($this->route('lecture_material')),
+            ],
             'is_material_updated' => ['required', 'boolean'],
             'material' => ['sometimes'],
         ];

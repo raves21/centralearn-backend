@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Chapter;
 
+use App\Models\Chapter;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class Update extends FormRequest
 {
@@ -21,10 +23,18 @@ class Update extends FormRequest
      */
     public function rules(): array
     {
+        $courseSemesterId = Chapter::find($this->route('chapter'))->course_semester_id;
+
         return [
             'name' => ['sometimes', 'string'],
             'description' => ['sometimes', 'string'],
-            'order' => ['sometimes', 'integer'],
+            'order' => [
+                'sometimes',
+                'integer',
+                Rule::unique('course_semesters')
+                    ->where(fn($q) => $q->where('course_semester_id', $courseSemesterId))
+                    ->ignore($this->route('chapter'))
+            ],
             'published_at' => ['sometimes', 'date']
         ];
     }

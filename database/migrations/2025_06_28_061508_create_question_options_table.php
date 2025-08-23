@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('question_options', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('option_based_question')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('option_based_question_id')->constrained()->cascadeOnDelete();
             $table->string('optionable_type');
             $table->string('optionable_id');
+            $table->integer('order');
             $table->boolean('is_correct');
             $table->timestamps();
+
+            $table->unique(['order', 'option_based_question_id']);
         });
     }
 

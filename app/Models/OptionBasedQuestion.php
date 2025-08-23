@@ -15,6 +15,8 @@ class OptionBasedQuestion extends Model
         'point_worth'
     ];
 
+    protected $with = ['options'];
+
     public function options()
     {
         return $this->hasMany(QuestionOption::class);

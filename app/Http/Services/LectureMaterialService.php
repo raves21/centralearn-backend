@@ -43,23 +43,25 @@ class LectureMaterialService
 
     public function create(array $formData)
     {
-        if ($formData['material_type'] === 'text') {
-            $newTextAttachment = $this->textAttachmentRepo->create(['content' => $formData['material']['content']]);
-            $newLectureMaterial = $this->lectureMaterialRepo->create([
-                ...$formData,
-                'materialable_type' => TextAttachment::class,
-                'materialable_id' => $newTextAttachment->id
-            ]);
-            return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($newLectureMaterial));
-        } else {
-            $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
-            $newLectureMaterial = $this->lectureMaterialRepo->create([
-                ...$formData,
-                'materialable_type' => FileAttachment::class,
-                'materialable_id' => $newFileAttachment->id
-            ]);
-            return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($newLectureMaterial));
+        switch ($formData['material_type']) {
+            case 'text':
+                $newTextAttachment = $this->textAttachmentRepo->create(['content' => $formData['material']['content']]);
+                $newLectureMaterial = $this->lectureMaterialRepo->create([
+                    ...$formData,
+                    'materialable_type' => TextAttachment::class,
+                    'materialable_id' => $newTextAttachment->id
+                ]);
+                break;
+            case 'file':
+                $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
+                $newLectureMaterial = $this->lectureMaterialRepo->create([
+                    ...$formData,
+                    'materialable_type' => FileAttachment::class,
+                    'materialable_id' => $newFileAttachment->id
+                ]);
+                break;
         }
+        return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($newLectureMaterial));
     }
 
     public function updateById(string $id, array $formData)
@@ -70,71 +72,71 @@ class LectureMaterialService
             return new LectureMaterialResource($this->lectureMaterialRepo->updateById($id, $formData));
         }
 
-        $materialType = match ($lectureMaterial->materialable_type) {
+        $prevMaterialType = match ($lectureMaterial->materialable_type) {
             FileAttachment::class => 'file',
             TextAttachment::class => 'text'
         };
 
-        if ($materialType !== $formData['material_type']) {
+        if ($prevMaterialType !== $formData['material_type']) {
             //if user changed the material type
-            if ($formData['material_type'] === 'text') {
-                //if before it was file but now updates to text,
-                //delete previous file attachment
-                $this->fileAttachmentRepo->deleteById($lectureMaterial->materialable_id);
-                //and create new text attachment
-                $newTextAttachment = $this->textAttachmentRepo->create(['content' => $formData['material']['content']]);
-                $updatedLectureMaterial = $this->lectureMaterialRepo->updateById($id, [
-                    ...$formData,
-                    'materialable_id' => $newTextAttachment->id,
-                    'materialable_type' => TextAttachment::class
-                ]);
-                return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($updatedLectureMaterial));
-            } else {
-                //if before it was text but now updates to file
-                //delete previous text attachment
-                $this->textAttachmentRepo->deleteById($lectureMaterial->materialable_id);
-                //and create new file attachment
-                $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
-                $updatedLectureMaterial = $this->lectureMaterialRepo->updateById($id, [
-                    ...$formData,
-                    'materialable_id' => $newFileAttachment->id,
-                    'materialable_type' => FileAttachment::class
-                ]);
-                return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($updatedLectureMaterial));
+            //delete previous material
+            $this->lectureMaterialRepo->deleteMorph(
+                morphType: $lectureMaterial->materialable_type,
+                morphId: $lectureMaterial->materialable_id
+            );
+
+            switch ($formData['material_type']) {
+                case 'text':
+                    $newTextAttachment = $this->textAttachmentRepo->create(['content' => $formData['material']['content']]);
+                    $updatedLectureMaterial = $this->lectureMaterialRepo->updateById($id, [
+                        ...$formData,
+                        'materialable_id' => $newTextAttachment->id,
+                        'materialable_type' => TextAttachment::class
+                    ]);
+                    break;
+                case 'file':
+                    $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
+                    $updatedLectureMaterial = $this->lectureMaterialRepo->updateById($id, [
+                        ...$formData,
+                        'materialable_id' => $newFileAttachment->id,
+                        'materialable_type' => FileAttachment::class
+                    ]);
+                    break;
             }
         } else {
-            //if same material type
-            if ($formData['material_type'] === 'text') {
-                $this->textAttachmentRepo->updateById(
-                    $lectureMaterial->materialable_id,
-                    ['content' => $formData['material']['content']]
-                );
-                $updatedLectureMaterial = $this->lectureMaterialRepo->updateById($id, $formData);
-                return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($updatedLectureMaterial));
-            } else {
-                //delete previous file attachment
-                $this->fileAttachmentRepo->deleteById($lectureMaterial->materialable_id);
-                //upload new file attachment
-                $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
-                $updatedLectureMaterial = $this->lectureMaterialRepo->updateById($id, [
-                    ...$formData,
-                    'materialable_id' => $newFileAttachment->id,
-                    'materialable_type' => FileAttachment::class
-                ]);
-                return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($updatedLectureMaterial));
+            //if material type remained the same
+            switch ($formData['material_type']) {
+                case 'text':
+                    $this->textAttachmentRepo->updateById(
+                        $lectureMaterial->materialable_id,
+                        ['content' => $formData['material']['content']]
+                    );
+                    $updatedLectureMaterial = $this->lectureMaterialRepo->updateById($id, $formData);
+                    break;
+                case 'file':
+                    //delete previous
+                    $this->fileAttachmentRepo->deleteById($lectureMaterial->materialable_id);
+                    //upload new
+                    $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
+                    $updatedLectureMaterial = $this->lectureMaterialRepo->updateById($id, [
+                        ...$formData,
+                        'materialable_id' => $newFileAttachment->id,
+                        'materialable_type' => FileAttachment::class
+                    ]);
+                    break;
             }
         }
+        return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($updatedLectureMaterial));
     }
 
     public function deleteById(string $id)
     {
         $lectureMaterial = $this->lectureMaterialRepo->findById($id);
-        //delete associated material
-        if ($lectureMaterial->materialable_type === FileAttachment::class) {
-            $this->fileAttachmentRepo->deleteById($lectureMaterial->materialable_id);
-        } else {
-            $this->textAttachmentRepo->deleteById($lectureMaterial->materialable_id);
-        }
+        //delete material
+        $this->lectureMaterialRepo->deleteMorph(
+            morphType: $lectureMaterial->materialable_type,
+            morphId: $lectureMaterial->materialable_id
+        );
         return $this->lectureMaterialRepo->deleteById($id);
     }
 }

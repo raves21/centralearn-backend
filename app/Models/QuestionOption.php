@@ -12,8 +12,13 @@ class QuestionOption extends Model
 
     protected $fillable = [
         'option_based_question_id',
-        'is_correct'
+        'optionable_id',
+        'optionable_type',
+        'is_correct',
+        'order'
     ];
+
+    protected $with = ['optionable'];
 
     public function optionBasedQuestion()
     {
