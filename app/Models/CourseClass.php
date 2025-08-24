@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-class CourseSemester extends Model
+class CourseClass extends Model
 {
     use HasUuids;
 

@@ -5,7 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ChapterContentController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\CourseController;
-use App\Http\Controllers\CourseSemesterController;
+use App\Http\Controllers\CourseClassController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\InstructorController;
 use App\Http\Controllers\LectureMaterialController;
@@ -59,8 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('courses', CourseController::class)->except('update');
     Route::post('courses/{course}', [CourseController::class, 'update']);
 
-    Route::apiResource('course-semesters', CourseSemesterController::class)->except('update');
-    Route::post('course-semesters/{course_semester}', [CourseSemesterController::class, 'update']);
+    Route::apiResource('course-semesters', CourseClassController::class)->except('update');
+    Route::post('course-semesters/{course_semester}', [CourseClassController::class, 'update']);
 
     Route::apiResource('lecture-materials', LectureMaterialController::class)->except(['update', 'show']);
     Route::post('lecture-materials/{lecture_material}', [LectureMaterialController::class, 'update']);

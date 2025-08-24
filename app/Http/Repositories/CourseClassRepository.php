@@ -2,14 +2,14 @@
 
 namespace App\Http\Repositories;
 
-use App\Models\CourseSemester;
+use App\Models\CourseClass;
 use Illuminate\Support\Collection;
 
-class CourseSemesterRepository extends BaseRepository
+class CourseClassRepository extends BaseRepository
 {
-    public function __construct(CourseSemester $courseSemester)
+    public function __construct(CourseClass $courseClass)
     {
-        parent::__construct($courseSemester);
+        parent::__construct($courseClass);
     }
 
     public function getStudentEnrolledCourses(
@@ -20,7 +20,7 @@ class CourseSemesterRepository extends BaseRepository
         $semesterId = $filters['semester_id'] ?? null;
         $courseName = $filters['course_name'] ?? null;
 
-        return CourseSemester::whereHas('studentEnrollments', function ($q) use ($semesterId, $studentEnrolledSemesters, $studentId) {
+        return CourseClass::whereHas('studentEnrollments', function ($q) use ($semesterId, $studentEnrolledSemesters, $studentId) {
             $q->where('student_id', $studentId);
             $q->when($semesterId || $studentEnrolledSemesters->isNotEmpty(), function ($q) use ($semesterId, $studentEnrolledSemesters) {
                 $q->where('semester_id', $semesterId ?? $studentEnrolledSemesters->first()->id);
@@ -44,7 +44,7 @@ class CourseSemesterRepository extends BaseRepository
         $semesterId = $filters['semester_id'] ?? null;
         $courseName = $filters['course_name'] ?? null;
 
-        return CourseSemester::whereHas('instructorAssignments', function ($q) use ($semesterId, $instructorAssignedSemesters, $instructorId) {
+        return CourseClass::whereHas('instructorAssignments', function ($q) use ($semesterId, $instructorAssignedSemesters, $instructorId) {
             $q->where('instructor_id', $instructorId);
             $q->when($semesterId || $instructorAssignedSemesters->isNotEmpty(), function ($q) use ($semesterId, $instructorAssignedSemesters) {
                 $q->where('semester_id', $semesterId ?? $instructorAssignedSemesters->first()->id);

@@ -2,10 +2,10 @@
 
 namespace App\Http\Services;
 
-use App\Http\Repositories\CourseSemesterRepository;
+use App\Http\Repositories\CourseClassRepository;
 use App\Http\Repositories\SemesterRepository;
 use App\Http\Repositories\StudentRepository;
-use App\Http\Resources\CourseSemesterResource;
+use App\Http\Resources\CourseClassResource;
 use App\Http\Resources\SemesterResource;
 use App\Http\Resources\StudentResource;
 
@@ -14,16 +14,16 @@ class StudentService
 
     private $studentRepo;
     private $semesterRepo;
-    private $courseSemesterRepo;
+    private $courseClassRepo;
 
     public function __construct(
         StudentRepository $studentRepo,
         SemesterRepository $semesterRepo,
-        CourseSemesterRepository $courseSemesterRepo
+        CourseClassRepository $courseClassRepo
     ) {
         $this->studentRepo = $studentRepo;
         $this->semesterRepo = $semesterRepo;
-        $this->courseSemesterRepo = $courseSemesterRepo;
+        $this->courseClassRepo = $courseClassRepo;
     }
 
     public function getAll()
@@ -73,8 +73,8 @@ class StudentService
     {
         $this->studentRepo->ensureExists($studentId);
         $studentEnrolledSemesters = $this->semesterRepo->getStudentEnrolledSemesters(studentId: $studentId);
-        return CourseSemesterResource::collection(
-            $this->courseSemesterRepo->getStudentEnrolledCourses(
+        return CourseClassResource::collection(
+            $this->courseClassRepo->getStudentEnrolledCourses(
                 studentId: $studentId,
                 filters: $filters,
                 studentEnrolledSemesters: $studentEnrolledSemesters

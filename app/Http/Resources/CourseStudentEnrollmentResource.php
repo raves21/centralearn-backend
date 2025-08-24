@@ -17,7 +17,7 @@ class CourseStudentEnrollmentResource extends JsonResource
         return [
             'id' => $this->id,
             'student' => new StudentResource($this->whenLoaded('student')),
-            'courseSemester' => new CourseSemesterResource($this->whenLoaded('course_semester')),
+            'courseClass' => new CourseClassResource($this->whenLoaded('course_semester')),
             'finalGrade' => $this->final_grade
         ];
     }

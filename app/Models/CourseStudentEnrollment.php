@@ -19,8 +19,8 @@ class CourseStudentEnrollment extends Model
         return $this->belongsTo(Student::class);
     }
 
-    public function courseSemester()
+    public function courseClass()
     {
-        return $this->belongsTo(CourseSemester::class);
+        return $this->belongsTo(CourseClass::class);
     }
 }

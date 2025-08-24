@@ -65,7 +65,7 @@ class CourseService
         }
 
         if (isset($formData['departments'])) {
-            $hasStudentEnrollment = $course->whereHas('courseSemesters.studentEnrollments')->exists();
+            $hasStudentEnrollment = $course->whereHas('courseClasses.studentEnrollments')->exists();
             if ($hasStudentEnrollment) {
                 return response()->json([
                     'error' => 'cannot update this Course\'s Department/s because it has a student enrollment/s.'

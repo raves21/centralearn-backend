@@ -2,81 +2,81 @@
 
 namespace App\Http\Services;
 
-use App\Http\Repositories\CourseSemesterRepository;
+use App\Http\Repositories\CourseClassRepository;
 use App\Http\Repositories\FileAttachmentRepository;
-use App\Http\Resources\CourseSemesterResource;
+use App\Http\Resources\CourseClassResource;
 
-class CourseSemesterService
+class CourseClassService
 {
-    private $courseSemesterRepo;
+    private $courseClassRepo;
     private $fileAttachmentRepo;
 
     public function __construct(
-        CourseSemesterRepository $courseSemesterRepo,
+        CourseClassRepository $courseClassRepo,
         FileAttachmentRepository $fileAttachmentRepo
     ) {
-        $this->courseSemesterRepo = $courseSemesterRepo;
+        $this->courseClassRepo = $courseClassRepo;
         $this->fileAttachmentRepo = $fileAttachmentRepo;
     }
 
     public function getAll(array $filters)
     {
-        return CourseSemesterResource::collection($this->courseSemesterRepo->getAll(filters: $filters, relationships: ['course', 'semester']));
+        return CourseClassResource::collection($this->courseClassRepo->getAll(filters: $filters, relationships: ['course', 'semester']));
     }
 
     public function findById(string $id)
     {
-        return new CourseSemesterResource($this->courseSemesterRepo->findById($id, relationships: ['course', 'semester']));
+        return new CourseClassResource($this->courseClassRepo->findById($id, relationships: ['course', 'semester']));
     }
 
     public function create(array $formData)
     {
         if (isset($formData['image'])) {
             $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
-            $newCourseSemester = $this->courseSemesterRepo->create(
+            $newCourseClass = $this->courseClassRepo->create(
                 [...$formData, 'image_url' => $newImage->url],
                 relationships: ['course', 'semester']
             );
         } else {
-            $newCourseSemester = $this->courseSemesterRepo->create(
+            $newCourseClass = $this->courseClassRepo->create(
                 $formData,
                 relationships: ['course', 'semester']
             );
         }
-        return new CourseSemesterResource($newCourseSemester);
+        return new CourseClassResource($newCourseClass);
     }
 
     public function updateById(string $id, array $formData)
     {
-        $courseSemester = $this->courseSemesterRepo->findById($id);
+        $courseClass = $this->courseClassRepo->findById($id);
         if (isset($formData['image'])) {
-            if ($courseSemester->image_url) {
+            if ($courseClass->image_url) {
                 //delete previous image
-                $this->fileAttachmentRepo->deleteByFilter(['url' => $courseSemester->image_url]);
+                $this->fileAttachmentRepo->deleteByFilter(['url' => $courseClass->image_url]);
             }
             //upload new image
             $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
-            $updatedCourseSemester = $this->courseSemesterRepo->updateById(
+            $updatedCourseClass = $this->courseClassRepo->updateById(
                 $id,
                 [...$formData, 'image_url' => $newImage->url],
                 relationships: ['course', 'semester']
             );
         } else {
-            $updatedCourseSemester = $this->courseSemesterRepo->updateById(
+            $updatedCourseClass = $this->courseClassRepo->updateById(
                 $id,
                 $formData,
                 relationships: ['course', 'semester']
             );
         }
-        return new CourseSemesterResource($updatedCourseSemester);
+        return new CourseClassResource($updatedCourseClass);
     }
 
     public function deleteById(string $id)
     {
-        $courseSemester = $this->courseSemesterRepo->findById($id);
-        if ($courseSemester->image_url) {
-            $this->fileAttachmentRepo->deleteByFilter(['url' => $courseSemester->image_url]);
+        $courseClass = $this->courseClassRepo->findById($id);
+        if ($courseClass->image_url) {
+            $this->fileAttachmentRepo->deleteByFilter(['url' => $courseClass->image_url]);
         }
-        return $this->courseSemesterRepo->deleteById($id);
+        return $this->courseClassRepo->deleteById($id);
     }
 }

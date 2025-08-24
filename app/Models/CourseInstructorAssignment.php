@@ -20,8 +20,8 @@ class CourseInstructorAssignment extends Model
         return $this->belongsTo(Instructor::class);
     }
 
-    public function courseSemester()
+    public function courseClass()
     {
-        return $this->belongsTo(CourseSemester::class);
+        return $this->belongsTo(CourseClass::class);
     }
 }

@@ -18,7 +18,7 @@ class CourseStudentEnrollmentService
     {
         return new CourseStudentEnrollmentResource($this->courseStudentEnrollmentRepo->create(
             $formData,
-            relationships: ['student', 'courseSemester']
+            relationships: ['student', 'courseClass']
         ));
     }
 
@@ -26,7 +26,7 @@ class CourseStudentEnrollmentService
     {
         return new CourseStudentEnrollmentResource($this->courseStudentEnrollmentRepo->findById(
             $id,
-            relationships: ['student', 'courseSemester']
+            relationships: ['student', 'courseClass']
         ));
     }
 
@@ -35,7 +35,7 @@ class CourseStudentEnrollmentService
         return new CourseStudentEnrollmentResource($this->courseStudentEnrollmentRepo->updateById(
             $id,
             $formData,
-            relationships: ['student', 'courseSemester']
+            relationships: ['student', 'courseClass']
         ));
     }
 

@@ -15,7 +15,7 @@ class SemesterRepository extends BaseRepository
 
     public function getStudentEnrolledSemesters(string $studentId)
     {
-        return Semester::whereHas('courseSemesters.studentEnrollments', function ($q) use ($studentId) {
+        return Semester::whereHas('courseClasses.studentEnrollments', function ($q) use ($studentId) {
             $q->where('student_id', $studentId);
         })
             ->orderByDesc('start_date')
@@ -24,7 +24,7 @@ class SemesterRepository extends BaseRepository
 
     public function getInstructorAssignedSemesters(string $instructorId)
     {
-        return Semester::whereHas('courseSemesters.instructorAssignments', function ($q) use ($instructorId) {
+        return Semester::whereHas('courseClasses.instructorAssignments', function ($q) use ($instructorId) {
             $q->where('instructor_id', $instructorId);
         })
             ->orderByDesc('start_date')

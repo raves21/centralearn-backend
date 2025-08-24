@@ -2,10 +2,10 @@
 
 namespace App\Http\Services;
 
-use App\Http\Repositories\CourseSemesterRepository;
+use App\Http\Repositories\CourseClassRepository;
 use App\Http\Repositories\InstructorRepository;
 use App\Http\Repositories\SemesterRepository;
-use App\Http\Resources\CourseSemesterResource;
+use App\Http\Resources\CourseClassResource;
 use App\Http\Resources\InstructorResource;
 use App\Http\Resources\SemesterResource;
 
@@ -13,16 +13,16 @@ class InstructorService
 {
     private $instructorRepo;
     private $semesterRepo;
-    private $courseSemesterRepo;
+    private $courseClassRepo;
 
     public function __construct(
         InstructorRepository $instructorRepo,
         SemesterRepository $semesterRepo,
-        CourseSemesterRepository $courseSemesterRepo
+        CourseClassRepository $courseClassRepo
     ) {
         $this->instructorRepo = $instructorRepo;
         $this->semesterRepo = $semesterRepo;
-        $this->courseSemesterRepo = $courseSemesterRepo;
+        $this->courseClassRepo = $courseClassRepo;
     }
 
     public function getAll()
@@ -70,8 +70,8 @@ class InstructorService
     {
         $this->instructorRepo->ensureExists($instructorId);
         $instructorAssignedSemesters = $this->semesterRepo->getInstructorAssignedSemesters($instructorId);
-        return CourseSemesterResource::collection(
-            $this->courseSemesterRepo->getInstructorAssignedCourses(
+        return CourseClassResource::collection(
+            $this->courseClassRepo->getInstructorAssignedCourses(
                 instructorId: $instructorId,
                 instructorAssignedSemesters: $instructorAssignedSemesters,
                 filters: $filters

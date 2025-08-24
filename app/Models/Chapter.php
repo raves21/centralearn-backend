@@ -19,9 +19,9 @@ class Chapter extends Model
         'course_semester_id'
     ];
 
-    public function courseSemester()
+    public function courseClass()
     {
-        return $this->belongsTo(CourseSemester::class);
+        return $this->belongsTo(CourseClass::class);
     }
 
     public function contents()

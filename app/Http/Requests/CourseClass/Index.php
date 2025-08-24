@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\CourseSemester;
+namespace App\Http\Requests\CourseClass;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class Update extends FormRequest
+class Index extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,9 +22,8 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'section_name' => ['sometimes', 'string'],
-            'status' => ['sometimes', 'in:open,close'],
-            'image' => ['sometimes', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
+            'course_id' => ['sometimes', 'exists:courses,id'],
+            'semester_id' => ['sometimes', 'exists:semesters,id']
         ];
     }
 }
