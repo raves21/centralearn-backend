@@ -42,7 +42,7 @@ class SemesterRepository extends BaseRepository
         if ($prevSemEndDate && $nextSemStartDate) {
             return [
                 'startDateMin' => self::formatDate($prevSemEndDate->addDay(1)),
-                'endDateMax' => self::formatDate($nextSemStartDate->addDay(1))
+                'endDateMax' => self::formatDate($nextSemStartDate->subDay(1))
             ];
         } else if ($prevSemEndDate && !$nextSemStartDate) {
             return [
@@ -52,7 +52,7 @@ class SemesterRepository extends BaseRepository
         } else if (!$prevSemEndDate && $nextSemStartDate) {
             return [
                 'startDateMin' => null,
-                'endDateMax' => self::formatDate($nextSemStartDate->addDay(1))
+                'endDateMax' => self::formatDate($nextSemStartDate->subDay(1))
             ];
         } else {
             return [
