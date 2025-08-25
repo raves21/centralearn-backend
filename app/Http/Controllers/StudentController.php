@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\Student\GetCoursesFilters;
-use App\Http\Requests\Student\GetEnrolledCourses;
-use App\Http\Resources\StudentResource;
-use App\Http\Resources\UserResource;
-use App\Models\Student;
+use App\Http\Requests\Student\EnrollToClass;
+use App\Http\Requests\Student\GetEnrollableClasses;
+use App\Http\Requests\Student\GetEnrolledClasses;
+use App\Http\Requests\Student\Store;
+use App\Http\Requests\Student\Update;
 use App\Http\Services\StudentService;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
@@ -38,21 +36,37 @@ class StudentController extends Controller
         return $this->studentService->getEnrolledSemesters($studentId);
     }
 
-    public function getEnrolledCourses(string $studentId, GetEnrolledCourses $request)
+    public function getEnrolledClasses(string $studentId, GetEnrolledClasses $request)
+    {
+        return $this->studentService->getEnrolledClasses(
+            studentId: $studentId,
+            filters: $request->validated()
+        );
+    }
+
+    public function getEnrollableClasses(GetEnrollableClasses $request, string $studentId)
     {
         $validated = $request->validated();
-        return $this->studentService->getEnrolledCourses(
+        return $this->studentService->getEnrollableClasses(
             studentId: $studentId,
-            filters: $validated
+            semesterId: $validated['semester_id']
+        );
+    }
+
+    public function enrollToClass(string $studentId, EnrollToClass $request)
+    {
+        return $this->studentService->enrollToClass(
+            studentId: $studentId,
+            classId: $request->validated()['course_class_id']
         );
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Store $request)
     {
-        //
+        return $this->studentService->create($request->validated());
     }
 
     /**
@@ -66,16 +80,16 @@ class StudentController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Student $student)
+    public function update(Update $request, string $studentId)
     {
-        //
+        return $this->studentService->updateById($studentId, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Student $student)
+    public function destroy(string $studentId)
     {
-        //
+        return $this->studentService->deleteById($studentId);
     }
 }

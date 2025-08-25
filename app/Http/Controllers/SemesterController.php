@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Semester\Index;
 use App\Http\Requests\Semester\Store;
 use App\Http\Requests\Semester\Update;
 use App\Http\Requests\Semester\UpdateSemesterGetMinMaxTimestamps;
@@ -19,9 +20,9 @@ class SemesterController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Index $request)
     {
-        return $this->semesterService->getAll();
+        return $this->semesterService->getAll($request->validated());
     }
 
     /**

@@ -31,6 +31,6 @@ class Student extends Model
 
     public function courseEnrollments()
     {
-        return $this->hasMany(CourseStudentEnrollment::class);
+        return $this->hasMany(ClassStudentEnrollment::class);
     }
 }

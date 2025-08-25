@@ -15,9 +15,11 @@ class SemesterService
         $this->semesterRepo = $semesterRepo;
     }
 
-    public function getAll()
+    public function getAll(array $filters)
     {
-        return SemesterResource::collection($this->semesterRepo->getAll());
+        return SemesterResource::collection($this->semesterRepo->getAll(
+            orderBy: $filters['order_by'] ?? 'created_at',
+        ));
     }
 
     public function create(array $formData)

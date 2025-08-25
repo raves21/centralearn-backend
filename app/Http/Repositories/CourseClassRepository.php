@@ -2,7 +2,11 @@
 
 namespace App\Http\Repositories;
 
+use App\Models\Course;
 use App\Models\CourseClass;
+use App\Models\Instructor;
+use App\Models\Semester;
+use App\Models\Student;
 use Illuminate\Support\Collection;
 
 class CourseClassRepository extends BaseRepository
@@ -12,7 +16,7 @@ class CourseClassRepository extends BaseRepository
         parent::__construct($courseClass);
     }
 
-    public function getStudentEnrolledCourses(
+    public function getStudentEnrolledClasses(
         string $studentId,
         array $filters,
         ?Collection $studentEnrolledSemesters = null
@@ -32,11 +36,11 @@ class CourseClassRepository extends BaseRepository
                         ->orWhereRaw('LOWER(code) LIKE ?', ["{$courseName}%"]);
                 });
             })
-            ->with(['course.departments:id,name,code'])
+            ->with(['course.departments:id,name,code', 'semester'])
             ->get();
     }
 
-    public function getInstructorAssignedCourses(
+    public function getInstructorAssignedClasses(
         string $instructorId,
         array $filters,
         ?Collection $instructorAssignedSemesters = null
@@ -56,7 +60,64 @@ class CourseClassRepository extends BaseRepository
                         ->orWhereRaw('LOWER(code) LIKE ?', ["{$courseName}%"]);
                 });
             })
-            ->with(['course.departments:id,name,code'])
+            ->with(['course.departments:id,name,code', 'semester'])
             ->get();
+    }
+
+    public function getStudentEnrollableClasses(Student $student, Semester $semester)
+    {
+
+        $enrolledClassesIds = $student->courseEnrollments()
+            ->whereHas('courseClass', function ($q) use ($semester) {
+                $q->where('semester_id', $semester->id);
+            })
+            ->pluck('course_class_id');
+
+        $enrollableClasses = CourseClass::whereNotIn('id', $enrolledClassesIds)
+            ->whereHas('course.departments', function ($q) use ($student) {
+                $q->where('departments.id', $student->program->department_id);
+            })
+            ->with(['course', 'semester'])
+            ->get();
+
+        return $enrollableClasses;
+    }
+
+    public function getInstructorAssignableClasses(Instructor $instructor, Semester $semester)
+    {
+        $assignedClassesIds = $instructor->courseAssignments()
+            ->whereHas('courseClass', function ($q) use ($semester) {
+                $q->where('semester_id', $semester->id);
+            })
+            ->pluck('course_class_id');
+
+        $assignableClasses = CourseClass::whereNotIn('id', $assignedClassesIds)
+            ->whereHas('course.departments', function ($q) use ($instructor) {
+                $q->where('departments.id', $instructor->department_id);
+            })
+            ->with(['course', 'semester'])
+            ->get();
+
+        return $assignableClasses;
+    }
+
+    public function verifyStudentDepartment(Student $student, string $classId)
+    {
+        $studentInClassDepartment = CourseClass::where('id', $classId)
+            ->whereHas('course.departments', function ($q) use ($student) {
+                $q->where('departments.id', $student->program->department_id);
+            })->exists();
+
+        if (!$studentInClassDepartment) abort(403, 'Student must belong in the class\'s departments.');
+    }
+
+    public function verifyInstructorDepartment(Instructor $instructor, string $classId)
+    {
+        $instructorInClassDepartment = CourseClass::where('id', $classId)
+            ->whereHas('course.departments', function ($q) use ($instructor) {
+                $q->where('departments.id', $instructor->department_id);
+            })->exists();
+
+        if (!$instructorInClassDepartment) abort(403, 'Student must belong in the class\'s departments.');
     }
 }

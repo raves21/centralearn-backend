@@ -23,7 +23,7 @@ class Update extends FormRequest
      */
     public function rules(): array
     {
-        $courseClassId = Chapter::find($this->route('chapter'))->course_semester_id;
+        $courseClassId = Chapter::find($this->route('chapter'))->course_class_id;
 
         return [
             'name' => ['sometimes', 'string'],
@@ -31,8 +31,8 @@ class Update extends FormRequest
             'order' => [
                 'sometimes',
                 'integer',
-                Rule::unique('course_semesters')
-                    ->where(fn($q) => $q->where('course_semester_id', $courseClassId))
+                Rule::unique('course_classes')
+                    ->where(fn($q) => $q->where('course_class_id', $courseClassId))
                     ->ignore($this->route('chapter'))
             ],
             'published_at' => ['sometimes', 'date']

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\Chapter;
+namespace App\Http\Requests\Semester;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,7 +22,7 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'course_class_id' => ['required', 'exists:course_classes,id']
+            'order_by' => ['sometimes', 'string']
         ];
     }
 }

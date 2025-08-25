@@ -16,7 +16,7 @@ class Chapter extends Model
         'description',
         'order',
         'published_at',
-        'course_semester_id'
+        'course_class_id'
     ];
 
     public function courseClass()

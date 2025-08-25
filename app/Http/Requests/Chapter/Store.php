@@ -24,13 +24,13 @@ class Store extends FormRequest
     {
         return [
             'name' => ['required', 'string'],
-            'course_semester_id' => ['required', 'exists:course_semesters,id'],
+            'course_class_id' => ['required', 'exists:course_classes,id'],
             'description' => ['nullable', 'string'],
             'order' => [
                 'required',
                 'integer',
                 'min:1',
-                Rule::unique('chapters')->where(fn($q) => $q->where('course_semester_id', $this->course_semester_id))
+                Rule::unique('chapters')->where(fn($q) => $q->where('course_class_id', $this->course_class_id))
             ],
             'published_at' => ['required', 'date']
         ];

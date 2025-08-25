@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Instructor\AssignToClass;
+use App\Http\Requests\Instructor\GetAssignableClasses;
 use App\Http\Requests\Instructor\GetAssignedCourses;
-use App\Http\Resources\InstructorResource;
+use App\Http\Requests\Instructor\Store;
+use App\Http\Requests\Instructor\Update;
 use App\Http\Services\InstructorService;
-use App\Models\Instructor;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class InstructorController extends Controller
 {
@@ -35,21 +35,37 @@ class InstructorController extends Controller
         return $this->instructorService->getAssignedSemesters($instructorId);
     }
 
-    public function getAssignedCourses(string $instructorId, GetAssignedCourses $request)
+    public function getAssignedClasses(string $instructorId, GetAssignedCourses $request)
+    {
+        return $this->instructorService->getAssignedClasses(
+            instructorId: $instructorId,
+            filters: $request->validated()
+        );
+    }
+
+    public function getAssignableClasses(GetAssignableClasses $request, string $instructorId)
     {
         $validated = $request->validated();
-        return $this->instructorService->getAssignedCourses(
+        return $this->instructorService->getAssignableClasses(
             instructorId: $instructorId,
-            filters: $validated
+            semesterId: $validated['semester_id']
+        );
+    }
+
+    public function assignToClass(string $instructorId, AssignToClass $request)
+    {
+        return $this->instructorService->assignToClass(
+            instructorId: $instructorId,
+            classId: $request->validated()['course_class_id']
         );
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Store $request)
     {
-        //
+        return $this->instructorService->create($request->validated());
     }
 
     /**
@@ -63,16 +79,16 @@ class InstructorController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Instructor $instructor)
+    public function update(Update $request, string $instructorId)
     {
-        //
+        return $this->instructorService->updateById($instructorId, $request->validated());
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Instructor $instructor)
+    public function destroy(string $instructorId)
     {
-        //
+        return $this->instructorService->deleteById($instructorId);
     }
 }

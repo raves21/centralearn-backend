@@ -2,7 +2,7 @@
 
 namespace App\Http\Repositories;
 
-use App\Http\Requests\CourseStudentEnrollment\GetStudentCourses;
+use App\Http\Requests\ClassStudentEnrollment\GetStudentCourses;
 use App\Models\Student;
 use Illuminate\Support\Facades\Auth;
 

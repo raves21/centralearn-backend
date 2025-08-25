@@ -4,13 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CourseStudentEnrollment extends Model
+class ClassStudentEnrollment extends Model
 {
-    protected $table = 'course_student_enrollment';
+    protected $table = 'class_student_enrollment';
 
     protected $fillable = [
         'student_id',
-        'course_semester_id',
+        'course_class_id',
         'final_grade'
     ];
 

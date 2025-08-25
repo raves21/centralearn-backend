@@ -11,16 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('chapters', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+        Schema::create('class_instructor_assignment', function (Blueprint $table) {
+            $table->id();
             $table->foreignUuid('course_class_id')->constrained()->cascadeOnDelete();
-            $table->string('name');
-            $table->integer('order');
-            $table->string('description')->nullable();
-            $table->timestamp('published_at')->nullable();
+            $table->foreignUuid('instructor_id')->constrained()->cascadeOnDelete();
             $table->timestamps();
-
-            $table->unique(['order', 'course_class_id']);
         });
     }
 
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('chapters');
+        Schema::dropIfExists('class_instructor_assignment');
     }
 };

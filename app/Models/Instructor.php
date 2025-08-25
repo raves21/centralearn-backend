@@ -26,6 +26,6 @@ class Instructor extends Model
 
     public function courseAssignments()
     {
-        return $this->hasMany(CourseInstructorAssignment::class);
+        return $this->hasMany(ClassInstructorAssignment::class);
     }
 }

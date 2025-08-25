@@ -27,18 +27,24 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('students')->group(function () {
         Route::get('me', [StudentController::class, 'currentUserStudentProfile']);
-        Route::get('{student}/courses-enrolled', [StudentController::class, 'getEnrolledCourses']);
+        Route::get('{student}/classes-enrolled', [StudentController::class, 'getEnrolledClasses']);
         Route::get('{student}/semesters-enrolled', [StudentController::class, 'getEnrolledSemesters']);
+        Route::get('{student}/enrollable-classes', [StudentController::class, 'getEnrollableClasses']);
+        Route::post('{student}/enroll-to-class', [StudentController::class, 'enrollToClass']);
     });
 
     Route::prefix('instructors')->group(function () {
         Route::get('me', [InstructorController::class, 'currentUserInstructorProfile']);
-        Route::get('{instructor}/courses-assigned', [InstructorController::class, 'getAssignedCourses']);
+        Route::get('{instructor}/classes-assigned', [InstructorController::class, 'getAssignedClasses']);
         Route::get('{instructor}/semesters-assigned', [InstructorController::class, 'getAssignedSemesters']);
+        Route::get('{instructor}/assignable-classes', [InstructorController::class, 'getAssignableClasses']);
+        Route::post('{instructor}/assign-to-class', [InstructorController::class, 'assignToClass']);
     });
 
-    Route::get('semesters/updateSemesterGetMinMaxTimestamps', [SemesterController::class, 'updateSemesterGetMinMaxTimestamps']);
-    Route::get('semesters/createSemesterGetMinMaxTimestamps', [SemesterController::class, 'createSemesterGetMinMaxTimestamps']);
+    Route::prefix('semesters')->group(function () {
+        Route::get('update-semester-get-minmax-timestamps', [SemesterController::class, 'updateSemesterGetMinMaxTimestamps']);
+        Route::get('create-semester-get-minmax-timestamps', [SemesterController::class, 'createSemesterGetMinMaxTimestamps']);
+    });
 
     Route::apiResources([
         'instructors' => InstructorController::class,
@@ -59,8 +65,8 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('courses', CourseController::class)->except('update');
     Route::post('courses/{course}', [CourseController::class, 'update']);
 
-    Route::apiResource('course-semesters', CourseClassController::class)->except('update');
-    Route::post('course-semesters/{course_semester}', [CourseClassController::class, 'update']);
+    Route::apiResource('course-classes', CourseClassController::class)->except('update');
+    Route::post('course-classes/{course_class}', [CourseClassController::class, 'update']);
 
     Route::apiResource('lecture-materials', LectureMaterialController::class)->except(['update', 'show']);
     Route::post('lecture-materials/{lecture_material}', [LectureMaterialController::class, 'update']);

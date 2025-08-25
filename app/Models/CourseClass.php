@@ -28,19 +28,19 @@ class CourseClass extends Model
 
     public function studentEnrollments()
     {
-        return $this->hasMany(CourseStudentEnrollment::class);
+        return $this->hasMany(ClassStudentEnrollment::class);
     }
 
     public function instructorAssignments()
     {
-        return $this->hasMany(CourseInstructorAssignment::class);
+        return $this->hasMany(ClassInstructorAssignment::class);
     }
 
     public function instructors()
     {
         return $this->hasManyThrough(
             Instructor::class,
-            CourseInstructorAssignment::class,
+            ClassInstructorAssignment::class,
             'course_id',
             'id',
             'id',
@@ -52,7 +52,7 @@ class CourseClass extends Model
     {
         return $this->hasManyThrough(
             Student::class,
-            CourseStudentEnrollment::class,
+            ClassStudentEnrollment::class,
             'course_id',
             'id',
             'id',
