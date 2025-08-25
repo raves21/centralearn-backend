@@ -96,8 +96,9 @@ class InstructorService
     {
         $instructor = $this->instructorRepo->findById($instructorId);
 
-        $this->instructorRepo->ensureExists($instructorId);
-        $this->classInstructorAssignmentRepo->checkDuplicateClassInstructorAssignment($instructorId, $classId);
+        $classAssignmentExists = $this->classInstructorAssignmentRepo->checkClassAssignmentExistence($instructorId, $classId);
+        if ($classAssignmentExists) abort(409, 'Instructor is already assigned in this class.');
+
         $this->courseClassRepo->verifyInstructorDepartment($instructor, $classId);
 
         return new ClassInstructorAssignmentResource(
@@ -109,5 +110,16 @@ class InstructorService
                 relationships: ['instructor', 'courseClass.course', 'courseClass.semester']
             )
         );
+    }
+
+    public function unassignToClass(string $instructorId, string $classId)
+    {
+        $classAssignmentExists = $this->classInstructorAssignmentRepo->checkClassAssignmentExistence($instructorId, $classId);
+        if (!$classAssignmentExists) abort(404, 'Instructor is not assigned in this class.');
+
+        return $this->classInstructorAssignmentRepo->deleteByFilter([
+            'instructor_id' => $instructorId,
+            'course_class_id' => $classId
+        ]);
     }
 }

@@ -11,11 +11,11 @@ class ClassInstructorAssignmentRepository extends BaseRepository
         parent::__construct($classInstructorAssignment);
     }
 
-    public function checkDuplicateClassInstructorAssignment(string $instructorId, string $classId)
+    public function checkClassAssignmentExistence(string $instructorId, string $classId)
     {
         $assignmentExists = ClassInstructorAssignment::where('instructor_id', $instructorId)
             ->where('course_class_id', $classId)->exists();
 
-        if ($assignmentExists) abort(409, 'Instructor is already enrolled in this class!');
+        return $assignmentExists;
     }
 }

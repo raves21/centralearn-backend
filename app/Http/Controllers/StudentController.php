@@ -6,6 +6,7 @@ use App\Http\Requests\Student\EnrollToClass;
 use App\Http\Requests\Student\GetEnrollableClasses;
 use App\Http\Requests\Student\GetEnrolledClasses;
 use App\Http\Requests\Student\Store;
+use App\Http\Requests\Student\UnenrollToClass;
 use App\Http\Requests\Student\Update;
 use App\Http\Services\StudentService;
 
@@ -56,6 +57,14 @@ class StudentController extends Controller
     public function enrollToClass(string $studentId, EnrollToClass $request)
     {
         return $this->studentService->enrollToClass(
+            studentId: $studentId,
+            classId: $request->validated()['course_class_id']
+        );
+    }
+
+    public function unenrollToClass(string $studentId, UnenrollToClass $request)
+    {
+        return $this->studentService->unenrollToClass(
             studentId: $studentId,
             classId: $request->validated()['course_class_id']
         );

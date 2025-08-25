@@ -31,6 +31,7 @@ Route::middleware('auth')->group(function () {
         Route::get('{student}/semesters-enrolled', [StudentController::class, 'getEnrolledSemesters']);
         Route::get('{student}/enrollable-classes', [StudentController::class, 'getEnrollableClasses']);
         Route::post('{student}/enroll-to-class', [StudentController::class, 'enrollToClass']);
+        Route::post('{student}/unenroll-to-class', [StudentController::class, 'unenrollToClass']);
     });
 
     Route::prefix('instructors')->group(function () {
@@ -39,6 +40,7 @@ Route::middleware('auth')->group(function () {
         Route::get('{instructor}/semesters-assigned', [InstructorController::class, 'getAssignedSemesters']);
         Route::get('{instructor}/assignable-classes', [InstructorController::class, 'getAssignableClasses']);
         Route::post('{instructor}/assign-to-class', [InstructorController::class, 'assignToClass']);
+        Route::post('{instructor}/unassign-to-class', [InstructorController::class, 'unassignToClass']);
     });
 
     Route::prefix('semesters')->group(function () {

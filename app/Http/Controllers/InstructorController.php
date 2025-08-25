@@ -6,6 +6,7 @@ use App\Http\Requests\Instructor\AssignToClass;
 use App\Http\Requests\Instructor\GetAssignableClasses;
 use App\Http\Requests\Instructor\GetAssignedCourses;
 use App\Http\Requests\Instructor\Store;
+use App\Http\Requests\Instructor\UnassignToClass;
 use App\Http\Requests\Instructor\Update;
 use App\Http\Services\InstructorService;
 
@@ -55,6 +56,14 @@ class InstructorController extends Controller
     public function assignToClass(string $instructorId, AssignToClass $request)
     {
         return $this->instructorService->assignToClass(
+            instructorId: $instructorId,
+            classId: $request->validated()['course_class_id']
+        );
+    }
+
+    public function unassignToClass(string $instructorId, UnassignToClass $request)
+    {
+        return $this->instructorService->unassignToClass(
             instructorId: $instructorId,
             classId: $request->validated()['course_class_id']
         );

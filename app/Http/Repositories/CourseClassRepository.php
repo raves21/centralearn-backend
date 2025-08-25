@@ -118,6 +118,6 @@ class CourseClassRepository extends BaseRepository
                 $q->where('departments.id', $instructor->department_id);
             })->exists();
 
-        if (!$instructorInClassDepartment) abort(403, 'Student must belong in the class\'s departments.');
+        if (!$instructorInClassDepartment) abort(403, 'Instructor must belong in the class\'s departments.');
     }
 }

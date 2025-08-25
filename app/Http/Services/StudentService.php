@@ -100,8 +100,9 @@ class StudentService
     {
         $student = $this->studentRepo->findById($studentId);
 
-        $this->studentRepo->ensureExists($studentId);
-        $this->classStudentEnrollmentRepo->checkDuplicateClassStudentEnrollment($studentId, $classId);
+        $enrollmentExists = $this->classStudentEnrollmentRepo->checkStudentEnrollmentExistence($studentId, $classId);
+        if ($enrollmentExists) abort(409, 'Student is already enrolled in this class.');
+
         $this->courseClassRepo->verifyStudentDepartment($student, $classId);
 
         return new ClassStudentEnrollmentResource($this->classStudentEnrollmentRepo->create(
@@ -111,5 +112,16 @@ class StudentService
             ],
             relationships: ['student', 'courseClass.course', 'courseClass.semester']
         ));
+    }
+
+    public function unenrollToClass(string $studentId, string $classId)
+    {
+        $enrollmentExists = $this->classStudentEnrollmentRepo->checkStudentEnrollmentExistence($studentId, $classId);
+        if (!$enrollmentExists) abort(404, 'Student is not enrolled in this class.');
+
+        return $this->classStudentEnrollmentRepo->deleteByFilter([
+            'student_id' => $studentId,
+            'course_class_id' => $classId
+        ]);
     }
 }

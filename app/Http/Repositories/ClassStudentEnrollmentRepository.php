@@ -11,11 +11,11 @@ class ClassStudentEnrollmentRepository extends BaseRepository
         parent::__construct($classStudentEnrollment);
     }
 
-    public function checkDuplicateClassStudentEnrollment(string $studentId, string $classId)
+    public function checkStudentEnrollmentExistence(string $studentId, string $classId)
     {
         $enrollmentExists = ClassStudentEnrollment::where('student_id', $studentId)
             ->where('course_class_id', $classId)->exists();
 
-        if ($enrollmentExists) abort(409, 'Student is already enrolled in this class!');
+        return $enrollmentExists;
     }
 }
