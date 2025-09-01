@@ -16,7 +16,7 @@ class AuthController extends Controller
         }
         if (Auth::attempt($request->validated(), true)) {
             $request->session()->regenerate();
-            return ['message' => 'ur logged in'];
+            return new UserResource(Auth::user())->additional(['with_permissions' => true]);
         }
         abort(404, 'Account not found');
     }
