@@ -22,7 +22,7 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'order_by' => ['sometimes', 'string']
+            'order_by' => ['nullable', 'string']
         ];
     }
 }

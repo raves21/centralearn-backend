@@ -22,8 +22,8 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'course_id' => ['sometimes', 'exists:courses,id'],
-            'semester_id' => ['sometimes', 'exists:semesters,id']
+            'course_id' => ['nullable', 'exists:courses,id'],
+            'semester_id' => ['nullable', 'exists:semesters,id']
         ];
     }
 }

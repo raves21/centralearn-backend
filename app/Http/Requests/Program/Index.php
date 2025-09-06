@@ -22,8 +22,8 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'department_id' => ['sometimes', 'exists:departments,id'],
-            'name' => ['sometimes', 'string']
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'name' => ['nullable', 'string']
         ];
     }
 }
