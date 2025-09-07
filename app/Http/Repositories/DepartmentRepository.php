@@ -22,12 +22,12 @@ class DepartmentRepository extends BaseRepository
         $query = Department::query();
         $query->with($relationships);
 
-        $nameFilter = strtolower($filters['name'] ?? '');
+        $searchQueryFilter = strtolower($filters['query'] ?? '');
 
-        if (!empty($nameFilter)) {
-            $query->where(function ($q) use ($nameFilter) {
-                $q->whereRaw('LOWER(name) LIKE ?', ["{$nameFilter}%"])
-                    ->orWhereRaw('LOWER(code) LIKE ?', ["{$nameFilter}%"]);
+        if (!empty($searchQueryFilter)) {
+            $query->where(function ($q) use ($searchQueryFilter) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["{$searchQueryFilter}%"])
+                    ->orWhereRaw('LOWER(code) LIKE ?', ["{$searchQueryFilter}%"]);
             });
         }
 

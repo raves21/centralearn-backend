@@ -22,7 +22,7 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['nullable', 'string'],
+            'query' => ['nullable', 'string'],
             'department_id' => ['nullable', 'exists:departments,id'],
         ];
     }

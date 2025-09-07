@@ -19,6 +19,7 @@ class SemesterService
     {
         return SemesterResource::collection($this->semesterRepo->getAll(
             orderBy: $filters['order_by'] ?? 'created_at',
+            filters: $filters
         ));
     }
 

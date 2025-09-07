@@ -23,7 +23,7 @@ class Index extends FormRequest
     {
         return [
             'department_id' => ['nullable', 'exists:departments,id'],
-            'name' => ['nullable', 'string']
+            'query' => ['nullable', 'string']
         ];
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Http\Repositories;
 
 use App\Models\Program;
+use App\Models\Semester;
+use Illuminate\Support\Facades\Schema;
 
 class ProgramRepository extends BaseRepository
 {
@@ -21,18 +23,20 @@ class ProgramRepository extends BaseRepository
         $query = Program::query();
         $query->with($relationships);
 
-        $nameFilter = strtolower($filters['name'] ?? '');
+        $searchQueryFilter = strtolower($filters['query'] ?? '');
 
-        if (!empty($nameFilter)) {
-            $query->where(function ($q) use ($nameFilter) {
-                $q->whereRaw('LOWER(name) LIKE ?', "{$nameFilter}%")
-                    ->orWhereRaw('LOWER(code) LIKE ?', "{$nameFilter}%");
+        if (!empty($searchQueryFilter)) {
+            $query->where(function ($q) use ($searchQueryFilter) {
+                $q->whereRaw('LOWER(name) LIKE ?', "{$searchQueryFilter}%")
+                    ->orWhereRaw('LOWER(code) LIKE ?', "{$searchQueryFilter}%");
             });
         }
 
-        foreach ($filters as $key => $value) {
-            if ($key === 'name' || $key === 'code') continue;
-            $query->where($key, $value);
+        foreach ($filters as $column => $value) {
+            if ($column === 'name' || $column === 'code') continue;
+            if (Schema::hasColumn((new Semester())->getTable(), $column)) {
+                $query->where($column, $value);
+            }
         }
 
         if ($paginate) return $query->paginate();

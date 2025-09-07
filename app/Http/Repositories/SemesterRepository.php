@@ -4,6 +4,7 @@ namespace App\Http\Repositories;
 
 use App\Models\Semester;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Schema;
 
 class SemesterRepository extends BaseRepository
 {
@@ -11,6 +12,35 @@ class SemesterRepository extends BaseRepository
     public function __construct(Semester $semester)
     {
         parent::__construct($semester);
+    }
+
+    public function getAll(
+        array $relationships = [],
+        array $filters = [],
+        string $orderBy = 'created_at',
+        string $sortDirection = 'desc',
+        bool $paginate = true
+    ) {
+        $query = Semester::query();
+        $query->with($relationships);
+
+        $searchQueryFilter = strtolower($filters['query'] ?? '');
+
+        if (!empty($searchQueryFilter)) {
+            $query->where(function ($q) use ($searchQueryFilter) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["{$searchQueryFilter}%"]);
+            });
+        }
+
+        foreach ($filters as $column => $value) {
+            if ($column === 'name') continue;
+            if (Schema::hasColumn((new Semester())->getTable(), $column)) {
+                $query->where($column, $value);
+            }
+        }
+
+        if ($paginate) return $query->paginate();
+        return $query->get();
     }
 
     public function getStudentEnrolledSemesters(string $studentId)
