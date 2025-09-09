@@ -28,7 +28,7 @@ class SemesterRepository extends BaseRepository
 
         if (!empty($searchQueryFilter)) {
             $query->where(function ($q) use ($searchQueryFilter) {
-                $q->whereRaw('LOWER(name) LIKE ?', ["{$searchQueryFilter}%"]);
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchQueryFilter}%"]);
             });
         }
 

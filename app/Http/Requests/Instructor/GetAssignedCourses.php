@@ -22,8 +22,8 @@ class GetAssignedCourses extends FormRequest
     public function rules(): array
     {
         return [
-            'course_name' => ['sometimes', 'string'],
-            'semester_id' => ['sometimes', 'exists:semesters,id']
+            'query' => ['nullable', 'string'],
+            'semester_id' => ['nullable', 'exists:semesters,id']
         ];
     }
 }

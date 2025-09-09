@@ -22,7 +22,7 @@ class CourseClassRepository extends BaseRepository
         ?Collection $studentEnrolledSemesters = null
     ) {
         $semesterId = $filters['semester_id'] ?? null;
-        $courseName = $filters['course_name'] ?? null;
+        $searchQueryFilter = $filters['query'] ?? null;
 
         return CourseClass::whereHas('studentEnrollments', function ($q) use ($semesterId, $studentEnrolledSemesters, $studentId) {
             $q->where('student_id', $studentId);
@@ -30,10 +30,10 @@ class CourseClassRepository extends BaseRepository
                 $q->where('semester_id', $semesterId ?? $studentEnrolledSemesters->first()->id);
             });
         })
-            ->when($courseName, function ($q) use ($courseName) {
-                $q->whereHas('course', function ($q) use ($courseName) {
-                    $q->whereRaw('LOWER(name) LIKE ?', ["{$courseName}%"])
-                        ->orWhereRaw('LOWER(code) LIKE ?', ["{$courseName}%"]);
+            ->when($searchQueryFilter, function ($q) use ($searchQueryFilter) {
+                $q->whereHas('course', function ($q) use ($searchQueryFilter) {
+                    $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchQueryFilter}%"])
+                        ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
                 });
             })
             ->with(['course.departments:id,name,code', 'semester'])
@@ -46,7 +46,7 @@ class CourseClassRepository extends BaseRepository
         ?Collection $instructorAssignedSemesters = null
     ) {
         $semesterId = $filters['semester_id'] ?? null;
-        $courseName = $filters['course_name'] ?? null;
+        $searchQueryFilter = $filters['query'] ?? null;
 
         return CourseClass::whereHas('instructorAssignments', function ($q) use ($semesterId, $instructorAssignedSemesters, $instructorId) {
             $q->where('instructor_id', $instructorId);
@@ -54,10 +54,10 @@ class CourseClassRepository extends BaseRepository
                 $q->where('semester_id', $semesterId ?? $instructorAssignedSemesters->first()->id);
             });
         })
-            ->when($courseName, function ($q) use ($courseName) {
-                $q->whereHas('course', function ($q) use ($courseName) {
-                    $q->whereRaw('LOWER(name) LIKE ?', ["{$courseName}%"])
-                        ->orWhereRaw('LOWER(code) LIKE ?', ["{$courseName}%"]);
+            ->when($searchQueryFilter, function ($q) use ($searchQueryFilter) {
+                $q->whereHas('course', function ($q) use ($searchQueryFilter) {
+                    $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchQueryFilter}%"])
+                        ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
                 });
             })
             ->with(['course.departments:id,name,code', 'semester'])

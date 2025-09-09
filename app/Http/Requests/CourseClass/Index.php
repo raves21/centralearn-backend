@@ -23,7 +23,7 @@ class Index extends FormRequest
     {
         return [
             'course_id' => ['nullable', 'exists:courses,id'],
-            'semester_id' => ['nullable', 'exists:semesters,id']
+            'semester_id' => ['nullable', 'exists:semesters,id'],
         ];
     }
 }

@@ -22,8 +22,8 @@ class GetEnrolledClasses extends FormRequest
     public function rules(): array
     {
         return [
-            'semester_id' => ['sometimes', 'exists:semesters,id'],
-            'course_name' => ['sometimes', 'string']
+            'semester_id' => ['nullable', 'exists:semesters,id'],
+            'query' => ['nullable', 'string']
         ];
     }
 }
