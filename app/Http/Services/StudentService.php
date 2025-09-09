@@ -31,12 +31,15 @@ class StudentService
         $this->classStudentEnrollmentRepo = $classStudentEnrollmentRepo;
     }
 
-    public function getAll()
+    public function getAll(array $filters)
     {
-        return StudentResource::collection($this->studentRepo->getAll(relationships: [
-            'program:id,name,code,department_id',
-            'program.department:id,name,code'
-        ]));
+        return StudentResource::collection($this->studentRepo->getAll(
+            filters: $filters,
+            relationships: [
+                'program:id,name,code,department_id',
+                'program.department:id,name,code'
+            ]
+        ));
     }
 
     public function create(array $formData)

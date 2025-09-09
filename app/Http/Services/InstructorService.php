@@ -30,11 +30,14 @@ class InstructorService
         $this->classInstructorAssignmentRepo = $classInstructorAssignmentRepo;
     }
 
-    public function getAll()
+    public function getAll(array $filters)
     {
-        return InstructorResource::collection($this->instructorRepo->getAll(relationships: [
-            'department:id,name,code'
-        ]));
+        return InstructorResource::collection($this->instructorRepo->getAll(
+            filters: $filters,
+            relationships: [
+                'department:id,name,code'
+            ]
+        ));
     }
 
     public function create(array $formData)

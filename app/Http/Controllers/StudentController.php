@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Student\EnrollToClass;
 use App\Http\Requests\Student\GetEnrollableClasses;
 use App\Http\Requests\Student\GetEnrolledClasses;
+use App\Http\Requests\Student\Index;
 use App\Http\Requests\Student\Store;
 use App\Http\Requests\Student\UnenrollToClass;
 use App\Http\Requests\Student\Update;
@@ -22,9 +23,9 @@ class StudentController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Index $request)
     {
-        return $this->studentService->getAll();
+        return $this->studentService->getAll($request->validated());
     }
 
     public function currentUserStudentProfile()

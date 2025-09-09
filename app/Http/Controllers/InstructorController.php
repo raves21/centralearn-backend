@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Instructor\AssignToClass;
 use App\Http\Requests\Instructor\GetAssignableClasses;
 use App\Http\Requests\Instructor\GetAssignedCourses;
+use App\Http\Requests\Instructor\Index;
 use App\Http\Requests\Instructor\Store;
 use App\Http\Requests\Instructor\UnassignToClass;
 use App\Http\Requests\Instructor\Update;
@@ -21,9 +22,9 @@ class InstructorController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Index $request)
     {
-        return $this->instructorService->getAll();
+        return $this->instructorService->getAll($request->validated());
     }
 
     public function currentUserInstructorProfile()
