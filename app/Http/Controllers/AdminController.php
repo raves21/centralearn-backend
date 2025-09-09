@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\Admin\Index;
 use App\Http\Requests\Admin\Store;
 use App\Http\Requests\Admin\Update;
 use App\Http\Services\AdminService;
@@ -17,9 +18,9 @@ class AdminController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Index $request)
     {
-        return $this->adminService->getAll();
+        return $this->adminService->getAll($request->validated());
     }
 
     /**

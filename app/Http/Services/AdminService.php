@@ -18,9 +18,9 @@ class AdminService
         $this->userRepo = $userRepo;
     }
 
-    public function getAll()
+    public function getAll(array $filters)
     {
-        return AdminResource::collection($this->adminRepo->getAll());
+        return AdminResource::collection($this->adminRepo->getAll($filters));
     }
 
     public function findById(string $id)

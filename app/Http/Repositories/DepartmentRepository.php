@@ -32,7 +32,6 @@ class DepartmentRepository extends BaseRepository
         }
 
         foreach ($filters as $key => $value) {
-            if ($key === 'name' || $key === 'code') continue;
             $query->where($key, $value);
         }
 

@@ -37,7 +37,6 @@ class CourseRepository extends BaseRepository
         }
 
         foreach ($filters as $column => $value) {
-            if ($column === 'name' || $column === 'code') continue;
             if (Schema::hasColumn((new Course())->getTable(), $column)) {
                 $query->where($column, $value);
             }

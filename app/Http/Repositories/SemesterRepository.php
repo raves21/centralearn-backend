@@ -33,7 +33,6 @@ class SemesterRepository extends BaseRepository
         }
 
         foreach ($filters as $column => $value) {
-            if ($column === 'name') continue;
             if (Schema::hasColumn((new Semester())->getTable(), $column)) {
                 $query->where($column, $value);
             }
