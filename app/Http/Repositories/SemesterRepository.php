@@ -22,7 +22,7 @@ class SemesterRepository extends BaseRepository
         bool $paginate = true
     ) {
         $query = Semester::query();
-        $query->with($relationships);
+        $query->with($relationships)->orderBy($orderBy, $sortDirection);
 
         $searchQueryFilter = strtolower($filters['query'] ?? '');
 

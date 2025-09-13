@@ -29,7 +29,7 @@ class InstructorRepository extends BaseRepository
         bool $paginate = true
     ) {
         $query = Instructor::query();
-        $query->with($relationships);
+        $query->with($relationships)->orderBy($orderBy, $sortDirection);
 
         $searchQueryFilter = strtolower($filters['query'] ?? '');
 

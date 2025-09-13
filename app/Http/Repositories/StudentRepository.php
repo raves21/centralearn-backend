@@ -31,7 +31,7 @@ class StudentRepository extends BaseRepository
         bool $paginate = true
     ) {
         $query = Student::query();
-        $query->with($relationships);
+        $query->with($relationships)->orderBy($orderBy, $sortDirection);
 
         $searchQueryFilter = strtolower($filters['query'] ?? '');
 

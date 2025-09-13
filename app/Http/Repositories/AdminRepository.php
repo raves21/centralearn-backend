@@ -20,7 +20,7 @@ class AdminRepository extends BaseRepository
         bool $paginate = true
     ) {
         $query = Admin::query();
-        $query->with($relationships);
+        $query->with($relationships)->orderBy($orderBy, $sortDirection);
 
         $searchQueryFilter = strtolower($filters['query'] ?? '');
 

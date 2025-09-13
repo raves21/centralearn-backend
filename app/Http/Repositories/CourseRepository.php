@@ -25,7 +25,7 @@ class CourseRepository extends BaseRepository
         bool $paginate = true
     ) {
         $query = Course::query();
-        $query->with($relationships);
+        $query->with($relationships)->orderBy($orderBy, $sortDirection);
 
         $searchQueryFilter = strtolower($filters['query'] ?? '');
 

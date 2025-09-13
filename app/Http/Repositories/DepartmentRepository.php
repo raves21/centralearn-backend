@@ -21,7 +21,7 @@ class DepartmentRepository extends BaseRepository
         bool $paginate = true
     ) {
         $query = Department::query();
-        $query->with($relationships);
+        $query->with($relationships)->orderBy($orderBy, $sortDirection);
 
         $searchQueryFilter = strtolower($filters['query'] ?? '');
 
@@ -37,6 +37,7 @@ class DepartmentRepository extends BaseRepository
                 $query->where($column, $value);
             }
         }
+
 
         if ($paginate) return $query->paginate();
         return $query->get();
