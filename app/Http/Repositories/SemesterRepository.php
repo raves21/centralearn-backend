@@ -70,18 +70,18 @@ class SemesterRepository extends BaseRepository
 
         if ($prevSemEndDate && $nextSemStartDate) {
             return [
-                'startDateMin' => self::formatDate($prevSemEndDate->addDay(1)),
-                'endDateMax' => self::formatDate($nextSemStartDate->subDay(1))
+                'startDateMin' => $prevSemEndDate->addDay(1),
+                'endDateMax' => $nextSemStartDate->subDay(1)
             ];
         } else if ($prevSemEndDate && !$nextSemStartDate) {
             return [
-                'startDateMin' => self::formatDate($prevSemEndDate->addDay(1)),
+                'startDateMin' => $prevSemEndDate->addDay(1),
                 'endDateMax' => null
             ];
         } else if (!$prevSemEndDate && $nextSemStartDate) {
             return [
                 'startDateMin' => null,
-                'endDateMax' => self::formatDate($nextSemStartDate->subDay(1))
+                'endDateMax' => $nextSemStartDate->subDay(1)
             ];
         } else {
             return [
@@ -94,13 +94,8 @@ class SemesterRepository extends BaseRepository
     public function createSemesterGetMinMaxTimestamps()
     {
         return [
-            'startDateMin' => self::formatDate(Carbon::parse(Semester::latest()->first()->end_date)->addDay(1)),
+            'startDateMin' => Carbon::parse(Semester::latest()->first()->end_date)->addDay(1),
             'endDateMax' => null
         ];
-    }
-
-    private function formatDate($date)
-    {
-        return $date->format('Y-m-d');
     }
 }
