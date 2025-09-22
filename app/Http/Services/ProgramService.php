@@ -32,12 +32,10 @@ class ProgramService
             $image = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
             $newProgram = $this->programRepo->create(
                 formData: [...$formData, 'image_url' => $image->url],
-                relationships: ['departments']
             );
         } else {
             $newProgram = $this->programRepo->create(
                 formData: $formData,
-                relationships: ['departments']
             );
         }
         return new ProgramResource($newProgram);

@@ -23,6 +23,7 @@ class Index extends FormRequest
     {
         return [
             'query' => ['nullable', 'string'],
+            'paginate' => ['nullable', 'boolean']
         ];
     }
 }
