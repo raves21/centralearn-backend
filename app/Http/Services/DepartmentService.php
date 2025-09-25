@@ -22,7 +22,11 @@ class DepartmentService
 
     public function getAll(array $filters)
     {
-        return DepartmentResource::collection($this->departmentRepo->getAll(filters: $filters, paginate: $filters['paginate'] ?? true));
+        $paginate = $filters['paginate'] ?? null;
+        return DepartmentResource::collection($this->departmentRepo->getAll(
+            filters: $filters,
+            paginate: empty($paginate) ? true : $paginate
+        ));
     }
 
     public function create(array $formData)

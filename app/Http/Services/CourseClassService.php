@@ -21,7 +21,12 @@ class CourseClassService
 
     public function getAll(array $filters)
     {
-        return CourseClassResource::collection($this->courseClassRepo->getAll(filters: $filters, relationships: ['course', 'semester']));
+        $paginate = $filters['paginate'] ?? null;
+        return CourseClassResource::collection($this->courseClassRepo->getAll(
+            filters: $filters,
+            relationships: ['course', 'semester'],
+            paginate: empty($paginate) ? true : $paginate
+        ));
     }
 
     public function findById(string $id)
