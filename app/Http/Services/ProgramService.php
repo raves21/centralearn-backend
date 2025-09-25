@@ -21,8 +21,13 @@ class ProgramService
 
     public function getAll(array $filters)
     {
+        $paginate = $filters['paginate'] ?? null;
         return ProgramResource::collection(
-            $this->programRepo->getAll(relationships: ['department'], filters: $filters)
+            $this->programRepo->getAll(
+                relationships: ['department'],
+                filters: $filters,
+                paginate: empty($paginate) ? true : $paginate
+            )
         );
     }
 
