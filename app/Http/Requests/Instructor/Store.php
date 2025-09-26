@@ -26,6 +26,7 @@ class Store extends FormRequest
             'last_name' => ['required', 'string'],
             'address' => ['required', 'string'],
             'job_title' => ['required', 'string'],
+            'is_admin' => ['required', 'boolean'],
             'department_id' => ['required', 'exists:departments,id'],
             'email' => ['required', 'email'],
             'password' => ['required', 'string', 'min:8'],

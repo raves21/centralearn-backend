@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,7 +19,8 @@ class InstructorResource extends JsonResource
             'id' => $this->id,
             'user' => new UserResource($this->user),
             'department' => new DepartmentResource($this->whenLoaded('department')),
-            'jobTitle' => $this->job_title
+            'jobTitle' => $this->job_title,
+            'isAdmin' => $this->user->hasRole(Role::ADMIN)
         ];
     }
 }

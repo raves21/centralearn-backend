@@ -6,10 +6,12 @@ use App\Http\Repositories\ClassStudentEnrollmentRepository;
 use App\Http\Repositories\CourseClassRepository;
 use App\Http\Repositories\SemesterRepository;
 use App\Http\Repositories\StudentRepository;
+use App\Http\Repositories\UserRepository;
 use App\Http\Resources\ClassStudentEnrollmentResource;
 use App\Http\Resources\CourseClassResource;
 use App\Http\Resources\SemesterResource;
 use App\Http\Resources\StudentResource;
+use App\Models\Role;
 
 class StudentService
 {
@@ -18,17 +20,20 @@ class StudentService
     private $semesterRepo;
     private $courseClassRepo;
     private $classStudentEnrollmentRepo;
+    private $userRepo;
 
     public function __construct(
         StudentRepository $studentRepo,
         SemesterRepository $semesterRepo,
         CourseClassRepository $courseClassRepo,
-        ClassStudentEnrollmentRepository $classStudentEnrollmentRepo
+        ClassStudentEnrollmentRepository $classStudentEnrollmentRepo,
+        UserRepository $userRepo
     ) {
         $this->studentRepo = $studentRepo;
         $this->semesterRepo = $semesterRepo;
         $this->courseClassRepo = $courseClassRepo;
         $this->classStudentEnrollmentRepo = $classStudentEnrollmentRepo;
+        $this->userRepo = $userRepo;
     }
 
     public function getAll(array $filters)
@@ -44,7 +49,9 @@ class StudentService
 
     public function create(array $formData)
     {
-        return new StudentResource($this->studentRepo->create($formData));
+        $newUser = $this->userRepo->create($formData);
+        $newUser->assignRole(Role::STUDENT);
+        return new StudentResource($this->studentRepo->create([...$formData, 'user_id' => $newUser->id]));
     }
 
     public function findById(string $id)

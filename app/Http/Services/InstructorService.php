@@ -2,14 +2,17 @@
 
 namespace App\Http\Services;
 
+use App\Http\Repositories\AdminRepository;
 use App\Http\Repositories\ClassInstructorAssignmentRepository;
 use App\Http\Repositories\CourseClassRepository;
 use App\Http\Repositories\InstructorRepository;
 use App\Http\Repositories\SemesterRepository;
+use App\Http\Repositories\UserRepository;
 use App\Http\Resources\ClassInstructorAssignmentResource;
 use App\Http\Resources\CourseClassResource;
 use App\Http\Resources\InstructorResource;
 use App\Http\Resources\SemesterResource;
+use App\Models\Role;
 
 class InstructorService
 {
@@ -17,17 +20,23 @@ class InstructorService
     private $semesterRepo;
     private $courseClassRepo;
     private $classInstructorAssignmentRepo;
+    private $userRepo;
+    private $adminRepo;
 
     public function __construct(
         InstructorRepository $instructorRepo,
         SemesterRepository $semesterRepo,
         CourseClassRepository $courseClassRepo,
-        ClassInstructorAssignmentRepository $classInstructorAssignmentRepo
+        ClassInstructorAssignmentRepository $classInstructorAssignmentRepo,
+        UserRepository $userRepo,
+        AdminRepository $adminRepo
     ) {
         $this->instructorRepo = $instructorRepo;
         $this->semesterRepo = $semesterRepo;
         $this->courseClassRepo = $courseClassRepo;
         $this->classInstructorAssignmentRepo = $classInstructorAssignmentRepo;
+        $this->userRepo = $userRepo;
+        $this->adminRepo = $adminRepo;
     }
 
     public function getAll(array $filters)
@@ -42,7 +51,14 @@ class InstructorService
 
     public function create(array $formData)
     {
-        return new InstructorResource($this->instructorRepo->create($formData));
+        $newUser = $this->userRepo->create($formData);
+        $isAdmin = $formData['is_admin'] ?? null;
+        if ($isAdmin) {
+            $this->adminRepo->create([...$formData, 'user_id' => $newUser->id]);
+            $newUser->assignRole(Role::ADMIN);
+        }
+        $newUser->assignRole(Role::INSTRUCTOR);
+        return new InstructorResource($this->instructorRepo->create([...$formData, 'user_id' => $newUser->id]));
     }
 
     public function findById(string $id)
