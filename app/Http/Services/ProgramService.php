@@ -50,7 +50,7 @@ class ProgramService
     {
         return new ProgramResource($this->programRepo->findById(
             $id,
-            relationships: ['departments']
+            relationships: ['department']
         ));
     }
 

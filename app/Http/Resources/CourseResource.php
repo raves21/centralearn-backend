@@ -18,9 +18,7 @@ class CourseResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'code' => $this->code,
-            'departments' => $this->whenLoaded('departments', function () {
-                return $this->departments->map(fn($dept) => $dept->code);
-            }),
+            'departments' => $this->whenLoaded('departments', fn() => DepartmentResource::collection($this->departments)),
             'imageUrl' => $this->image_url,
             'description' => $this->description
         ];

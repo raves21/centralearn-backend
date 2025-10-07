@@ -22,7 +22,7 @@ class CourseService
     public function getAll(array $filters)
     {
         return CourseResource::collection($this->courseRepo->getAll(
-            relationships: ['departments:id,code'],
+            relationships: ['departments'],
             filters: $filters
         ));
     }
