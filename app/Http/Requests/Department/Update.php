@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Department;
 
+use App\Models\FileAttachment;
+use App\Rules\FileOrDeleted;
 use Illuminate\Foundation\Http\FormRequest;
 
 class Update extends FormRequest
@@ -22,10 +24,13 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string'],
-            'code' => ['sometimes', 'string'],
-            'image' => ['sometimes', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
-            'description' => ['sometimes', 'string']
+            'name' => ['nullable', 'string'],
+            'code' => ['nullable', 'string'],
+            'image' => [
+                'nullable',
+                new FileOrDeleted()
+            ],
+            'description' => ['nullable', 'string']
         ];
     }
 }

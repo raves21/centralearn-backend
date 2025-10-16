@@ -45,24 +45,33 @@ class CourseService
     public function updateById(string $id, array $formData)
     {
         $course = $this->courseRepo->findById($id);
+        $payloadImage = $formData['image'] ?? null;
 
-        if (isset($formData['image'])) {
-            if ($course->image_url) {
-                //delete previous image
+        if ($course->image_url) {
+            if ($payloadImage) {
+                // Delete the old image in any case
                 $this->fileAttachmentRepo->deleteByFilter(['url' => $course->image_url]);
+
+                if ($payloadImage === "__DELETED__") {
+                    $formData['image_url'] = null;
+                } else {
+                    // Upload new image and update image_url
+                    $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
+                    $formData['image_url'] = $newImage->url;
+                }
             }
-            //upload new image
-            $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
-            $updatedCourse = $this->courseRepo->updateById(
-                id: $id,
-                formData: [...$formData, 'image_url' => $newImage->url],
-            );
         } else {
-            $updatedCourse = $this->courseRepo->updateById(
-                id: $id,
-                formData: $formData,
-            );
+            if ($payloadImage) {
+                $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
+                $formData['image_url'] = $newImage->url;
+            }
         }
+
+        $updatedCourse = $this->courseRepo->updateById(
+            id: $id,
+            formData: $formData,
+        );
+
 
         if (isset($formData['departments'])) {
             $hasStudentEnrollment = $course->whereHas('courseClasses.studentEnrollments')->exists();

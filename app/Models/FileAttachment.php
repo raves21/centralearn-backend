@@ -41,4 +41,20 @@ class FileAttachment extends Model
             Storage::disk('public')->delete($file->path);
         });
     }
+
+
+    // Images
+    public const MIME_JPG  = 'image/jpg';
+    public const MIME_JPEG = 'image/jpeg';
+    public const MIME_PNG  = 'image/png';
+
+    // Videos
+    public const MIME_MKV  = 'video/x-matroska';
+    public const MIME_MP4  = 'video/mp4';
+
+    // Documents
+    public const MIME_XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+    public const MIME_CSV  = 'text/csv';
+    public const MIME_DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+    public const MIME_PPTX = 'application/vnd.openxmlformats-officedocument.presentationml.presentation';
 }

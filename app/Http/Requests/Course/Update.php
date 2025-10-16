@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Course;
 
+use App\Rules\FileOrDeleted;
 use Illuminate\Foundation\Http\FormRequest;
 
 class Update extends FormRequest
@@ -25,7 +26,7 @@ class Update extends FormRequest
             'name' => ['sometimes', 'string'],
             'code' => ['sometimes', 'string'],
             'description' => ['sometimes', 'string'],
-            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
+            'image' => ['nullable', new FileOrDeleted()],
             'departments' => ['sometimes', 'array'],
             'departments.*' => ['exists:departments,id']
         ];
