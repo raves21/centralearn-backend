@@ -20,7 +20,7 @@ class InstructorResource extends JsonResource
             'user' => new UserResource($this->user),
             'department' => new DepartmentResource($this->whenLoaded('department')),
             'jobTitle' => $this->job_title,
-            'isAdmin' => $this->user->hasRole(Role::ADMIN)
+            'isAdmin' => (bool) $this->user->hasRole(Role::ADMIN)
         ];
     }
 }

@@ -13,6 +13,7 @@ use App\Http\Resources\CourseClassResource;
 use App\Http\Resources\InstructorResource;
 use App\Http\Resources\SemesterResource;
 use App\Models\Role;
+use Illuminate\Support\Facades\Log;
 
 class InstructorService
 {
@@ -73,7 +74,7 @@ class InstructorService
     {
         $user = $this->instructorRepo->findById($id)->user;
         if (empty($formData['password'])) unset($formData['password']);
-        return new InstructorResource($this->instructorRepo->updateById($user->id, $formData));
+        return new InstructorResource($this->instructorRepo->updateById($id, $formData));
     }
 
     public function deleteById(string $id)
