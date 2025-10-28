@@ -28,7 +28,7 @@ class Update extends FormRequest
             //general info
             'material_type' => ['required', 'in:text,file'],
             'order' => [
-                'sometimes',
+                'nullable',
                 'integer',
                 'min:1',
                 Rule::unique('lecture_materials')
@@ -36,18 +36,18 @@ class Update extends FormRequest
                     ->ignore($this->route('lecture_material')),
             ],
             'is_material_updated' => ['required', 'boolean'],
-            'material' => ['sometimes'],
+            'material' => ['nullable'],
         ];
         if ($this->input('material_type') === 'text') {
             $rules = [
                 ...$rules,
-                'material.content' => ['sometimes', 'string']
+                'material.content' => ['nullable', 'string']
             ];
         } else {
             $rules = [
                 ...$rules,
                 'material.file' => [
-                    'sometimes',
+                    'nullable',
                     'file',
                     'mimes:pdf,doc,docx,xlsx,mkv,mp4,jpg,jpeg,png',
                     'max:307200'

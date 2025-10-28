@@ -26,16 +26,16 @@ class Update extends FormRequest
         $courseClassId = Chapter::find($this->route('chapter'))->course_class_id;
 
         return [
-            'name' => ['sometimes', 'string'],
-            'description' => ['sometimes', 'string'],
+            'name' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'order' => [
-                'sometimes',
+                'nullable',
                 'integer',
                 Rule::unique('course_classes')
                     ->where(fn($q) => $q->where('course_class_id', $courseClassId))
                     ->ignore($this->route('chapter'))
             ],
-            'published_at' => ['sometimes', 'date']
+            'published_at' => ['nullable', 'date']
         ];
     }
 }

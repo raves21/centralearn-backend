@@ -27,16 +27,16 @@ class Update extends FormRequest
         $rules = [
             // general info
             'is_material_updated' => ['required', 'boolean'],
-            'material_type' => ['sometimes', 'in:option_based_question,text_based_question,text,file'],
+            'material_type' => ['nullable', 'in:option_based_question,text_based_question,text,file'],
             'order'         => [
-                'sometimes',
+                'nullable',
                 'integer',
                 'min:1',
                 Rule::unique('assessment_materials')
                     ->where(fn($q) => $q->where('assessment_id', $assessmentId))
                     ->ignore($this->route('assessment_material'))
             ],
-            'material'      => ['sometimes'],
+            'material'      => ['nullable'],
         ];
 
         $materialType = $this->input('material_type');
@@ -49,7 +49,7 @@ class Update extends FormRequest
             case 'text':
                 $rules = [
                     ...$rules,
-                    'material.content' => ['sometimes', 'string'],
+                    'material.content' => ['nullable', 'string'],
                 ];
                 break;
 
@@ -57,7 +57,7 @@ class Update extends FormRequest
                 $rules = [
                     ...$rules,
                     'material.file' => [
-                        'sometimes',
+                        'nullable',
                         'file',
                         'mimes:pdf,doc,docx,xlsx,mkv,mp4,jpg,jpeg,png',
                         'max:307200',
@@ -68,13 +68,13 @@ class Update extends FormRequest
             case 'option_based_question':
                 $rules = [
                     ...$rules,
-                    'material.option_based_question' => ['sometimes'],
+                    'material.option_based_question' => ['nullable'],
                     'material.option_based_question.question_text' => [
-                        'sometimes',
+                        'nullable',
                         'string'
                     ],
                     'material.option_based_question.point_worth' => [
-                        'sometimes',
+                        'nullable',
                         'integer',
                         'min:0'
                     ]
@@ -84,13 +84,13 @@ class Update extends FormRequest
             case 'text_based_question':
                 $rules = [
                     ...$rules,
-                    'material.text_based_question' => ['sometimes'],
+                    'material.text_based_question' => ['nullable'],
                     'material.text_based_question.question_text' => [
-                        'sometimes',
+                        'nullable',
                         'string'
                     ],
                     'material.text_based_question.type' => [
-                        'sometimes',
+                        'nullable',
                         'in:essay,identification'
                     ],
                     'material.text_based_question.identification_answer' => [
@@ -102,7 +102,7 @@ class Update extends FormRequest
                         'boolean'
                     ],
                     'material.text_based_question.point_worth' => [
-                        'sometimes',
+                        'nullable',
                         'integer',
                         'min:0'
                     ],

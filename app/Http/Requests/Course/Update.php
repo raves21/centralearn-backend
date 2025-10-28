@@ -23,11 +23,11 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string'],
-            'code' => ['sometimes', 'string'],
-            'description' => ['sometimes', 'string'],
+            'name' => ['nullable', 'string'],
+            'code' => ['nullable', 'string'],
+            'description' => ['nullable', 'string'],
             'image' => ['nullable', new FileOrDeleted()],
-            'departments' => ['sometimes', 'array'],
+            'departments' => ['nullable', 'array'],
             'departments.*' => ['exists:departments,id']
         ];
     }

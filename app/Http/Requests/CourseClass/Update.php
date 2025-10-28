@@ -22,9 +22,9 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'section_name' => ['sometimes', 'string'],
-            'status' => ['sometimes', 'in:open,close'],
-            'image' => ['sometimes', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
+            'section_name' => ['nullable', 'string'],
+            'status' => ['nullable', 'in:open,close'],
+            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
         ];
     }
 }

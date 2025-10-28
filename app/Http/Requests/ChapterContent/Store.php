@@ -55,7 +55,7 @@ class Store extends FormRequest
                 'content.max_score' => ['nullable', 'numeric'],
                 'content.is_answers_viewable_after_submit' => ['required', 'boolean'],
                 'content.is_score_viewable_after_submit' => ['required', 'boolean'],
-                'content.is_multi_attempts' => ['sometimes', 'boolean'],
+                'content.is_multi_attempts' => ['nullable', 'boolean'],
                 'content.max_attempts' => ['nullable', 'required_if:content.is_multi_attempts,true', 'integer'],
                 'content.multi_attempt_grading_type' => ['nullable', 'required_if:content.is_multi_attempts,true', 'in:avg_score,highest_score'],
             ];

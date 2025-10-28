@@ -22,9 +22,9 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['sometimes', 'string'],
-            'start_date' => ['sometimes', 'date'],
-            'end_date' => ['sometimes', 'date'],
+            'name' => ['nullable', 'string'],
+            'start_date' => ['nullable', 'date'],
+            'end_date' => ['nullable', 'date'],
         ];
     }
 }

@@ -22,13 +22,13 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['sometimes', 'string'],
-            'last_name' => ['sometimes', 'string'],
-            'address' => ['sometimes', 'string'],
-            'job_title' => ['sometimes', 'string'],
-            'department_id' => ['sometimes', 'exists:departments,id'],
-            'email' => ['sometimes', 'email'],
-            'password' => ['sometimes', 'string', 'min:8'],
+            'first_name' => ['nullable', 'string'],
+            'last_name' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
+            'job_title' => ['nullable', 'string'],
+            'department_id' => ['nullable', 'exists:departments,id'],
+            'email' => ['nullable', 'email'],
+            'password' => ['nullable', 'string', 'min:8'],
         ];
     }
 }

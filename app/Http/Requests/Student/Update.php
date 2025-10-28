@@ -22,13 +22,13 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'first_name' => ['sometimes', 'string'],
-            'last_name' => ['sometimes', 'string'],
-            'address' => ['sometimes', 'string'],
+            'first_name' => ['nullable', 'string'],
+            'last_name' => ['nullable', 'string'],
+            'address' => ['nullable', 'string'],
             //can only update program_id if not enrolled to any courseClass
-            'program_id' => ['sometimes', 'exists:programs,id'],
-            'email' => ['sometimes', 'email'],
-            'password' => ['sometimes', 'string', 'min:8'],
+            'program_id' => ['nullable', 'exists:programs,id'],
+            'email' => ['nullable', 'email'],
+            'password' => ['nullable', 'string', 'min:8'],
         ];
     }
 }

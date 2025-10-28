@@ -18,25 +18,25 @@ class Update extends FormRequest
         $chapterId = ChapterContent::find($this->route('chapter'))->chapter_id;
         $rules = [
             // General info
-            'name' => ['sometimes', 'string'],
+            'name' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
             'order' => [
-                'sometimes',
+                'nullable',
                 'integer',
                 'min:1',
                 Rule::unique('chapter_contents')
                     ->where(fn($q) => $q->where('chapter_id', $chapterId))
                     ->ignore($this->route('chapter_content'))
             ],
-            'content_type' => ['sometimes', 'in:lecture,assessment'],
+            'content_type' => ['nullable', 'in:lecture,assessment'],
             'content' => ['required_if:content_type,assessment'],
 
             // Visibility
-            'is_published' => ['sometimes', 'boolean'],
+            'is_published' => ['nullable', 'boolean'],
             'publishes_at' => ['nullable', 'date'],
 
             // Accessibility
-            'is_open' => ['sometimes', 'boolean'],
+            'is_open' => ['nullable', 'boolean'],
             'opens_at' => ['nullable', 'date', Rule::afterOrEqual(today())],
             'closes_at' => ['nullable', 'date', 'after:opens_at'],
         ];
@@ -47,9 +47,9 @@ class Update extends FormRequest
                 ...$rules,
                 'content.time_limit' => ['nullable', 'integer'],
                 'content.max_score' => ['nullable', 'numeric'],
-                'content.is_answers_viewable_after_submit' => ['sometimes', 'boolean'],
-                'content.is_score_viewable_after_submit' => ['sometimes', 'boolean'],
-                'content.is_multi_attempts' => ['sometimes', 'boolean'],
+                'content.is_answers_viewable_after_submit' => ['nullable', 'boolean'],
+                'content.is_score_viewable_after_submit' => ['nullable', 'boolean'],
+                'content.is_multi_attempts' => ['nullable', 'boolean'],
                 'content.max_attempts' => ['nullable', 'integer'],
                 'content.multi_attempt_grading_type' => ['nullable', 'in:avg_score,highest_score'],
             ];

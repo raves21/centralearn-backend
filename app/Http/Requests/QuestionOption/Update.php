@@ -26,17 +26,17 @@ class Update extends FormRequest
         $optionBasedQId = QuestionOption::find($this->route('question_option'))->option_based_question_id;
         $rules = [
             'is_option_updated' => ['required', 'boolean'],
-            'option_type' => ['sometimes', 'in:text,file'],
-            'is_correct' => ['sometimes', 'boolean'],
+            'option_type' => ['nullable', 'in:text,file'],
+            'is_correct' => ['nullable', 'boolean'],
             'order' => [
-                'sometimes',
+                'nullable',
                 'integer',
                 'min:1',
                 Rule::unique('question_options')
                     ->where(fn($q) => $q->where('option_based_question_id', $optionBasedQId))
                     ->ignore($this->route('question_option'))
             ],
-            'option' => ['sometimes'],
+            'option' => ['nullable'],
         ];
 
         $optionType = $this->input('option_type');
@@ -44,14 +44,14 @@ class Update extends FormRequest
             case 'text':
                 $rules = [
                     ...$rules,
-                    'option.content' => ['sometimes', 'string'],
+                    'option.content' => ['nullable', 'string'],
                 ];
                 break;
             case 'file':
                 $rules = [
                     ...$rules,
                     'option.file' => [
-                        'sometimes',
+                        'nullable',
                         'file',
                         'mimes:jpg,jpeg,png',
                         'max:10000',
