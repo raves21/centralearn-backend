@@ -65,6 +65,9 @@ class StudentService
 
     public function updateById(string $id, array $formData)
     {
+        $user = $this->studentRepo->findById($id)->user;
+        if (empty($formData['password'])) unset($formData['password']);
+        $this->userRepo->updateById($user->id, $formData);
         return new StudentResource($this->studentRepo->updateById($id, $formData));
     }
 

@@ -39,7 +39,6 @@ class AdminService
     public function updateById(string $id, array $formData)
     {
         $user = $this->adminRepo->findById($id)->user;
-
         if (empty($formData['password'])) unset($formData['password']);
         $this->userRepo->updateById($user->id, $formData);
         return new AdminResource($this->adminRepo->updateById($id, $formData));

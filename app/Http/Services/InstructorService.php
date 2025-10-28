@@ -71,7 +71,9 @@ class InstructorService
 
     public function updateById(string $id, array $formData)
     {
-        return new InstructorResource($this->instructorRepo->updateById($id, $formData));
+        $user = $this->instructorRepo->findById($id)->user;
+        if (empty($formData['password'])) unset($formData['password']);
+        return new InstructorResource($this->instructorRepo->updateById($user->id, $formData));
     }
 
     public function deleteById(string $id)
