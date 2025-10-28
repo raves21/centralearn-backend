@@ -20,6 +20,7 @@ class CourseClassResource extends JsonResource
             'semester' => new SemesterResource($this->whenLoaded('semester')),
             'sectionName' => $this->section_name,
             'status' => $this->status,
+            'imageUrl' => $this->image_url
         ];
     }
 }

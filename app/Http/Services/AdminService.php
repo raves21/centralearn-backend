@@ -6,6 +6,7 @@ use App\Http\Repositories\AdminRepository;
 use App\Http\Repositories\UserRepository;
 use App\Http\Resources\AdminResource;
 use App\Models\Role;
+use Illuminate\Support\Facades\Log;
 
 class AdminService
 {
@@ -38,6 +39,8 @@ class AdminService
     public function updateById(string $id, array $formData)
     {
         $user = $this->adminRepo->findById($id)->user;
+
+        if (empty($formData['password'])) unset($formData['password']);
         $this->userRepo->updateById($user->id, $formData);
         return new AdminResource($this->adminRepo->updateById($id, $formData));
     }

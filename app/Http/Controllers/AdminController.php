@@ -6,6 +6,7 @@ use App\Http\Requests\Admin\Index;
 use App\Http\Requests\Admin\Store;
 use App\Http\Requests\Admin\Update;
 use App\Http\Services\AdminService;
+use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {

@@ -17,7 +17,7 @@ class AdminResource extends JsonResource
         return [
             'id' => $this->id,
             'jobTitle' => $this->job_title,
-            'user' => new UserResource($this->user)
+            'user' => new UserResource($this->user),
         ];
     }
 }

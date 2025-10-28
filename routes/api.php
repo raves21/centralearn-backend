@@ -49,14 +49,20 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::apiResources([
-        'instructors' => InstructorController::class,
-        'students' => StudentController::class,
-        'admins' => AdminController::class,
         'semesters' => SemesterController::class,
         'chapters' => ChapterController::class,
         'contents' => ChapterContentController::class,
     ]);
 
+
+    Route::apiResource('admins', AdminController::class)->except('update');
+    Route::post('admins/{admin}', [AdminController::class, 'update']);
+
+    Route::apiResource('instructors', InstructorController::class)->except('update');
+    Route::post('instructors/{instructor}', [InstructorController::class, 'update']);
+
+    Route::apiResource('students', StudentController::class)->except('update');
+    Route::post('students/{student}', [StudentController::class, 'update']);
 
     Route::apiResource('departments', DepartmentController::class)->except('update');
     Route::post('departments/{department}', [DepartmentController::class, 'update']);
