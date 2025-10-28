@@ -29,6 +29,7 @@ class Update extends FormRequest
             'department_id' => ['nullable', 'exists:departments,id'],
             'email' => ['nullable', 'email'],
             'password' => ['nullable', 'string', 'min:8'],
+            'is_admin' => ['nullable', 'boolean']
         ];
     }
 }

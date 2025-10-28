@@ -74,6 +74,13 @@ class InstructorService
     {
         $user = $this->instructorRepo->findById($id)->user;
         if (empty($formData['password'])) unset($formData['password']);
+        if ($user->hasRole(Role::ADMIN) && !$formData['is_admin']) {
+            $user->removeRole(Role::ADMIN);
+        }
+        if (!$user->hasRole(Role::ADMIN) && $formData['is_admin']) {
+            $user->assignRole(Role::ADMIN);
+        }
+        $this->userRepo->updateById($user->id, $formData);
         return new InstructorResource($this->instructorRepo->updateById($id, $formData));
     }
 
