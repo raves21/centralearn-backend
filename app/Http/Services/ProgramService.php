@@ -57,26 +57,33 @@ class ProgramService
     public function updateById(string $id, array $formData)
     {
         $program = $this->programRepo->findById($id);
-        if (isset($formData['image'])) {
-            //delete previous image
-            if ($program->image_url) {
+        $payloadImage = $formData['image'] ?? null;
+
+        if ($program->image_url) {
+            if ($payloadImage) {
+                // Delete the old image in any case
                 $this->fileAttachmentRepo->deleteByFilter(['url' => $program->image_url]);
+
+                if ($payloadImage === "__DELETED__") {
+                    $formData['image_url'] = null;
+                } else {
+                    // Upload new image and update image_url
+                    $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
+                    $formData['image_url'] = $newImage->url;
+                }
             }
-            //upload new image
-            $newImage = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image']);
-            $updatedProgram = $this->programRepo->updateById(
-                id: $id,
-                formData: [...$formData, 'image_url' => $newImage->url],
-                relationships: ['department']
-            );
         } else {
-            $updatedProgram = $this->programRepo->updateById(
-                id: $id,
-                formData: $formData,
-                relationships: ['department']
-            );
+            if ($payloadImage) {
+                $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
+                $formData['image_url'] = $newImage->url;
+            }
         }
-        return new ProgramResource($updatedProgram);
+
+        return new ProgramResource($this->programRepo->updateById(
+            id: $id,
+            formData: $formData,
+            relationships: ['department']
+        ));
     }
 
     public function deleteById(string $id)

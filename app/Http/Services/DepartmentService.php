@@ -51,18 +51,29 @@ class DepartmentService
     public function updateById(string $id, array $formData)
     {
         $department = $this->departmentRepo->findById($id);
-        if (isset($formData['image'])) {
-            //delete previous image
-            if ($department->image_url) {
+        $payloadImage = $formData['image'] ?? null;
+
+        if ($department->image_url) {
+            if ($payloadImage) {
+                // Delete the old image in any case
                 $this->fileAttachmentRepo->deleteByFilter(['url' => $department->image_url]);
+
+                if ($payloadImage === "__DELETED__") {
+                    $formData['image_url'] = null;
+                } else {
+                    // Upload new image and update image_url
+                    $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
+                    $formData['image_url'] = $newImage->url;
+                }
             }
-            //upload new image
-            $newImage = $this->fileAttachmentRepo->uploadAndCreate(file: $formData['image']);
-            $updatedDepartment = $this->departmentRepo->updateById($id, [...$formData, 'image_url' => $newImage->url]);
         } else {
-            $updatedDepartment = $this->departmentRepo->updateById($id, $formData);
+            if ($payloadImage) {
+                $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
+                $formData['image_url'] = $newImage->url;
+            }
         }
-        return new DepartmentResource($updatedDepartment);
+
+        return new DepartmentResource($this->departmentRepo->updateById($id, $formData));
     }
 
     public function deleteById(string $id)

@@ -54,26 +54,33 @@ class CourseClassService
     public function updateById(string $id, array $formData)
     {
         $courseClass = $this->courseClassRepo->findById($id);
-        if (isset($formData['image'])) {
-            if ($courseClass->image_url) {
-                //delete previous image
+        $payloadImage = $formData['image'] ?? null;
+
+        if ($courseClass->image_url) {
+            if ($payloadImage) {
+                // Delete the old image in any case
                 $this->fileAttachmentRepo->deleteByFilter(['url' => $courseClass->image_url]);
+
+                if ($payloadImage === "__DELETED__") {
+                    $formData['image_url'] = null;
+                } else {
+                    // Upload new image and update image_url
+                    $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
+                    $formData['image_url'] = $newImage->url;
+                }
             }
-            //upload new image
-            $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
-            $updatedCourseClass = $this->courseClassRepo->updateById(
-                $id,
-                [...$formData, 'image_url' => $newImage->url],
-                relationships: ['course', 'semester']
-            );
         } else {
-            $updatedCourseClass = $this->courseClassRepo->updateById(
-                $id,
-                $formData,
-                relationships: ['course', 'semester']
-            );
+            if ($payloadImage) {
+                $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
+                $formData['image_url'] = $newImage->url;
+            }
         }
-        return new CourseClassResource($updatedCourseClass);
+
+        return new CourseClassResource($this->courseClassRepo->updateById(
+            $id,
+            $formData,
+            relationships: ['course', 'semester']
+        ));
     }
 
     public function deleteById(string $id)
