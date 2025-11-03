@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\CourseClass;
 
+use App\Rules\FileOrDeleted;
 use Illuminate\Foundation\Http\FormRequest;
 
 class Update extends FormRequest
@@ -24,7 +25,7 @@ class Update extends FormRequest
         return [
             'section_name' => ['nullable', 'string'],
             'status' => ['nullable', 'in:open,close'],
-            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
+            'image' => ['nullable', new FileOrDeleted()],
         ];
     }
 }

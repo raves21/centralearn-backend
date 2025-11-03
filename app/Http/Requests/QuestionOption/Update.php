@@ -3,6 +3,7 @@
 namespace App\Http\Requests\QuestionOption;
 
 use App\Models\QuestionOption;
+use App\Rules\FileOrDeleted;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -52,9 +53,7 @@ class Update extends FormRequest
                     ...$rules,
                     'option.file' => [
                         'nullable',
-                        'file',
-                        'mimes:jpg,jpeg,png',
-                        'max:10000',
+                        'image' => ['nullable', new FileOrDeleted()],
                     ],
                 ];
                 break;

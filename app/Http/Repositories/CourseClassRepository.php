@@ -108,7 +108,7 @@ class CourseClassRepository extends BaseRepository
                 $q->where('departments.id', $student->program->department_id);
             })->exists();
 
-        if (!$studentInClassDepartment) abort(403, 'Student must belong in the class\'s departments.');
+        if (!$studentInClassDepartment) abort(409, 'Student must belong in the class\'s departments.');
     }
 
     public function verifyInstructorDepartment(Instructor $instructor, string $classId)
@@ -118,6 +118,6 @@ class CourseClassRepository extends BaseRepository
                 $q->where('departments.id', $instructor->department_id);
             })->exists();
 
-        if (!$instructorInClassDepartment) abort(403, 'Instructor must belong in the class\'s departments.');
+        if (!$instructorInClassDepartment) abort(409, 'Instructor must belong in the class\'s departments.');
     }
 }

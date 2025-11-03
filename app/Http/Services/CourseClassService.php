@@ -3,20 +3,25 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\CourseClassRepository;
+use App\Http\Repositories\CourseRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Resources\CourseClassResource;
+use Illuminate\Support\Facades\Log;
 
 class CourseClassService
 {
     private $courseClassRepo;
     private $fileAttachmentRepo;
+    private $courseRepo;
 
     public function __construct(
         CourseClassRepository $courseClassRepo,
-        FileAttachmentRepository $fileAttachmentRepo
+        FileAttachmentRepository $fileAttachmentRepo,
+        CourseRepository $courseRepo
     ) {
         $this->courseClassRepo = $courseClassRepo;
         $this->fileAttachmentRepo = $fileAttachmentRepo;
+        $this->courseRepo = $courseRepo;
     }
 
     public function getAll(array $filters)
@@ -36,6 +41,8 @@ class CourseClassService
 
     public function create(array $formData)
     {
+        $course = $this->courseRepo->findById($formData['course_id']);
+
         if (isset($formData['image'])) {
             $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
             $newCourseClass = $this->courseClassRepo->create(
@@ -44,7 +51,7 @@ class CourseClassService
             );
         } else {
             $newCourseClass = $this->courseClassRepo->create(
-                $formData,
+                [...$formData, 'image_url' => $course->image_url],
                 relationships: ['course', 'semester']
             );
         }
@@ -62,7 +69,8 @@ class CourseClassService
                 $this->fileAttachmentRepo->deleteByFilter(['url' => $courseClass->image_url]);
 
                 if ($payloadImage === "__DELETED__") {
-                    $formData['image_url'] = null;
+                    //set image_url to course's image_url as default
+                    $formData['image_url'] = $courseClass->course->image_url;
                 } else {
                     // Upload new image and update image_url
                     $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
