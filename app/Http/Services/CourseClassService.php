@@ -51,7 +51,7 @@ class CourseClassService
             );
         } else {
             $newCourseClass = $this->courseClassRepo->create(
-                [...$formData, 'image_url' => $course->image_url],
+                [...$formData, 'image_url' => $this->fileAttachmentRepo->getRandomDefaultImageUrl()],
                 relationships: ['course', 'semester']
             );
         }
@@ -65,12 +65,15 @@ class CourseClassService
 
         if ($courseClass->image_url) {
             if ($payloadImage) {
-                // Delete the old image in any case
-                $this->fileAttachmentRepo->deleteByFilter(['url' => $courseClass->image_url]);
+                $defaultImageUrls = $this->fileAttachmentRepo->getDefaultImagesUrls();
+                // Delete the old image if its not one of the default image urls
+                if (!in_array($courseClass->image_url, $defaultImageUrls)) {
+                    $this->fileAttachmentRepo->deleteByFilter(['url' => $courseClass->image_url]);
+                }
 
                 if ($payloadImage === "__DELETED__") {
-                    //set image_url to course's image_url as default
-                    $formData['image_url'] = $courseClass->course->image_url;
+                    //as a default, set image_url to a random default image
+                    $formData['image_url'] = $this->fileAttachmentRepo->getRandomDefaultImageUrl();
                 } else {
                     // Upload new image and update image_url
                     $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);

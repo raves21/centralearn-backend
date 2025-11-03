@@ -4,6 +4,8 @@ namespace App\Http\Repositories;
 
 use App\Models\FileAttachment;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 
 class FileAttachmentRepository extends BaseRepository
 {
@@ -35,5 +37,18 @@ class FileAttachmentRepository extends BaseRepository
         ]);
 
         return $newFile;
+    }
+
+    public function getRandomDefaultImageUrl()
+    {
+        $files = Storage::disk('public')->files('default-images');
+        $fileUrls = array_map(fn($file) => asset(Storage::url($file)), $files);
+        return Arr::random($fileUrls);
+    }
+
+    public function getDefaultImagesUrls()
+    {
+        $files = Storage::disk('public')->files('default-images');
+        return array_map(fn($file) => asset(Storage::url($file)), $files);
     }
 }
