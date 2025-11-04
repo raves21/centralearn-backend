@@ -24,7 +24,9 @@ class CourseClassRepository extends BaseRepository
         $semesterId = $filters['semester_id'] ?? null;
         $searchQueryFilter = $filters['query'] ?? null;
 
-        return CourseClass::whereHas('studentEnrollments', function ($q) use ($semesterId, $studentEnrolledSemesters, $studentId) {
+        $paginate = $filters['paginate'] ?? false;
+
+        $query = CourseClass::whereHas('studentEnrollments', function ($q) use ($semesterId, $studentEnrolledSemesters, $studentId) {
             $q->where('student_id', $studentId);
             $q->when($semesterId || $studentEnrolledSemesters->isNotEmpty(), function ($q) use ($semesterId, $studentEnrolledSemesters) {
                 $q->where('semester_id', $semesterId ?? $studentEnrolledSemesters->first()->id);
@@ -36,8 +38,10 @@ class CourseClassRepository extends BaseRepository
                         ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
                 });
             })
-            ->with(['course.departments:id,name,code', 'semester'])
-            ->get();
+            ->with(['course.departments:id,name,code', 'semester']);
+
+        if ($paginate) return $query->paginate();
+        return $query->get();
     }
 
     public function getInstructorAssignedClasses(
