@@ -26,7 +26,7 @@ class ProgramService
             $this->programRepo->getAll(
                 relationships: ['department'],
                 filters: $filters,
-                paginate: empty($paginate) ? true : $paginate
+                paginate: $filters['paginate'] ?: true
             )
         );
     }

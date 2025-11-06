@@ -26,11 +26,10 @@ class CourseClassService
 
     public function getAll(array $filters)
     {
-        $paginate = $filters['paginate'] ?? null;
         return CourseClassResource::collection($this->courseClassRepo->getAll(
             filters: $filters,
             relationships: ['course', 'semester'],
-            paginate: empty($paginate) ? true : $paginate
+            paginate: $filters['paginate'] ?: true
         ));
     }
 

@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\LectureMaterial;
+namespace App\Http\Requests\Section;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class Index extends FormRequest
+class Store extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,14 +22,7 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'lecture_id' => ['required', 'exists:lectures,id'],
-            'paginate' => ['required', 'boolean']
+            //
         ];
-    }
-    protected function prepareForValidation()
-    {
-        $this->merge([
-            'paginate' => filter_var($this->paginate, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
-        ]);
     }
 }

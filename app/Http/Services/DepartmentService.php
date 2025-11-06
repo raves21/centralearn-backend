@@ -25,7 +25,7 @@ class DepartmentService
         $paginate = $filters['paginate'] ?? null;
         return DepartmentResource::collection($this->departmentRepo->getAll(
             filters: $filters,
-            paginate: empty($paginate) ? true : $paginate
+            paginate: $filters['paginate'] ?: true
         ));
     }
 

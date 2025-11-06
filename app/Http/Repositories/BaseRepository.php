@@ -22,7 +22,7 @@ class BaseRepository
 
     public function findByFilter(array $filters)
     {
-        return get_class($this->model)::where(function ($q) use ($filters) {
+        return $this->model->where(function ($q) use ($filters) {
             foreach ($filters as $key => $value) {
                 $q->where($key, $value);
             }

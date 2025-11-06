@@ -14,6 +14,7 @@ use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AssesementMaterialController;
 use App\Http\Controllers\QuestionOptionController;
+use App\Http\Controllers\SectionController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -52,6 +53,7 @@ Route::middleware('auth')->group(function () {
         'semesters' => SemesterController::class,
         'chapters' => ChapterController::class,
         'contents' => ChapterContentController::class,
+        'sections' => SectionController::class
     ]);
 
 

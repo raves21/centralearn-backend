@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\LectureMaterial;
+namespace App\Http\Requests\Section;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -22,10 +22,10 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'lecture_id' => ['required', 'exists:lectures,id'],
-            'paginate' => ['required', 'boolean']
+            'paginate' => ['nullable', 'boolean']
         ];
     }
+
     protected function prepareForValidation()
     {
         $this->merge([

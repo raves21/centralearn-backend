@@ -26,4 +26,10 @@ class Index extends FormRequest
             'paginate' => ['nullable', 'boolean']
         ];
     }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'paginate' => filter_var($this->paginate, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+        ]);
+    }
 }
