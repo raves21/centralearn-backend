@@ -53,7 +53,6 @@ Route::middleware('auth')->group(function () {
         'semesters' => SemesterController::class,
         'chapters' => ChapterController::class,
         'contents' => ChapterContentController::class,
-        'sections' => SectionController::class
     ]);
 
 
@@ -74,6 +73,9 @@ Route::middleware('auth')->group(function () {
 
     Route::apiResource('courses', CourseController::class)->except('update');
     Route::post('courses/{course}', [CourseController::class, 'update']);
+
+    Route::apiResource('sections', SectionController::class)->except(['update', 'show']);
+    Route::post('sections/{section}', [SectionController::class, 'update']);
 
     Route::apiResource('course-classes', CourseClassController::class)->except('update');
     Route::post('course-classes/{course_class}', [CourseClassController::class, 'update']);
