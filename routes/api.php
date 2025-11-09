@@ -74,7 +74,7 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('courses', CourseController::class)->except('update');
     Route::post('courses/{course}', [CourseController::class, 'update']);
 
-    Route::apiResource('sections', SectionController::class)->except(['update', 'show']);
+    Route::apiResource('sections', SectionController::class)->except(['update']);
     Route::post('sections/{section}', [SectionController::class, 'update']);
 
     Route::apiResource('course-classes', CourseClassController::class)->except('update');
