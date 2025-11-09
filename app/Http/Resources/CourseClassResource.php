@@ -18,7 +18,7 @@ class CourseClassResource extends JsonResource
             'id' => $this->id,
             'course' => new CourseResource($this->whenLoaded('course')),
             'semester' => new SemesterResource($this->whenLoaded('semester')),
-            'sectionName' => $this->section_name,
+            'section' => new SectionResource($this->whenLoaded('section')),
             'status' => $this->status,
             'imageUrl' => $this->image_url
         ];

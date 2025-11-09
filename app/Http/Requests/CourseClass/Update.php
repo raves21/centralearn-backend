@@ -23,7 +23,6 @@ class Update extends FormRequest
     public function rules(): array
     {
         return [
-            'section_name' => ['nullable', 'string'],
             'status' => ['nullable', 'in:open,close'],
             'image' => ['nullable', new FileOrDeleted()],
         ];

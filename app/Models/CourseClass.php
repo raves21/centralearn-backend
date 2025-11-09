@@ -9,7 +9,7 @@ class CourseClass extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['course_id', 'semester_id', 'section_name', 'status', 'image_url'];
+    protected $fillable = ['course_id', 'semester_id', 'section_id', 'status', 'image_url'];
 
     public function course()
     {
@@ -19,6 +19,11 @@ class CourseClass extends Model
     public function semester()
     {
         return $this->belongsTo(Semester::class);
+    }
+
+    public function section()
+    {
+        return $this->belongsTo(Section::class);
     }
 
     public function chapters()

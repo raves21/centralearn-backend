@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\CourseClass;
 
+use App\Rules\FileOrDeleted;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class Store extends FormRequest
 {
@@ -22,11 +24,25 @@ class Store extends FormRequest
     public function rules(): array
     {
         return [
-            'course_id' => ['required', 'string'],
-            'semester_id' => ['required', 'string'],
-            'section_name' => ['required', 'string'],
+            'course_id' => ['required', 'exists:courses,id'],
+            'semester_id' => ['required', 'exists:semesters,id'],
+            'section_id' => [
+                'required',
+                'exists:sections,id',
+                Rule::unique('course_classes')
+                    ->where(fn($q) => $q
+                        ->where('course_id', $this->course_id)
+                        ->where('semester_id', $this->semester_id))
+            ],
             'status' => ['required', 'in:open,close'],
-            'image' => ['nullable', 'file', 'mimes:jpeg,jpg,png,webp', 'max:10000'],
+            'image' => ['nullable', new FileOrDeleted()],
+        ];
+    }
+
+    public function messages()
+    {
+        return [
+            'section_id.unique' => 'A Class with this Course, Semester, and Section already exists.'
         ];
     }
 }

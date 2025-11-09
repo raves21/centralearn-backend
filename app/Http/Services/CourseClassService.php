@@ -28,30 +28,29 @@ class CourseClassService
     {
         return CourseClassResource::collection($this->courseClassRepo->getAll(
             filters: $filters,
-            relationships: ['course', 'semester'],
+            relationships: ['course', 'semester', 'section'],
             paginate: $filters['paginate'] ?: true
         ));
     }
 
     public function findById(string $id)
     {
-        return new CourseClassResource($this->courseClassRepo->findById($id, relationships: ['course', 'semester']));
+        return new CourseClassResource($this->courseClassRepo->findById($id, relationships: ['course', 'semester', 'section']));
     }
 
     public function create(array $formData)
     {
-        $course = $this->courseRepo->findById($formData['course_id']);
-
+        Log::info($formData);
         if (isset($formData['image'])) {
             $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
             $newCourseClass = $this->courseClassRepo->create(
                 [...$formData, 'image_url' => $newImage->url],
-                relationships: ['course', 'semester']
+                relationships: ['course', 'semester', 'section']
             );
         } else {
             $newCourseClass = $this->courseClassRepo->create(
                 [...$formData, 'image_url' => $this->fileAttachmentRepo->getRandomDefaultImageUrl()],
-                relationships: ['course', 'semester']
+                relationships: ['course', 'semester', 'section']
             );
         }
         return new CourseClassResource($newCourseClass);
@@ -89,7 +88,7 @@ class CourseClassService
         return new CourseClassResource($this->courseClassRepo->updateById(
             $id,
             $formData,
-            relationships: ['course', 'semester']
+            relationships: ['course', 'semester', 'section']
         ));
     }
 
