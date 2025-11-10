@@ -113,12 +113,12 @@ class InstructorService
         );
     }
 
-    public function getAssignableClasses(string $instructorId, string $semesterId)
+    public function getAssignableClasses(string $instructorId, array $filters)
     {
         $instructor = $this->instructorRepo->findById($instructorId);
-        $semester = $this->semesterRepo->findById($semesterId);
-
-        return CourseClassResource::collection($this->courseClassRepo->getInstructorAssignableClasses($instructor, $semester));
+        return CourseClassResource::collection(
+            $this->courseClassRepo->getInstructorAssignableClasses($instructor, $filters)
+        );
     }
 
     public function assignToClass(string $instructorId, string $classId)

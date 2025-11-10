@@ -38,7 +38,7 @@ class CourseClassRepository extends BaseRepository
                         ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
                 });
             })
-            ->with(['course.departments:id,name,code', 'semester']);
+            ->with(['course.departments:id,name,code', 'semester', 'section']);
 
         if ($paginate) return $query->paginate();
         return $query->get();
@@ -64,45 +64,66 @@ class CourseClassRepository extends BaseRepository
                         ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
                 });
             })
-            ->with(['course.departments:id,name,code', 'semester'])
+            ->with(['course.departments:id,name,code', 'semester', 'section'])
             ->get();
     }
 
-    public function getStudentEnrollableClasses(Student $student, Semester $semester)
+    public function getStudentEnrollableClasses(Student $student, array $filters = [])
     {
-
-        $enrolledClassesIds = $student->courseEnrollments()
-            ->whereHas('courseClass', function ($q) use ($semester) {
-                $q->where('semester_id', $semester->id);
-            })
-            ->pluck('course_class_id');
+        $enrolledClassesIds = $student->courseEnrollments()->pluck('course_class_id');
 
         $enrollableClasses = CourseClass::whereNotIn('id', $enrolledClassesIds)
             ->whereHas('course.departments', function ($q) use ($student) {
                 $q->where('departments.id', $student->program->department_id);
             })
-            ->with(['course', 'semester'])
-            ->get();
+            ->when($filters['course_id'] ?? null, function ($q, $courseId) {
+                $q->whereHas('course', function ($q) use ($courseId) {
+                    $q->where('id', $courseId);
+                });
+            })
+            ->when($filters['section_id'] ?? null, function ($q, $sectionId) {
+                $q->whereHas('section', function ($q) use ($sectionId) {
+                    $q->where('id', $sectionId);
+                });
+            })
+            ->when($filters['semester_id'] ?? null, function ($q, $semesterId) {
+                $q->whereHas('semester', function ($q) use ($semesterId) {
+                    $q->where('id', $semesterId);
+                });
+            })
+            ->with(['course', 'semester', 'section'])
+            ->paginate();
 
         return $enrollableClasses;
     }
 
-    public function getInstructorAssignableClasses(Instructor $instructor, Semester $semester)
+    public function getInstructorAssignableClasses(Instructor $instructor, array $filters = [])
     {
-        $assignedClassesIds = $instructor->courseAssignments()
-            ->whereHas('courseClass', function ($q) use ($semester) {
-                $q->where('semester_id', $semester->id);
-            })
-            ->pluck('course_class_id');
+        $enrolledClassesIds = $instructor->courseEnrollments()->pluck('course_class_id');
 
-        $assignableClasses = CourseClass::whereNotIn('id', $assignedClassesIds)
+        $enrollableClasses = CourseClass::whereNotIn('id', $enrolledClassesIds)
             ->whereHas('course.departments', function ($q) use ($instructor) {
-                $q->where('departments.id', $instructor->department_id);
+                $q->where('departments.id', $instructor->program->department_id);
             })
-            ->with(['course', 'semester'])
-            ->get();
+            ->when($filters['course_id'] ?? null, function ($q, $courseId) {
+                $q->whereHas('course', function ($q) use ($courseId) {
+                    $q->where('id', $courseId);
+                });
+            })
+            ->when($filters['section_id'] ?? null, function ($q, $sectionId) {
+                $q->whereHas('section', function ($q) use ($sectionId) {
+                    $q->where('id', $sectionId);
+                });
+            })
+            ->when($filters['semester_id'] ?? null, function ($q, $semesterId) {
+                $q->whereHas('semester', function ($q) use ($semesterId) {
+                    $q->where('id', $semesterId);
+                });
+            })
+            ->with(['course', 'semester', 'section'])
+            ->paginate();
 
-        return $assignableClasses;
+        return $enrollableClasses;
     }
 
     public function verifyStudentDepartment(Student $student, string $classId)

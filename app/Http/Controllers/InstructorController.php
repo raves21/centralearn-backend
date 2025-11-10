@@ -47,10 +47,9 @@ class InstructorController extends Controller
 
     public function getAssignableClasses(GetAssignableClasses $request, string $instructorId)
     {
-        $validated = $request->validated();
         return $this->instructorService->getAssignableClasses(
             instructorId: $instructorId,
-            semesterId: $validated['semester_id']
+            filters: $request->validated()
         );
     }
 

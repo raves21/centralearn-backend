@@ -12,6 +12,7 @@ use App\Http\Resources\CourseClassResource;
 use App\Http\Resources\SemesterResource;
 use App\Http\Resources\StudentResource;
 use App\Models\Role;
+use DeepCopy\Filter\Filter;
 
 class StudentService
 {
@@ -100,12 +101,11 @@ class StudentService
         );
     }
 
-    public function getEnrollableClasses(string $studentId, string $semesterId)
+    public function getEnrollableClasses(string $studentId, array $filters)
     {
         $student = $this->studentRepo->findById($studentId);
-        $semester = $this->semesterRepo->findById($semesterId);
         return CourseClassResource::collection(
-            $this->courseClassRepo->getStudentEnrollableClasses($student, $semester)
+            $this->courseClassRepo->getStudentEnrollableClasses($student, $filters)
         );
     }
 

@@ -22,7 +22,9 @@ class GetEnrollableClasses extends FormRequest
     public function rules(): array
     {
         return [
-            'semester_id' => ['required', 'exists:semesters,id'],
+            'semester_id' => ['nullable', 'exists:semesters,id'],
+            'course_id' => ['nullable', 'exists:courses,id'],
+            'section_id' => ['nullable', 'exists:sections,id'],
         ];
     }
 }

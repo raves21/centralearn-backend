@@ -51,7 +51,7 @@ class StudentController extends Controller
         $validated = $request->validated();
         return $this->studentService->getEnrollableClasses(
             studentId: $studentId,
-            semesterId: $validated['semester_id']
+            filters: $request->validated()
         );
     }
 
