@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Instructor\AssignToClass;
 use App\Http\Requests\Instructor\GetAssignableClasses;
-use App\Http\Requests\Instructor\GetAssignedCourses;
+use App\Http\Requests\Instructor\GetAssignedClasses;
 use App\Http\Requests\Instructor\Index;
 use App\Http\Requests\Instructor\Store;
 use App\Http\Requests\Instructor\UnassignToClass;
@@ -37,7 +37,7 @@ class InstructorController extends Controller
         return $this->instructorService->getAssignedSemesters($instructorId);
     }
 
-    public function getAssignedClasses(string $instructorId, GetAssignedCourses $request)
+    public function getAssignedClasses(string $instructorId, GetAssignedClasses $request)
     {
         return $this->instructorService->getAssignedClasses(
             instructorId: $instructorId,

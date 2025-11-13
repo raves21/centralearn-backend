@@ -4,7 +4,7 @@ namespace App\Http\Requests\Instructor;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetAssignedCourses extends FormRequest
+class GetAssignedClasses extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,17 @@ class GetAssignedCourses extends FormRequest
     public function rules(): array
     {
         return [
+            'semester_id' => ['nullable', 'exists:semesters,id'],
+            'course_id' => ['nullable', 'exists:courses,id'],
+            'section_id' => ['nullable', 'exists:sections,id'],
             'query' => ['nullable', 'string'],
-            'semester_id' => ['nullable', 'exists:semesters,id']
+            'paginate' => ['nullable', 'boolean']
         ];
+    }
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'paginate' => filter_var($this->paginate, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+        ]);
     }
 }

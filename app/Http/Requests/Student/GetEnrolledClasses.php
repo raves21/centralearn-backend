@@ -23,6 +23,8 @@ class GetEnrolledClasses extends FormRequest
     {
         return [
             'semester_id' => ['nullable', 'exists:semesters,id'],
+            'course_id' => ['nullable', 'exists:courses,id'],
+            'section_id' => ['nullable', 'exists:sections,id'],
             'query' => ['nullable', 'string'],
             'paginate' => ['nullable', 'boolean']
         ];

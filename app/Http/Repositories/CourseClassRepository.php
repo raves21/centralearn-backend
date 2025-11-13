@@ -52,7 +52,9 @@ class CourseClassRepository extends BaseRepository
         $semesterId = $filters['semester_id'] ?? null;
         $searchQueryFilter = $filters['query'] ?? null;
 
-        return CourseClass::whereHas('instructorAssignments', function ($q) use ($semesterId, $instructorAssignedSemesters, $instructorId) {
+        $paginate = $filters['paginate'] ?? false;
+
+        $query = CourseClass::whereHas('instructorAssignments', function ($q) use ($semesterId, $instructorAssignedSemesters, $instructorId) {
             $q->where('instructor_id', $instructorId);
             $q->when($semesterId || $instructorAssignedSemesters->isNotEmpty(), function ($q) use ($semesterId, $instructorAssignedSemesters) {
                 $q->where('semester_id', $semesterId ?? $instructorAssignedSemesters->first()->id);
@@ -64,8 +66,10 @@ class CourseClassRepository extends BaseRepository
                         ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
                 });
             })
-            ->with(['course.departments:id,name,code', 'semester', 'section'])
-            ->get();
+            ->with(['course.departments:id,name,code', 'semester', 'section']);
+
+        if ($paginate) return $query->paginate();
+        return $query->get();
     }
 
     public function getStudentEnrollableClasses(Student $student, array $filters = [])
@@ -99,11 +103,11 @@ class CourseClassRepository extends BaseRepository
 
     public function getInstructorAssignableClasses(Instructor $instructor, array $filters = [])
     {
-        $enrolledClassesIds = $instructor->courseEnrollments()->pluck('course_class_id');
+        $enrolledClassesIds = $instructor->courseAssignments()->pluck('course_class_id');
 
         $enrollableClasses = CourseClass::whereNotIn('id', $enrolledClassesIds)
             ->whereHas('course.departments', function ($q) use ($instructor) {
-                $q->where('departments.id', $instructor->program->department_id);
+                $q->where('departments.id', $instructor->department_id);
             })
             ->when($filters['course_id'] ?? null, function ($q, $courseId) {
                 $q->whereHas('course', function ($q) use ($courseId) {
