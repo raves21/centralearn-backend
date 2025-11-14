@@ -53,11 +53,6 @@ class InstructorService
     public function create(array $formData)
     {
         $newUser = $this->userRepo->create($formData);
-        $isAdmin = $formData['is_admin'] ?? null;
-        if ($isAdmin) {
-            $this->adminRepo->create([...$formData, 'user_id' => $newUser->id]);
-            $newUser->assignRole(Role::ADMIN);
-        }
         $newUser->assignRole(Role::INSTRUCTOR);
         return new InstructorResource($this->instructorRepo->create([...$formData, 'user_id' => $newUser->id]));
     }
@@ -74,12 +69,6 @@ class InstructorService
     {
         $user = $this->instructorRepo->findById($id)->user;
         if (empty($formData['password'])) unset($formData['password']);
-        if ($user->hasRole(Role::ADMIN) && !$formData['is_admin']) {
-            $user->removeRole(Role::ADMIN);
-        }
-        if (!$user->hasRole(Role::ADMIN) && $formData['is_admin']) {
-            $user->assignRole(Role::ADMIN);
-        }
         $this->userRepo->updateById($user->id, $formData);
         return new InstructorResource($this->instructorRepo->updateById($id, $formData));
     }
