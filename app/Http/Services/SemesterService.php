@@ -17,9 +17,11 @@ class SemesterService
 
     public function getAll(array $filters)
     {
+        $paginateFilter = $filters['paginate'] ?? null;
         return SemesterResource::collection($this->semesterRepo->getAll(
             orderBy: $filters['order_by'] ?? 'created_at',
-            filters: $filters
+            filters: $filters,
+            paginate: $paginateFilter !== null ? $paginateFilter : true
         ));
     }
 

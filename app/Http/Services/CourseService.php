@@ -5,6 +5,7 @@ namespace App\Http\Services;
 use App\Http\Repositories\CourseRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Resources\CourseResource;
+use Illuminate\Support\Facades\Log;
 
 class CourseService
 {
@@ -21,9 +22,12 @@ class CourseService
 
     public function getAll(array $filters)
     {
+        $paginateFilter = $filters['paginate'] ?? null;
+
         return CourseResource::collection($this->courseRepo->getAll(
             relationships: ['departments'],
-            filters: $filters
+            filters: $filters,
+            paginate: $paginateFilter !== null ? $paginateFilter : true
         ));
     }
 

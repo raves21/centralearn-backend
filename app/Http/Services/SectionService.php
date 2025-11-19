@@ -16,9 +16,10 @@ class SectionService
 
     public function getAll(array $filters)
     {
+        $paginateFilter = $filters['paginate'] ?? null;
         return SectionResource::collection($this->sectionRepo->getAll(
             filters: $filters,
-            paginate: $filters['paginate'] ?: true
+            paginate: $paginateFilter !== null ? $paginateFilter : true
         ));
     }
 

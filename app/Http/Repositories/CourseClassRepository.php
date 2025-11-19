@@ -16,6 +16,53 @@ class CourseClassRepository extends BaseRepository
         parent::__construct($courseClass);
     }
 
+    public function getAll(
+        array $relationships = [],
+        array $filters = [],
+        string $orderBy = 'created_at',
+        string $sortDirection = 'desc',
+        bool $paginate = true
+    ) {
+        $query = CourseClass::query();
+
+        // Apply query filter (course name/code search)
+        $query->when($filters['query'] ?? null, function ($q) use ($filters) {
+            $q->whereHas('course', function ($q) use ($filters) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$filters['query']}%"])
+                    ->orWhereRaw('LOWER(code) LIKE ?', ["%{$filters['query']}%"]);
+            });
+        });
+
+        // Apply course_id filter
+        $query->when($filters['course_id'] ?? null, function ($q, $courseId) {
+            $q->where('course_id', $courseId);
+        });
+
+        // Apply semester_id filter
+        $query->when($filters['semester_id'] ?? null, function ($q, $semesterId) {
+            $q->where('semester_id', $semesterId);
+        });
+
+        // Apply status filter
+        $query->when($filters['status'] ?? null, function ($q, $status) {
+            $q->where('status', $status);
+        });
+
+        // Apply relationships
+        if (!empty($relationships)) {
+            $query->with($relationships);
+        }
+
+        // Apply ordering
+        $query->orderBy($orderBy, $sortDirection);
+
+        if ($paginate) {
+            return $query->paginate();
+        }
+
+        return $query->get();
+    }
+
     public function getStudentEnrolledClasses(
         string $studentId,
         array $filters,

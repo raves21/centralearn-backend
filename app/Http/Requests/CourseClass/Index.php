@@ -22,8 +22,10 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
+            'query' => ['nullable', 'string'],
             'course_id' => ['nullable', 'exists:courses,id'],
             'semester_id' => ['nullable', 'exists:semesters,id'],
+            'status' => ['nullable', 'in:open,close'],
             'paginate' => ['nullable', 'boolean']
         ];
     }

@@ -22,10 +22,10 @@ class DepartmentService
 
     public function getAll(array $filters)
     {
-        $paginate = $filters['paginate'] ?? null;
+        $paginateFilter = $filters['paginate'] ?? null;
         return DepartmentResource::collection($this->departmentRepo->getAll(
             filters: $filters,
-            paginate: $filters['paginate'] ?: true
+            paginate: $paginateFilter !== null ? $paginateFilter : true
         ));
     }
 
