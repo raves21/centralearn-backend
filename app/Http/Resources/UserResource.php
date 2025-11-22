@@ -21,7 +21,9 @@ class UserResource extends JsonResource
             'email' => $this->email,
             'address' => $this->address,
             'roles' => $this->getRoleNames(),
-
+            $this->mergeWhen($this->hasRole('admin'), fn() => ['adminId' => $this->admin->id]),
+            $this->mergeWhen($this->hasRole('student'), fn() => ['studentId' => $this->student->id]),
+            $this->mergeWhen($this->hasRole('instructor'), fn() => ['instructorId' => $this->instructor->id]),
             $this->mergeWhen(
                 $this->additional && $this->additional['with_permissions'],
                 fn() => ['permissions' => $this->getAllPermissions()->pluck('name')]

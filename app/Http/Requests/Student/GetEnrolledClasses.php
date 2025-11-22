@@ -24,6 +24,7 @@ class GetEnrolledClasses extends FormRequest
         return [
             'semester_id' => ['nullable', 'exists:semesters,id'],
             'course_id' => ['nullable', 'exists:courses,id'],
+            'status' => ['nullable', 'in:open,close'],
             'section_id' => ['nullable', 'exists:sections,id'],
             'query' => ['nullable', 'string'],
             'paginate' => ['nullable', 'boolean']
@@ -31,8 +32,10 @@ class GetEnrolledClasses extends FormRequest
     }
     protected function prepareForValidation()
     {
-        $this->merge([
-            'paginate' => filter_var($this->paginate, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
-        ]);
+        if ($this->has('paginate')) {
+            $this->merge([
+                'paginate' => filter_var($this->paginate, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+            ]);
+        }
     }
 }

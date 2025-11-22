@@ -70,15 +70,18 @@ class CourseClassRepository extends BaseRepository
     ) {
         $semesterId = $filters['semester_id'] ?? null;
         $searchQueryFilter = $filters['query'] ?? null;
+        $statusFilter = $filters['status'] ?? null;
 
-        $paginate = $filters['paginate'] ?? false;
+        $paginateFilter = $filters['paginate'] ?? null;
+        $shouldPaginate = $paginateFilter !== null ? $paginateFilter : true;
 
-        $query = CourseClass::whereHas('studentEnrollments', function ($q) use ($semesterId, $studentEnrolledSemesters, $studentId) {
+        $query = CourseClass::whereHas('studentEnrollments', function ($q) use ($semesterId, $studentEnrolledSemesters, $studentId, $statusFilter) {
             $q->where('student_id', $studentId);
             $q->when($semesterId || $studentEnrolledSemesters->isNotEmpty(), function ($q) use ($semesterId, $studentEnrolledSemesters) {
                 $q->where('semester_id', $semesterId ?? $studentEnrolledSemesters->first()->id);
             });
         })
+            ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
             ->when($searchQueryFilter, function ($q) use ($searchQueryFilter) {
                 $q->whereHas('course', function ($q) use ($searchQueryFilter) {
                     $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchQueryFilter}%"])
@@ -87,7 +90,7 @@ class CourseClassRepository extends BaseRepository
             })
             ->with(['course.departments:id,name,code', 'semester', 'section']);
 
-        if ($paginate) return $query->paginate();
+        if ($shouldPaginate) return $query->paginate();
         return $query->get();
     }
 
@@ -98,8 +101,10 @@ class CourseClassRepository extends BaseRepository
     ) {
         $semesterId = $filters['semester_id'] ?? null;
         $searchQueryFilter = $filters['query'] ?? null;
+        $statusFilter = $filters['status'] ?? null;
 
-        $paginate = $filters['paginate'] ?? false;
+        $paginateFilter = $filters['paginate'] ?? null;
+        $shouldPaginate = $paginateFilter !== null ? $paginateFilter : true;
 
         $query = CourseClass::whereHas('instructorAssignments', function ($q) use ($semesterId, $instructorAssignedSemesters, $instructorId) {
             $q->where('instructor_id', $instructorId);
@@ -107,6 +112,7 @@ class CourseClassRepository extends BaseRepository
                 $q->where('semester_id', $semesterId ?? $instructorAssignedSemesters->first()->id);
             });
         })
+            ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
             ->when($searchQueryFilter, function ($q) use ($searchQueryFilter) {
                 $q->whereHas('course', function ($q) use ($searchQueryFilter) {
                     $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchQueryFilter}%"])
@@ -115,7 +121,7 @@ class CourseClassRepository extends BaseRepository
             })
             ->with(['course.departments:id,name,code', 'semester', 'section']);
 
-        if ($paginate) return $query->paginate();
+        if ($shouldPaginate) return $query->paginate();
         return $query->get();
     }
 
