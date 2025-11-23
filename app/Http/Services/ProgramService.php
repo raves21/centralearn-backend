@@ -21,12 +21,13 @@ class ProgramService
 
     public function getAll(array $filters)
     {
-        $paginate = $filters['paginate'] ?? null;
+        $paginateFilter = $filters['paginate'] ?? null;
+
         return ProgramResource::collection(
             $this->programRepo->getAll(
                 relationships: ['department'],
                 filters: $filters,
-                paginate: $filters['paginate'] ?: true
+                paginate: $paginateFilter !== null ? $paginateFilter : true
             )
         );
     }
