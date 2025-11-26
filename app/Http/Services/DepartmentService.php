@@ -6,6 +6,7 @@ use App\Http\Repositories\DepartmentRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Resources\DepartmentResource;
 use App\Models\FileAttachment;
+use Illuminate\Support\Arr;
 
 class DepartmentService
 {
@@ -22,10 +23,9 @@ class DepartmentService
 
     public function getAll(array $filters)
     {
-        $paginateFilter = $filters['paginate'] ?? null;
         return DepartmentResource::collection($this->departmentRepo->getAll(
             filters: $filters,
-            paginate: $paginateFilter !== null ? $paginateFilter : true
+            paginate: Arr::get($filters, 'paginate', true)
         ));
     }
 

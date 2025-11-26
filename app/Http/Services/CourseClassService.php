@@ -6,6 +6,7 @@ use App\Http\Repositories\CourseClassRepository;
 use App\Http\Repositories\CourseRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Resources\CourseClassResource;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 
 class CourseClassService
@@ -26,11 +27,10 @@ class CourseClassService
 
     public function getAll(array $filters)
     {
-        $paginateFilter = $filters['paginate'] ?? null;
         return CourseClassResource::collection($this->courseClassRepo->getAll(
             filters: $filters,
             relationships: ['course', 'semester', 'section'],
-            paginate: $paginateFilter !== null ? $paginateFilter : true
+            paginate: Arr::get($filters, 'paginate', true)
         ));
     }
 

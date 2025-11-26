@@ -18,10 +18,13 @@ class ChapterService
 
     public function getAll(array $filters)
     {
+        $includeChapterContentsFilter = Arr::get($filters, 'include_chapter_contents', true);
+
         return ChapterResource::collection($this->chapterRepo->getAll(
             filters: $filters,
             orderBy: 'order',
             sortDirection: 'asc',
+            relationships: $includeChapterContentsFilter ? ['contents'] : [],
             paginate: false
         ));
     }

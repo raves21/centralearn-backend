@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\SemesterRepository;
 use App\Http\Resources\SemesterResource;
+use Illuminate\Support\Arr;
 
 class SemesterService
 {
@@ -17,11 +18,10 @@ class SemesterService
 
     public function getAll(array $filters)
     {
-        $paginateFilter = $filters['paginate'] ?? null;
         return SemesterResource::collection($this->semesterRepo->getAll(
-            orderBy: $filters['order_by'] ?? 'created_at',
+            orderBy: Arr::get($filters, 'order_by', 'created_at'),
             filters: $filters,
-            paginate: $paginateFilter !== null ? $paginateFilter : true
+            paginate: Arr::get($filters, 'paginate', true)
         ));
     }
 

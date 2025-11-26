@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('text_attachments', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->text('content');
-            $table->timestamps();
+        Schema::table('text_attachments', function (Blueprint $table) {
+            $table->dropColumn('content');
+            $table->text('content')->nullable();
         });
     }
 
@@ -23,6 +22,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('text_attachments');
+        Schema::table('text_attachments', function (Blueprint $table) {
+            $table->dropColumn('content');
+            $table->string('content')->nullable();
+        });
     }
 };

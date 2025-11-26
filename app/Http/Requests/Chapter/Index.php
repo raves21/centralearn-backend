@@ -22,7 +22,17 @@ class Index extends FormRequest
     public function rules(): array
     {
         return [
-            'course_class_id' => ['required', 'exists:course_classes,id']
+            'course_class_id' => ['required', 'exists:course_classes,id'],
+            'include_chapter_contents' => ['nullable', 'boolean']
         ];
+    }
+
+    protected function prepareForValidation()
+    {
+        if ($this->has('include_chapter_contents')) {
+            $this->merge([
+                'include_chapter_contents' => filter_var($this->include_chapter_contents, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE),
+            ]);
+        }
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\Services;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Repositories\ProgramRepository;
 use App\Http\Resources\ProgramResource;
+use Illuminate\Support\Arr;
 
 class ProgramService
 {
@@ -21,13 +22,12 @@ class ProgramService
 
     public function getAll(array $filters)
     {
-        $paginateFilter = $filters['paginate'] ?? null;
 
         return ProgramResource::collection(
             $this->programRepo->getAll(
                 relationships: ['department'],
                 filters: $filters,
-                paginate: $paginateFilter !== null ? $paginateFilter : true
+                paginate: Arr::get($filters, 'paginate', true)
             )
         );
     }
