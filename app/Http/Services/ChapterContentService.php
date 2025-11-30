@@ -74,7 +74,7 @@ class ChapterContentService
 
     public function findById(string $id)
     {
-        return new ChapterContentResource($this->chapterContentRepo->findById($id));
+        return new ChapterContentResource($this->chapterContentRepo->findById($id, relationships: ['chapter']));
     }
 
     public function deleteById(string $id)

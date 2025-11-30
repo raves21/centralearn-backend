@@ -13,9 +13,9 @@ class SectionSeeder extends Seeder
      */
     public function run(): void
     {
-        for($i=0; $i<10; $i++){
+        for ($i = 0; $i < 10; $i++) {
             Section::create([
-                'name' => ucfirst(fake()->word())
+                'name' => ucfirst(fake()->unique()->word())
             ]);
         }
     }

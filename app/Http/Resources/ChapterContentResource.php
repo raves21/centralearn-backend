@@ -23,7 +23,7 @@ class ChapterContentResource extends JsonResource
             'isOpen' => (bool)$this->is_open,
             'opensAt' => $this->opens_at,
             'closesAt' => $this->closes_at,
-            'chapterId' => $this->chapter_id,
+            'chapter' => $this->whenLoaded('chapter', fn() => new ChapterResource($this->chapter)),
             'isPublished' => (bool)$this->is_published,
             'publishesAt' => $this->publishes_at,
             'order' => $this->order,
