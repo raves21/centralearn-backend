@@ -24,19 +24,18 @@ class Store extends FormRequest
                 'min:1',
                 Rule::unique('lecture_materials')->where(fn($q) => $q->where('lecture_id', $this->lecture_id))
             ],
-            'material'      => ['required'],
         ];
 
         if ($this->input('material_type') === 'text') {
             $rules = [
                 ...$rules,
-                'material.content' => ['required', 'string'],
+                'material_content' => ['required_if:material_type,text', 'string'],
             ];
         } else {
             $rules = [
                 ...$rules,
-                'material.file' => [
-                    'required',
+                'material_file' => [
+                    'required_if:material_type,file',
                     'file',
                     'mimes:pdf,doc,docx,xlsx,mkv,mp4,jpg,jpeg,png',
                     'max:307200',

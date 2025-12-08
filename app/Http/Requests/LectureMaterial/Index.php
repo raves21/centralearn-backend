@@ -23,7 +23,7 @@ class Index extends FormRequest
     {
         return [
             'lecture_id' => ['required', 'exists:lectures,id'],
-            'paginate' => ['required', 'boolean']
+            'paginate' => ['nullable', 'boolean']
         ];
     }
     protected function prepareForValidation()

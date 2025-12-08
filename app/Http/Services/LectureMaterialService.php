@@ -6,9 +6,11 @@ use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Repositories\LectureMaterialRepository;
 use App\Http\Repositories\TextAttachmentRepository;
 use App\Http\Resources\LectureMaterialResource;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\FileAttachment;
 use App\Models\TextAttachment;
+use Illuminate\Support\Arr;
 
 class LectureMaterialService
 {
@@ -32,7 +34,7 @@ class LectureMaterialService
             filters: $filters,
             orderBy: 'order',
             sortDirection: 'asc',
-            paginate: $filters['paginate']
+            paginate: Arr::get($filters, 'paginate', true)
         ));
     }
 
@@ -45,7 +47,7 @@ class LectureMaterialService
     {
         switch ($formData['material_type']) {
             case 'text':
-                $newTextAttachment = $this->textAttachmentRepo->create(['content' => $formData['material']['content']]);
+                $newTextAttachment = $this->textAttachmentRepo->create(['content' => $formData['material_content']]);
                 $newLectureMaterial = $this->lectureMaterialRepo->create([
                     ...$formData,
                     'materialable_type' => TextAttachment::class,
@@ -53,7 +55,7 @@ class LectureMaterialService
                 ]);
                 break;
             case 'file':
-                $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
+                $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material_file']);
                 $newLectureMaterial = $this->lectureMaterialRepo->create([
                     ...$formData,
                     'materialable_type' => FileAttachment::class,
@@ -62,6 +64,42 @@ class LectureMaterialService
                 break;
         }
         return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($newLectureMaterial));
+    }
+
+    public function createBulk(array $formData)
+    {
+        DB::beginTransaction();
+
+        try {
+            foreach ($formData['materials'] as $material) {
+                switch ($material['material_type']) {
+                    case 'text':
+                        $newTextAttachment = $this->textAttachmentRepo->create(['content' => $material['material_content']]);
+                        $this->lectureMaterialRepo->create([
+                            'lecture_id' => $material['lecture_id'],
+                            'order' => $material['order'],
+                            'materialable_type' => TextAttachment::class,
+                            'materialable_id' => $newTextAttachment->id
+                        ]);
+                        break;
+                    case 'file':
+                        $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']);
+                        $this->lectureMaterialRepo->create([
+                            'lecture_id' => $material['lecture_id'],
+                            'order' => $material['order'],
+                            'materialable_type' => FileAttachment::class,
+                            'materialable_id' => $newFileAttachment->id
+                        ]);
+                        break;
+                }
+            }
+
+            DB::commit();
+            return ['message' => 'Lecture materials created successfully'];
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 
     public function updateById(string $id, array $formData)

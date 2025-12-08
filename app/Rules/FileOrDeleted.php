@@ -22,16 +22,16 @@ class FileOrDeleted implements ValidationRule
 
         if ($value instanceof UploadedFile && $value->isValid()) {
             if (!in_array($value->getMimeType(), ['image/jpeg', 'image/png'])) {
-                $fail("The $attribute must be a JPEG or PNG image.");
+                $fail("The $attribute must be a JPEG or PNG image.", null);
             }
 
             if ($value->getSize() > 5 * 1024 * 1024) { // 5MB
-                $fail("The $attribute must not be larger than 5MB.");
+                $fail("The $attribute must not be larger than 5MB.", null);
             }
 
             return;
         }
 
-        $fail("The $attribute must be a valid file or the string 'DELETED'.");
+        $fail("The $attribute must be a valid file or the string 'DELETED'.", null);
     }
 }
