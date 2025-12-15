@@ -66,41 +66,132 @@ class LectureMaterialService
         return new LectureMaterialResource($this->lectureMaterialRepo->getFresh($newLectureMaterial));
     }
 
-    public function createBulk(array $formData)
+    public function processBulk(array $formData)
     {
         DB::beginTransaction();
 
         try {
-            foreach ($formData['materials'] as $material) {
-                switch ($material['material_type']) {
-                    case 'text':
-                        $newTextAttachment = $this->textAttachmentRepo->create(['content' => $material['material_content']]);
-                        $this->lectureMaterialRepo->create([
-                            'lecture_id' => $material['lecture_id'],
-                            'order' => $material['order'],
-                            'materialable_type' => TextAttachment::class,
-                            'materialable_id' => $newTextAttachment->id
+            $results = [
+                'created' => 0,
+                'updated' => 0,
+                'deleted' => 0,
+            ];
+
+            // Handle NEW materials
+            if (!empty($formData['new'])) {
+                foreach ($formData['new'] as $material) {
+                    switch ($material['material_type']) {
+                        case 'text':
+                            $newTextAttachment = $this->textAttachmentRepo->create(['content' => $material['material_content']]);
+                            $this->lectureMaterialRepo->create([
+                                'lecture_id' => $material['lecture_id'],
+                                'order' => $material['order'],
+                                'materialable_type' => TextAttachment::class,
+                                'materialable_id' => $newTextAttachment->id
+                            ]);
+                            break;
+                        case 'file':
+                            $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']);
+                            $this->lectureMaterialRepo->create([
+                                'lecture_id' => $material['lecture_id'],
+                                'order' => $material['order'],
+                                'materialable_type' => FileAttachment::class,
+                                'materialable_id' => $newFileAttachment->id
+                            ]);
+                            break;
+                    }
+                    $results['created']++;
+                }
+            }
+
+            // Handle UPDATED materials
+            if (!empty($formData['updated'])) {
+                // Two-pass update to handle order swapping without unique constraint violations
+
+                // First pass: Set all orders to temporary negative values to free up the order numbers
+                foreach ($formData['updated'] as $index => $material) {
+                    if (isset($material['order'])) {
+                        $this->lectureMaterialRepo->updateById($material['id'], [
+                            'order' => - ($index + 1) // Use negative index to avoid conflicts
                         ]);
-                        break;
-                    case 'file':
-                        $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']);
-                        $this->lectureMaterialRepo->create([
-                            'lecture_id' => $material['lecture_id'],
-                            'order' => $material['order'],
-                            'materialable_type' => FileAttachment::class,
-                            'materialable_id' => $newFileAttachment->id
-                        ]);
-                        break;
+                    }
+                }
+
+                // Second pass: Update to final values (order + content/file if needed)
+                foreach ($formData['updated'] as $material) {
+                    $id = $material['id'];
+                    $lectureMaterial = $this->lectureMaterialRepo->findById($id);
+
+                    if (!$material['is_material_updated']) {
+                        // If material is unchanged, just update order if provided
+                        $updateData = [];
+                        if (isset($material['order'])) {
+                            $updateData['order'] = $material['order'];
+                        }
+                        if (!empty($updateData)) {
+                            $this->lectureMaterialRepo->updateById($id, $updateData);
+                        }
+                    } else {
+                        // Material content/file is being updated
+                        switch ($material['material_type']) {
+                            case 'text':
+                                // Update text content
+                                $this->textAttachmentRepo->updateById(
+                                    $lectureMaterial->materialable_id,
+                                    ['content' => $material['material']['content']]
+                                );
+                                $updateData = [];
+                                if (isset($material['order'])) {
+                                    $updateData['order'] = $material['order'];
+                                }
+                                if (!empty($updateData)) {
+                                    $this->lectureMaterialRepo->updateById($id, $updateData);
+                                }
+                                break;
+                            case 'file':
+                                // Delete old file and upload new
+                                $this->fileAttachmentRepo->deleteById($lectureMaterial->materialable_id);
+                                $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material']['file']);
+                                $updateData = [
+                                    'materialable_id' => $newFileAttachment->id,
+                                ];
+                                if (isset($material['order'])) {
+                                    $updateData['order'] = $material['order'];
+                                }
+                                $this->lectureMaterialRepo->updateById($id, $updateData);
+                                break;
+                        }
+                    }
+                    $results['updated']++;
+                }
+            }
+
+            // Handle DELETED materials
+            if (!empty($formData['deleted'])) {
+                foreach ($formData['deleted'] as $id) {
+                    $lectureMaterial = $this->lectureMaterialRepo->findById($id);
+                    // Delete the associated material (text or file)
+                    $this->lectureMaterialRepo->deleteMorph(
+                        morphType: $lectureMaterial->materialable_type,
+                        morphId: $lectureMaterial->materialable_id
+                    );
+                    // Delete the lecture material record
+                    $this->lectureMaterialRepo->deleteById($id);
+                    $results['deleted']++;
                 }
             }
 
             DB::commit();
-            return ['message' => 'Lecture materials created successfully'];
+            return [
+                'message' => 'Bulk operations completed successfully',
+                'results' => $results
+            ];
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
         }
     }
+
 
     public function updateById(string $id, array $formData)
     {

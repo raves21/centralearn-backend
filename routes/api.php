@@ -81,7 +81,7 @@ Route::middleware('auth')->group(function () {
     Route::post('course-classes/{course_class}', [CourseClassController::class, 'update']);
 
     Route::apiResource('lecture-materials', LectureMaterialController::class)->except(['update', 'show']);
-    Route::post('lecture-materials/create-bulk', [LectureMaterialController::class, 'storeBulk']);
+    Route::post('lecture-materials/process-bulk', [LectureMaterialController::class, 'processBulk']);
     Route::post('lecture-materials/{lecture_material}', [LectureMaterialController::class, 'update']);
 
     Route::apiResource('assessment-materials', AssesementMaterialController::class)->except(['update', 'show']);

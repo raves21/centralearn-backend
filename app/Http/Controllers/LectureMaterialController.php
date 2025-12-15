@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\LectureMaterial\Index;
 use App\Http\Requests\LectureMaterial\Store;
-use App\Http\Requests\LectureMaterial\StoreBulk;
+use App\Http\Requests\LectureMaterial\ProcessBulk;
 use App\Http\Requests\LectureMaterial\Update;
 use App\Http\Services\LectureMaterialService;
 use Illuminate\Http\Request;
@@ -31,9 +31,9 @@ class LectureMaterialController extends Controller
         return $this->lectureMaterialService->create($request->validated());
     }
 
-    public function storeBulk(StoreBulk $request)
+    public function processBulk(ProcessBulk $request)
     {
-        return $this->lectureMaterialService->createBulk($request->validated());
+        return $this->lectureMaterialService->processBulk($request->validated());
     }
 
     /**
