@@ -39,16 +39,4 @@ class FileAttachmentRepository extends BaseRepository
         return $newFile;
     }
 
-    public function getRandomDefaultImageUrl()
-    {
-        $files = Storage::disk('public')->files('default-images');
-        $fileUrls = array_map(fn($file) => asset(Storage::url($file)), $files);
-        return Arr::random($fileUrls);
-    }
-
-    public function getDefaultImagesUrls()
-    {
-        $files = Storage::disk('public')->files('default-images');
-        return array_map(fn($file) => asset(Storage::url($file)), $files);
-    }
 }

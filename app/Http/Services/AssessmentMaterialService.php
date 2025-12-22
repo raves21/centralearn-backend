@@ -17,21 +17,15 @@ use Illuminate\Support\Arr;
 class AssessmentMaterialService
 {
     private $assessmentMaterialRepo;
-    private $textAttachmentRepo;
-    private $fileAttachmentRepo;
     private $optionBasedQuestionRepo;
     private $textBasedQuestionRepo;
 
     public function __construct(
         AssessmentMaterialRepository $assessmentMaterialRepo,
-        TextAttachmentRepository $textAttachmentRepo,
-        FileAttachmentRepository $fileAttachmentRepo,
         OptionBasedQuestionRepository $optionBasedQuestionRepo,
         TextBasedQuestionRepository $textBasedQuestionRepo
     ) {
         $this->assessmentMaterialRepo = $assessmentMaterialRepo;
-        $this->textAttachmentRepo = $textAttachmentRepo;
-        $this->fileAttachmentRepo = $fileAttachmentRepo;
         $this->optionBasedQuestionRepo = $optionBasedQuestionRepo;
         $this->textBasedQuestionRepo = $textBasedQuestionRepo;
     }
@@ -56,24 +50,6 @@ class AssessmentMaterialService
         $materialType = $formData['material_type'];
 
         switch ($materialType) {
-            case 'text':
-                $newTextAttachment = $this->textAttachmentRepo->create($formData['material']['content']);
-                $newAsmtMaterial = $this->assessmentMaterialRepo->create([
-                    ...$formData,
-                    'materialable_id' => $newTextAttachment->id,
-                    'materialable_type' => TextAttachment::class
-                ]);
-                break;
-
-            case 'file':
-                $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
-                $newAsmtMaterial = $this->assessmentMaterialRepo->create([
-                    ...$formData,
-                    'materialable_id' => $newFileAttachment->id,
-                    'materialable_type' => FileAttachment::class
-                ]);
-                break;
-
             case 'option_based_question':
                 $newOptionBasedQ = $this->optionBasedQuestionRepo->create($formData['material']['option_based_question']);
                 $newAsmtMaterial = $this->assessmentMaterialRepo->create([
@@ -104,8 +80,6 @@ class AssessmentMaterialService
         }
 
         $prevMaterialType = match ($asmtMaterial->materialable_type) {
-            TextAttachment::class => 'text',
-            FileAttachment::class => 'file',
             OptionBasedQuestion::class => 'option_based_question',
             TextBasedQuestion::class => 'text_based_question'
         };
@@ -119,24 +93,6 @@ class AssessmentMaterialService
             );
 
             switch ($formData['material_type']) {
-                case 'text':
-                    $newTextAttachment = $this->textAttachmentRepo->create($formData['material']['content']);
-                    $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
-                        ...$formData,
-                        'materialable_id' => $newTextAttachment->id,
-                        'materialable_type' => TextAttachment::class
-                    ]);
-                    break;
-
-                case 'file':
-                    $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
-                    $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
-                        ...$formData,
-                        'materialable_id' => $newFileAttachment->id,
-                        'materialable_type' => FileAttachment::class
-                    ]);
-                    break;
-
                 case 'option_based_question':
                     $newOptionBasedQ = $this->optionBasedQuestionRepo->create($formData['material']['option_based_question']);
                     $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
@@ -158,23 +114,6 @@ class AssessmentMaterialService
         } else {
             //if material type is unchanged
             switch ($formData['material_type']) {
-                case 'text':
-                    $this->textAttachmentRepo->updateById($asmtMaterial->materialable_id, $formData['material']['content']);
-                    $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, $formData);
-                    break;
-
-                case 'file':
-                    //delete previous file
-                    $this->fileAttachmentRepo->deleteById($asmtMaterial->materialable_id);
-                    //upload new
-                    $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($formData['material']['file']);
-                    $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
-                        ...$formData,
-                        'materialable_id' => $newFileAttachment->id,
-                        'materialable_type' => FileAttachment::class
-                    ]);
-                    break;
-
                 case 'option_based_question':
                     $this->optionBasedQuestionRepo->updateById($asmtMaterial->materialable_id, $formData['material']['option_based_question']);
                     $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, $formData);
