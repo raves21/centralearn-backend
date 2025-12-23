@@ -3,26 +3,21 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\CourseClassRepository;
-use App\Http\Repositories\CourseRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Resources\CourseClassResource;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Log;
 
 class CourseClassService
 {
     private $courseClassRepo;
     private $fileAttachmentRepo;
-    private $courseRepo;
 
     public function __construct(
         CourseClassRepository $courseClassRepo,
         FileAttachmentRepository $fileAttachmentRepo,
-        CourseRepository $courseRepo
     ) {
         $this->courseClassRepo = $courseClassRepo;
         $this->fileAttachmentRepo = $fileAttachmentRepo;
-        $this->courseRepo = $courseRepo;
     }
 
     public function getAll(array $filters)
@@ -41,7 +36,6 @@ class CourseClassService
 
     public function create(array $formData)
     {
-        Log::info($formData);
         if (isset($formData['image'])) {
             $newImage = $this->fileAttachmentRepo->uploadAndCreate($formData['image']);
             $newCourseClass = $this->courseClassRepo->create(
@@ -50,7 +44,7 @@ class CourseClassService
             );
         } else {
             $newCourseClass = $this->courseClassRepo->create(
-                [...$formData, 'image_url' => $this->fileAttachmentRepo->getRandomDefaultImageUrl()],
+                [...$formData, 'image_url' => FileAttachmentService::getRandomDefaultImageUrl()],
                 relationships: ['course', 'semester', 'section']
             );
         }
@@ -64,7 +58,7 @@ class CourseClassService
 
         if ($courseClass->image_url) {
             if ($payloadImage) {
-                $defaultImageUrls = $this->fileAttachmentRepo->getDefaultImagesUrls();
+                $defaultImageUrls = FileAttachmentService::getDefaultImagesUrls();
                 // Delete the old image if its not one of the default image urls
                 if (!in_array($courseClass->image_url, $defaultImageUrls)) {
                     $this->fileAttachmentRepo->deleteByFilter(['url' => $courseClass->image_url]);
@@ -72,7 +66,7 @@ class CourseClassService
 
                 if ($payloadImage === "__DELETED__") {
                     //as a default, set image_url to a random default image
-                    $formData['image_url'] = $this->fileAttachmentRepo->getRandomDefaultImageUrl();
+                    $formData['image_url'] = FileAttachmentService::getRandomDefaultImageUrl();
                 } else {
                     // Upload new image and update image_url
                     $newImage = $this->fileAttachmentRepo->uploadAndCreate($payloadImage);
