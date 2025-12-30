@@ -15,7 +15,7 @@ class Update extends FormRequest
 
     public function rules(): array
     {
-        $chapterId = ChapterContent::find($this->route('chapter'))->chapter_id;
+        $chapterId = ChapterContent::find($this->route('content'))->chapter_id;
         $rules = [
             // General info
             'name' => ['nullable', 'string'],
@@ -26,7 +26,6 @@ class Update extends FormRequest
                 'min:1',
                 Rule::unique('chapter_contents')
                     ->where(fn($q) => $q->where('chapter_id', $chapterId))
-                    ->ignore($this->route('chapter_content'))
             ],
             'content_type' => ['nullable', 'in:lecture,assessment'],
             'content' => ['required_if:content_type,assessment'],
@@ -37,7 +36,7 @@ class Update extends FormRequest
 
             // Accessibility
             'is_open' => ['nullable', 'boolean'],
-            'opens_at' => ['nullable', 'date', Rule::afterOrEqual(today())],
+            'opens_at' => ['nullable', 'date', 'after_or_equal:today'],
             'closes_at' => ['nullable', 'date', 'after:opens_at'],
         ];
 

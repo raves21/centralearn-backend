@@ -10,4 +10,9 @@ class ChapterRepository extends BaseRepository
     {
         parent::__construct($chapter);
     }
+
+    public function getContentCount(Chapter $chapter)
+    {
+        return $chapter->contents()->count();
+    }
 }

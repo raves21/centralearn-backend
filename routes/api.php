@@ -51,8 +51,6 @@ Route::middleware('auth')->group(function () {
 
     Route::apiResources([
         'semesters' => SemesterController::class,
-        'chapters' => ChapterController::class,
-        'contents' => ChapterContentController::class,
     ]);
 
 
@@ -79,6 +77,13 @@ Route::middleware('auth')->group(function () {
 
     Route::apiResource('course-classes', CourseClassController::class)->except('update');
     Route::post('course-classes/{course_class}', [CourseClassController::class, 'update']);
+
+    Route::apiResource('chapters', ChapterController::class)->except('update');
+    Route::get('chapters/{chapter}/content-count', [ChapterController::class, 'getContentCount']);
+    Route::post('chapters/{chapter}', [ChapterController::class, 'update']);
+
+    Route::apiResource('contents', ChapterContentController::class)->except('update');
+    Route::post('contents/{content}', [ChapterContentController::class, 'update']);
 
     Route::apiResource('lecture-materials', LectureMaterialController::class)->except(['update', 'show']);
     Route::post('lecture-materials/process-bulk', [LectureMaterialController::class, 'processBulk']);

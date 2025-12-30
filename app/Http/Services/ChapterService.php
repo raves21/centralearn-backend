@@ -48,4 +48,9 @@ class ChapterService
     {
         return $this->chapterRepo->deleteById($id);
     }
+
+    public function getContentCount(string $id)
+    {
+        return $this->chapterRepo->getContentCount($this->chapterRepo->findById($id));
+    }
 }

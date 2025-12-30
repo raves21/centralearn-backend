@@ -49,4 +49,9 @@ class ChapterController extends Controller
     {
         return $this->chapterService->deleteById($chapterId);
     }
+
+    public function getContentCount(string $chapterId)
+    {
+        return $this->chapterService->getContentCount($chapterId);
+    }
 }

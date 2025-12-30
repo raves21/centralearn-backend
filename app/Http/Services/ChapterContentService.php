@@ -32,7 +32,7 @@ class ChapterContentService
             filters: $filters,
             orderBy: 'order',
             sortDirection: 'asc',
-            paginate: $filters['paginate']
+            paginate: Arr::get($filters, 'paginate', true)
         ));
     }
 
