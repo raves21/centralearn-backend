@@ -31,7 +31,7 @@ class Update extends FormRequest
             'order' => [
                 'nullable',
                 'integer',
-                Rule::unique('course_classes')
+                Rule::unique('chapters')
                     ->where(fn($q) => $q->where('course_class_id', $courseClassId))
                     ->ignore($this->route('chapter'))
             ],

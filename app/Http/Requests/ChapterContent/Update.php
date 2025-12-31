@@ -26,6 +26,7 @@ class Update extends FormRequest
                 'min:1',
                 Rule::unique('chapter_contents')
                     ->where(fn($q) => $q->where('chapter_id', $chapterId))
+                    ->ignore($this->route('content'))
             ],
             'content_type' => ['nullable', 'in:lecture,assessment'],
             'content' => ['required_if:content_type,assessment'],
