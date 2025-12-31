@@ -32,7 +32,7 @@ class Store extends FormRequest
                 'min:1',
                 Rule::unique('chapters')->where(fn($q) => $q->where('course_class_id', $this->course_class_id))
             ],
-            'published_at' => ['required', 'date']
+            'published_at' => ['nullable', 'date']
         ];
     }
 }

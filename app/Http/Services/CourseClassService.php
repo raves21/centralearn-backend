@@ -95,4 +95,9 @@ class CourseClassService
         }
         return $this->courseClassRepo->deleteById($id);
     }
+
+    public function getChapterCount(string $id)
+    {
+        return $this->courseClassRepo->getChapterCount($this->courseClassRepo->findById($id));
+    }
 }

@@ -13,11 +13,9 @@ class ChapterContent extends Model
     protected $fillable = [
         'chapter_id',
         'name',
-        'is_published',
         'publishes_at',
         'contentable_id',
         'contentable_type',
-        'is_open',
         'opens_at',
         'closes_at',
         'description',

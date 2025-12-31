@@ -4,6 +4,7 @@ namespace App\Http\Resources;
 
 use App\Models\Assessment;
 use App\Models\Lecture;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,11 +21,11 @@ class ChapterContentResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'isOpen' => (bool)$this->is_open,
+            'isOpen' => $this->opens_at ? Carbon::parse($this->opens_at)->lessThanOrEqualTo(now()) : false,
             'opensAt' => $this->opens_at,
             'closesAt' => $this->closes_at,
             'chapter' => $this->whenLoaded('chapter', fn() => new ChapterResource($this->chapter)),
-            'isPublished' => (bool)$this->is_published,
+            'isPublished' => $this->publishes_at ? Carbon::parse($this->publishes_at)->lessThanOrEqualTo(now()) : false,
             'publishesAt' => $this->publishes_at,
             'order' => $this->order,
             'contentId' => $this->contentable_id,

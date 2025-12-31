@@ -38,11 +38,9 @@ class Store extends FormRequest
             'content' => ['required_if:content_type,assessment'],
 
             //visibility
-            'is_published' => ['required', 'boolean'],
             'publishes_at' => ['nullable', 'date'],
 
             //accessibility
-            'is_open' => ['required', 'boolean'],
             'opens_at' => ['nullable', 'date', Rule::date()->afterOrEqual(today())],
             'closes_at' => ['nullable', 'date', 'after:opens_at'],
         ];
@@ -62,31 +60,5 @@ class Store extends FormRequest
         }
 
         return $rules;
-    }
-
-    public function withValidator($validator)
-    {
-        $validator->after(function ($validator) {
-            $isPublished = $this->boolean('is_published');
-            $publishesAt = $this->input('publishes_at');
-            $isOpen = $this->boolean('is_open');
-            $opensAt = $this->input('opens_at');
-            $closesAt = $this->input('closes_at');
-
-            //publishes_at must only be set if not published
-            if ($isPublished && $publishesAt !== null) {
-                $validator->errors()->add('publishes_at', 'publishes_at can only be set if the content is not yet published.');
-            }
-
-            //opens_at must only be set if is_open is false
-            if ($isOpen && $opensAt !== null) {
-                $validator->errors()->add('opens_at', 'opens_at can only be set if the content is not already open.');
-            }
-
-            //closes_at must only be set if is_open is true or opens_at has value
-            if ((!$isOpen || $opensAt === null) && $closesAt !== null) {
-                $validator->errors()->add('closes_at', 'closes_at must only be set if content is already open, or if opens_at has value.');
-            }
-        });
     }
 }

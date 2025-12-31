@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('text_attachments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->text('content');
+            $table->text('content')->nullable();
             $table->timestamps();
         });
     }

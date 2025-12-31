@@ -202,4 +202,9 @@ class CourseClassRepository extends BaseRepository
 
         if (!$instructorInClassDepartment) abort(409, 'Instructor must belong in the class\'s departments.');
     }
+
+    public function getChapterCount(CourseClass $courseClass)
+    {
+        return $courseClass->chapters()->count();
+    }
 }

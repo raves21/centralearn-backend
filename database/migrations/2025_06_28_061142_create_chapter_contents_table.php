@@ -16,9 +16,7 @@ return new class extends Migration
             $table->foreignUuid('chapter_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->boolean('is_published');
             $table->timestamp('publishes_at')->nullable();
-            $table->boolean('is_open');
             $table->timestamp('opens_at')->nullable();
             $table->timestamp('closes_at')->nullable();
             $table->string('contentable_type');

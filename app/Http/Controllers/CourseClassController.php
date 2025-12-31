@@ -49,4 +49,9 @@ class CourseClassController extends Controller
     {
         return $this->courseClassService->deleteById($id);
     }
+
+    public function getChapterCount(string $id)
+    {
+        return $this->courseClassService->getChapterCount($id);
+    }
 }
