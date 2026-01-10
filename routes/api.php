@@ -81,9 +81,11 @@ Route::middleware('auth')->group(function () {
 
     Route::apiResource('chapters', ChapterController::class)->except('update');
     Route::get('chapters/{chapter}/content-count', [ChapterController::class, 'getContentCount']);
+    Route::post('chapters/reorder-bulk', [ChapterController::class, 'reorderBulk']);
     Route::post('chapters/{chapter}', [ChapterController::class, 'update']);
 
     Route::apiResource('contents', ChapterContentController::class)->except('update');
+    Route::post('contents/reorder-bulk', [ChapterContentController::class, 'reorderBulk']);
     Route::post('contents/{content}', [ChapterContentController::class, 'update']);
 
     Route::apiResource('lecture-materials', LectureMaterialController::class)->except(['update', 'show']);

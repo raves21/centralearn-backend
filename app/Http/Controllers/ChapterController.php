@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Chapter\Index;
+use App\Http\Requests\Chapter\ReorderBulk;
 use App\Http\Requests\Chapter\Store;
 use App\Http\Requests\Chapter\Update;
 use App\Http\Services\ChapterService;
@@ -53,5 +54,10 @@ class ChapterController extends Controller
     public function getContentCount(string $chapterId)
     {
         return $this->chapterService->getContentCount($chapterId);
+    }
+
+    public function reorderBulk(ReorderBulk $request)
+    {
+        return $this->chapterService->reorderBulk($request->validated());
     }
 }

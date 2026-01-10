@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChapterContent\ReorderBulk;
 use App\Http\Requests\ChapterContent\Index;
 use App\Http\Requests\ChapterContent\Store;
 use App\Http\Requests\ChapterContent\Update;
@@ -47,5 +48,10 @@ class ChapterContentController extends Controller
     public function destroy(string $chapterContentId)
     {
         return $this->chapterContentService->deleteById($chapterContentId);
+    }
+
+    public function reorderBulk(ReorderBulk $request)
+    {
+        return $this->chapterContentService->reorderBulk($request->validated());
     }
 }

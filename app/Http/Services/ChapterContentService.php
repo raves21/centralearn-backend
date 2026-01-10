@@ -9,6 +9,7 @@ use App\Http\Resources\ChapterContentResource;
 use App\Models\Assessment;
 use App\Models\Lecture;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
 class ChapterContentService
 {
@@ -90,5 +91,25 @@ class ChapterContentService
             //todo: and orphaned textattachments and fileattachments of question_option
         }
         $this->chapterContentRepo->deleteById($id);
+    }
+
+    public function reorderBulk(array $formData)
+    {
+        return DB::transaction(function () use ($formData) {
+            // First pass: set to temporary negative order to avoid unique constraint violations
+            foreach ($formData['contents'] as $content) {
+                // Use a negative value derived from the new order to ensure temporary uniqueness
+                // assuming new_order is typically positive.
+                $tempOrder = -1 * $content['new_order'];
+                $this->chapterContentRepo->updateById($content['id'], ['order' => $tempOrder]);
+            }
+
+            // Second pass: set to final correct order
+            foreach ($formData['contents'] as $content) {
+                $this->chapterContentRepo->updateById($content['id'], ['order' => $content['new_order']]);
+            }
+
+            return ['message' => 'reorder bulk success.'];
+        });
     }
 }

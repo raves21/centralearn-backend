@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\ChapterRepository;
 use App\Http\Resources\ChapterResource;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Arr;
 
 class ChapterService
@@ -52,5 +53,25 @@ class ChapterService
     public function getContentCount(string $id)
     {
         return $this->chapterRepo->getContentCount($this->chapterRepo->findById($id));
+    }
+
+    public function reorderBulk(array $formData)
+    {
+        return DB::transaction(function () use ($formData) {
+            // First pass: set to temporary negative order to avoid unique constraint violations
+            foreach ($formData['chapters'] as $chapter) {
+                // Use a negative value derived from the new order to ensure temporary uniqueness
+                // assuming new_order is typically positive.
+                $tempOrder = -1 * $chapter['new_order'];
+                $this->chapterRepo->updateById($chapter['id'], ['order' => $tempOrder]);
+            }
+
+            // Second pass: set to final correct order
+            foreach ($formData['chapters'] as $chapter) {
+                $this->chapterRepo->updateById($chapter['id'], ['order' => $chapter['new_order']]);
+            }
+
+            return ['message' => 'reorder bulk success.'];
+        });
     }
 }
