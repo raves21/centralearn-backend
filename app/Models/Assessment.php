@@ -14,7 +14,7 @@ class Assessment extends Model
         'opens_at',
         'closes_at',
         'time_limit',
-        'max_score',
+        'max_achievable_score',
         'is_answers_viewable_after_submit',
         'is_score_viewable_after_submit',
         'is_multi_attempts',

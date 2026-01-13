@@ -17,10 +17,10 @@ class StudentSeeder extends Seeder
     public function run(): void
     {
         //programs
-        $civilEng = Program::find('code', 'CE');
-        $comSci = Program::find('code', 'CS');
-        $businessAd = Program::find('code', 'BA');
-        $mma = Program::find('code', 'MMA');
+        $civilEng = Program::where('code', 'CE')->first();
+        $comSci = Program::where('code', 'CS')->first();
+        $businessAd = Program::where('code', 'BA')->first();
+        $mma = Program::where('code', 'MMA')->first();
 
         //4 students
         $student1 = User::factory()->create([

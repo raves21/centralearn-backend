@@ -16,11 +16,8 @@ class AssessmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'isOpen' => $this->is_open,
-            'opensAt' => $this->opens_at,
-            'closesAt' => $this->closes_at,
             'timeLimit' => $this->time_limit,
-            'maxScore' => $this->max_score,
+            'maxAchievableScore' => $this->max_achievable_score,
             'isAnswersViewableAfterSubmit' => $this->is_answers_viewable_after_submit,
             'isScoreViewableAfterSubmit' => $this->is_score_viewable_after_submit,
             'isMultiAttempts' => $this->is_multi_attempts,

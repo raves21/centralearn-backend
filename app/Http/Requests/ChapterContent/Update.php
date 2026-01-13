@@ -20,14 +20,6 @@ class Update extends FormRequest
             // General info
             'name' => ['nullable', 'string'],
             'description' => ['nullable', 'string'],
-            'order' => [
-                'nullable',
-                'integer',
-                'min:1',
-                Rule::unique('chapter_contents')
-                    ->where(fn($q) => $q->where('chapter_id', $chapterId))
-                    ->ignore($this->route('content'))
-            ],
             'content_type' => ['nullable', 'in:lecture,assessment'],
             'content' => ['required_if:content_type,assessment'],
 
@@ -43,13 +35,12 @@ class Update extends FormRequest
         if ($this->input('content_type') === 'assessment') {
             $rules = [
                 ...$rules,
-                'content.time_limit' => ['nullable', 'integer'],
-                'content.max_score' => ['nullable', 'numeric'],
+                'content.time_limit' => ['nullable', 'integer', 'min:1'],
                 'content.is_answers_viewable_after_submit' => ['nullable', 'boolean'],
                 'content.is_score_viewable_after_submit' => ['nullable', 'boolean'],
-                'content.is_multi_attempts' => ['nullable', 'boolean'],
-                'content.max_attempts' => ['nullable', 'integer'],
-                'content.multi_attempt_grading_type' => ['nullable', 'in:avg_score,highest_score'],
+                'content.is_multi_attempts' => ['required', 'boolean'],
+                'content.max_attempts' => ['nullable', 'required_if:content.is_multi_attempts,true', 'integer', 'min:2'],
+                'content.multi_attempt_grading_type' => ['nullable', 'required_if:content.is_multi_attempts,true', 'in:avg_score,highest_score'],
             ];
         }
 

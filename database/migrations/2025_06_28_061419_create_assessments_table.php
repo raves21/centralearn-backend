@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('assessments', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->integer('time_limit')->nullable();
-            $table->float('max_score');
+            $table->float('max_achievable_score')->nullable();
             $table->boolean('is_answers_viewable_after_submit');
             $table->boolean('is_score_viewable_after_submit');
             $table->boolean('is_multi_attempts')->boolean();

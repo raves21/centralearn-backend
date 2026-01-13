@@ -17,10 +17,10 @@ class InstructorSeeder extends Seeder
     public function run(): void
     {
         //departments
-        $cea = Department::find('code', 'CEA');
-        $ccis = Department::find('code', 'CCIS');
-        $cb = Department::find('code', 'CB');
-        $cas = Department::find('code', 'CAS');
+        $cea = Department::where('code', 'CEA')->first();
+        $ccis = Department::where('code', 'CCIS')->first();
+        $cb = Department::where('code', 'CB')->first();
+        $cas = Department::where('code', 'CAS')->first();
 
         //4 instructors
         $instructor_user_1 = User::factory()->create([

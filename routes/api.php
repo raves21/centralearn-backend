@@ -13,6 +13,7 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AssesementMaterialController;
+use App\Http\Controllers\AssessmentController;
 use App\Http\Controllers\QuestionOptionController;
 use App\Http\Controllers\SectionController;
 use Illuminate\Support\Facades\Route;
@@ -50,9 +51,8 @@ Route::middleware('auth')->group(function () {
     });
 
     Route::apiResources([
-        'semesters' => SemesterController::class,
+        'semesters' => SemesterController::class
     ]);
-
 
     Route::apiResource('admins', AdminController::class)->except('update');
     Route::post('admins/{admin}', [AdminController::class, 'update']);
@@ -87,6 +87,8 @@ Route::middleware('auth')->group(function () {
     Route::apiResource('contents', ChapterContentController::class)->except('update');
     Route::post('contents/reorder-bulk', [ChapterContentController::class, 'reorderBulk']);
     Route::post('contents/{content}', [ChapterContentController::class, 'update']);
+
+    Route::apiResource('assessments', AssessmentController::class)->only('update');
 
     Route::apiResource('lecture-materials', LectureMaterialController::class)->except(['update', 'show']);
     Route::post('lecture-materials/process-bulk', [LectureMaterialController::class, 'processBulk']);

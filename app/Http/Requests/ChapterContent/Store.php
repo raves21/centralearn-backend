@@ -49,12 +49,11 @@ class Store extends FormRequest
         if ($this->input('content_type') === 'assessment') {
             $rules = [
                 ...$rules,
-                'content.time_limit' => ['nullable', 'integer'],
-                'content.max_score' => ['nullable', 'numeric'],
+                'content.time_limit' => ['required', 'integer', 'min:1'],
                 'content.is_answers_viewable_after_submit' => ['required', 'boolean'],
                 'content.is_score_viewable_after_submit' => ['required', 'boolean'],
-                'content.is_multi_attempts' => ['nullable', 'boolean'],
-                'content.max_attempts' => ['nullable', 'required_if:content.is_multi_attempts,true', 'integer'],
+                'content.is_multi_attempts' => ['required', 'boolean'],
+                'content.max_attempts' => ['nullable', 'required_if:content.is_multi_attempts,true', 'integer', 'min:2'],
                 'content.multi_attempt_grading_type' => ['nullable', 'required_if:content.is_multi_attempts,true', 'in:avg_score,highest_score'],
             ];
         }
