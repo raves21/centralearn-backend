@@ -25,7 +25,7 @@ class Store extends FormRequest
         $rules = [
             // general info
             'assessment_id'    => ['required', 'exists:assessments,id'],
-            'material_type' => ['required', 'in:option_based_question,text_based_question,text,file'],
+            'material_type' => ['required', 'in:option_based_question,essay_question,text,file'],
             'order'         => [
                 'required',
                 'integer',
@@ -73,27 +73,15 @@ class Store extends FormRequest
                 ];
                 break;
 
-            case 'text_based_question':
+            case 'essay_question':
                 $rules = [
                     ...$rules,
-                    'material.text_based_question' => ['required'],
-                    'material.text_based_question.question_text' => [
+                    'material.essay_question' => ['required'],
+                    'material.essay_question.question_text' => [
                         'required',
                         'string'
                     ],
-                    'material.text_based_question.type' => [
-                        'required',
-                        'in:essay,identification'
-                    ],
-                    'material.text_based_question.identification_answer' => [
-                        'required_if:material.text_based_question.type,identification',
-                        'string'
-                    ],
-                    'material.text_based_question.is_identification_answer_case_sensitive' => [
-                        'required_if:material.text_based_question.type,identification',
-                        'boolean'
-                    ],
-                    'material.text_based_question.point_worth' => [
+                    'material.essay_question.point_worth' => [
                         'required',
                         'integer',
                         'min:0'

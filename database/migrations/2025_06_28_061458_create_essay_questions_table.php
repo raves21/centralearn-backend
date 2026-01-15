@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('text_based_questions', function (Blueprint $table) {
+        Schema::create('essay_questions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('question_text');
-            $table->enum('type', ['essay', 'identification'])->default('essay');
-            $table->string('identification_answer')->nullable();
-            $table->boolean('is_identification_answer_case_sensitive')->nullable();
             $table->integer('point_worth');
+            $table->integer('min_character_count')->nullable();
+            $table->integer('max_character_count')->nullable();
+            $table->integer('min_word_count')->nullable();
+            $table->integer('max_word_count')->nullable();
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('text_based_questions');
+        Schema::dropIfExists('essay_questions');
     }
 };

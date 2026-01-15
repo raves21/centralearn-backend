@@ -3,31 +3,26 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\AssessmentMaterialRepository;
-use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Repositories\OptionBasedQuestionRepository;
-use App\Http\Repositories\TextAttachmentRepository;
-use App\Http\Repositories\TextBasedQuestionRepository;
+use App\Http\Repositories\EssayQuestionRepository;
 use App\Http\Resources\AssessmentMaterialResource;
-use App\Models\FileAttachment;
+use App\Models\EssayQuestion;
 use App\Models\OptionBasedQuestion;
-use App\Models\TextAttachment;
-use App\Models\TextBasedQuestion;
-use Illuminate\Support\Arr;
 
 class AssessmentMaterialService
 {
     private $assessmentMaterialRepo;
     private $optionBasedQuestionRepo;
-    private $textBasedQuestionRepo;
+    private $essayQuestionRepo;
 
     public function __construct(
         AssessmentMaterialRepository $assessmentMaterialRepo,
         OptionBasedQuestionRepository $optionBasedQuestionRepo,
-        TextBasedQuestionRepository $textBasedQuestionRepo
+        EssayQuestionRepository $essayQuestionRepo
     ) {
         $this->assessmentMaterialRepo = $assessmentMaterialRepo;
         $this->optionBasedQuestionRepo = $optionBasedQuestionRepo;
-        $this->textBasedQuestionRepo = $textBasedQuestionRepo;
+        $this->essayQuestionRepo = $essayQuestionRepo;
     }
 
     public function getAll(array $filters)
@@ -59,12 +54,12 @@ class AssessmentMaterialService
                 ]);
                 break;
 
-            case 'text_based_question':
-                $newTextBasedQ = $this->textBasedQuestionRepo->create($formData['material']['text_based_question']);
+            case 'essay_question':
+                $newEssayQ = $this->essayQuestionRepo->create($formData['material']['essay_question']);
                 $newAsmtMaterial = $this->assessmentMaterialRepo->create([
                     ...$formData,
-                    'materialable_id' => $newTextBasedQ->id,
-                    'materialable_type' => TextBasedQuestion::class
+                    'materialable_id' => $newEssayQ->id,
+                    'materialable_type' => EssayQuestion::class
                 ]);
                 break;
         }
@@ -81,7 +76,7 @@ class AssessmentMaterialService
 
         $prevMaterialType = match ($asmtMaterial->materialable_type) {
             OptionBasedQuestion::class => 'option_based_question',
-            TextBasedQuestion::class => 'text_based_question'
+            EssayQuestion::class => 'essay_question'
         };
 
         if ($prevMaterialType !== $formData['material_type']) {
@@ -102,12 +97,12 @@ class AssessmentMaterialService
                     ]);
                     break;
 
-                case 'text_based_question':
-                    $newTextBasedQ = $this->textBasedQuestionRepo->create($formData['material']['text_based_question']);
+                case 'essay_question':
+                    $newEssayQ = $this->essayQuestionRepo->create($formData['material']['essay_question']);
                     $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
                         ...$formData,
-                        'materialable_id' => $newTextBasedQ->id,
-                        'materialable_type' => TextBasedQuestion::class
+                        'materialable_id' => $newEssayQ->id,
+                        'materialable_type' => EssayQuestion::class
                     ]);
                     break;
             }
@@ -119,8 +114,8 @@ class AssessmentMaterialService
                     $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, $formData);
                     break;
 
-                case 'text_based_question':
-                    $this->textBasedQuestionRepo->updateById($asmtMaterial->materialable_id, $formData['material']['text_based_question']);
+                case 'essay_question':
+                    $this->essayQuestionRepo->updateById($asmtMaterial->materialable_id, $formData['material']['essay_question']);
                     $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, $formData);
                     break;
             }

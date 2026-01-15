@@ -27,7 +27,7 @@ class Update extends FormRequest
         $rules = [
             // general info
             'is_material_updated' => ['required', 'boolean'],
-            'material_type' => ['nullable', 'in:option_based_question,text_based_question,text,file'],
+            'material_type' => ['nullable', 'in:option_based_question,essay_question,text,file'],
             'order'         => [
                 'nullable',
                 'integer',
@@ -81,27 +81,15 @@ class Update extends FormRequest
                 ];
                 break;
 
-            case 'text_based_question':
+            case 'essay_question':
                 $rules = [
                     ...$rules,
-                    'material.text_based_question' => ['nullable'],
-                    'material.text_based_question.question_text' => [
+                    'material.essay_question' => ['nullable'],
+                    'material.essay_question.question_text' => [
                         'nullable',
                         'string'
                     ],
-                    'material.text_based_question.type' => [
-                        'nullable',
-                        'in:essay,identification'
-                    ],
-                    'material.text_based_question.identification_answer' => [
-                        'required_if:material.text_based_question.type,identification',
-                        'string'
-                    ],
-                    'material.text_based_question.is_identification_answer_case_sensitive' => [
-                        'required_if:material.text_based_question.type,identification',
-                        'boolean'
-                    ],
-                    'material.text_based_question.point_worth' => [
+                    'material.essay_question.point_worth' => [
                         'nullable',
                         'integer',
                         'min:0'
