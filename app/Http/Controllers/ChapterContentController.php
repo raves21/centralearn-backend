@@ -54,4 +54,9 @@ class ChapterContentController extends Controller
     {
         return $this->chapterContentService->reorderBulk($request->validated());
     }
+
+    public function updateAssessmentMaxAchievableScore(string $chapterContentId)
+    {
+        return $this->chapterContentService->updateAssessmentMaxAchievableScore($chapterContentId);
+    }
 }

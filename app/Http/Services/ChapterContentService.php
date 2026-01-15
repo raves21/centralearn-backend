@@ -112,4 +112,19 @@ class ChapterContentService
             return ['message' => 'reorder bulk success.'];
         });
     }
+
+    public function updateAssessmentMaxAchievableScore(string $id)
+    {
+        $chapterContent = $this->chapterContentRepo->findById($id);
+
+        if ($chapterContent->contentable_type !== Assessment::class) {
+            abort(400, 'Chaptercontent given is not an assessment.');
+        }
+
+        $this->assessmentRepo->updateById($chapterContent->contentable_id, [
+            'max_achievable_score' => $chapterContent->contentable->max_achievable_score
+        ]);
+
+        return ['message' => 'update assessment max achievable score success.'];
+    }
 }
