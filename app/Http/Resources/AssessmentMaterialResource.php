@@ -3,9 +3,9 @@
 namespace App\Http\Resources;
 
 use App\Models\FileAttachment;
-use App\Models\OptionBasedQuestion;
 use App\Models\TextAttachment;
-use App\Models\EssayQuestion;
+use App\Models\EssayItem;
+use App\Models\OptionBasedItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,10 +31,10 @@ class AssessmentMaterialResource extends JsonResource
                         return new TextAttachmentResource($material);
                     case FileAttachment::class:
                         return new FileAttachmentResource($material);
-                    case OptionBasedQuestion::class:
-                        return new OptionBasedQuestionResource($material);
-                    case EssayQuestion::class:
-                        return new EssayQuestionResource($material);
+                    case OptionBasedItem::class:
+                        return new OptionBasedItemResource($material);
+                    case EssayItem::class:
+                        return new EssayItemResource($material);
                 }
             })
         ];

@@ -24,8 +24,8 @@ class TextAttachment extends Model
         return $this->morphOne(AssessmentMaterial::class, 'materialable');
     }
 
-    public function questionOption()
+    public function optionBasedItemOption()
     {
-        return $this->morphOne(QuestionOption::class, 'optionable');
+        return $this->morphOne(OptionBasedItemOption::class, 'optionable');
     }
 }

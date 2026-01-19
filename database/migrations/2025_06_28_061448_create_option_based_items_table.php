@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('option_based_questions', function (Blueprint $table) {
+        Schema::create('option_based_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('question_text');
-            $table->integer('point_worth')->default(1);
+            $table->boolean('is_multiple_choice')->default(false);
             $table->timestamps();
         });
     }
@@ -24,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('option_based_questions');
+        Schema::dropIfExists('option_based_items');
     }
 };

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('materialable_type');
             $table->string('materialable_id');
             $table->integer('order');
+            $table->double('point_worth')->default(1);
             $table->timestamps();
 
             $table->unique(['order', 'assessment_id']);

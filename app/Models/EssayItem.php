@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 
 
-class EssayQuestion extends Model
+class EssayItem extends Model
 {
     use HasUuids;
 
     protected $fillable = [
-        'question_text',
-        'point_worth'
+        'point_worth',
+        'min_character_count',
+        'max_character_count',
+        'min_word_count',
+        'max_word_count',
     ];
 }

@@ -7,7 +7,7 @@ use App\Models\TextAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class QuestionOptionResource extends JsonResource
+class OptionBasedItemOptionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -18,7 +18,7 @@ class QuestionOptionResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'optionBasedQuestionId' => $this->option_based_question_id,
+            'optionBasedItemId' => $this->option_based_item_id,
             'order' => $this->order,
             'isCorrect' => (bool) $this->is_correct,
             'optionType' => $this->optionable_type,

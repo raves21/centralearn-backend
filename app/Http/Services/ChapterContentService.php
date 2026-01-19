@@ -88,7 +88,7 @@ class ChapterContentService
         } else {
             $this->assessmentRepo->deleteById($chapterContent->contentable_id);
             //todo: implement scheduled deletion of orphaned option_based_questions and text_based_questions
-            //todo: and orphaned textattachments and fileattachments of question_option
+            //todo: and orphaned textattachments and fileattachments of option_based_item_options
         }
         $this->chapterContentRepo->deleteById($id);
     }

@@ -13,7 +13,8 @@ class AssessmentMaterial extends Model
         'assessment_id',
         'materialable_id',
         'materialable_type',
-        'order'
+        'order',
+        'point_worth'
     ];
 
     protected $with = ['materialable'];

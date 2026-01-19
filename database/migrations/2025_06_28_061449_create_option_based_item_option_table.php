@@ -11,16 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('question_options', function (Blueprint $table) {
+        Schema::create('option_based_item_options', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('option_based_question_id')->constrained()->cascadeOnDelete();
-            $table->string('optionable_type');
-            $table->string('optionable_id');
+            $table->foreignUuid('option_based_item_id')->constrained()->cascadeOnDelete();
+            $table->string('option_text')->nullable();
+            $table->string('option_file_url')->nullable();
             $table->integer('order');
             $table->boolean('is_correct');
             $table->timestamps();
 
-            $table->unique(['order', 'option_based_question_id']);
+            $table->unique(['order', 'option_based_item_id']);
         });
     }
 
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('question_options');
+        Schema::dropIfExists('option_based_item_options');
     }
 };

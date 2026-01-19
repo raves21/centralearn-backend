@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('essay_questions', function (Blueprint $table) {
+        Schema::create('essay_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('question_text');
-            $table->integer('point_worth');
             $table->integer('min_character_count')->nullable();
             $table->integer('max_character_count')->nullable();
             $table->integer('min_word_count')->nullable();
@@ -28,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('essay_questions');
+        Schema::dropIfExists('essay_items');
     }
 };

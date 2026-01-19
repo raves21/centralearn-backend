@@ -12,9 +12,7 @@ use App\Http\Controllers\LectureMaterialController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\AssesementMaterialController;
-use App\Http\Controllers\AssessmentController;
-use App\Http\Controllers\QuestionOptionController;
+use App\Http\Controllers\AssessmentMaterialController;
 use App\Http\Controllers\SectionController;
 use Illuminate\Support\Facades\Route;
 
@@ -89,13 +87,9 @@ Route::middleware('auth')->group(function () {
     Route::post('contents/{content}', [ChapterContentController::class, 'update']);
     Route::post('contents/{content}/update-assessment-max-achievable-score', [ChapterContentController::class, 'updateAssessmentMaxAchievableScore']);
 
-    Route::apiResource('lecture-materials', LectureMaterialController::class)->except(['update', 'show']);
+    Route::get('lecture-materials', [LectureMaterialController::class, 'index']);
     Route::post('lecture-materials/process-bulk', [LectureMaterialController::class, 'processBulk']);
-    Route::post('lecture-materials/{lecture_material}', [LectureMaterialController::class, 'update']);
 
-    Route::apiResource('assessment-materials', AssesementMaterialController::class)->except(['update', 'show']);
-    Route::post('assessment-materials/{assessment_material}', [AssesementMaterialController::class, 'update']);
-
-    Route::apiResource('question-options', QuestionOptionController::class)->except(['update', 'show']);
-    Route::post('question-options/{question_option}', [QuestionOptionController::class, 'update']);
+    Route::get('assessment-materials', [AssessmentMaterialController::class, 'index']);
+    Route::post('assessment-materials/process-bulk', [AssessmentMaterialController::class, 'processBulk']);
 });

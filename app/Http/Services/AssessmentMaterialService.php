@@ -3,26 +3,26 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\AssessmentMaterialRepository;
-use App\Http\Repositories\OptionBasedQuestionRepository;
-use App\Http\Repositories\EssayQuestionRepository;
+use App\Http\Repositories\EssayItemRepository;
+use App\Http\Repositories\OptionBasedItemRepository;
 use App\Http\Resources\AssessmentMaterialResource;
-use App\Models\EssayQuestion;
-use App\Models\OptionBasedQuestion;
+use App\Models\EssayItem;
+use App\Models\OptionBasedItem;
 
 class AssessmentMaterialService
 {
     private $assessmentMaterialRepo;
-    private $optionBasedQuestionRepo;
-    private $essayQuestionRepo;
+    private $optionBasedItemRepo;
+    private $essayItemRepo;
 
     public function __construct(
         AssessmentMaterialRepository $assessmentMaterialRepo,
-        OptionBasedQuestionRepository $optionBasedQuestionRepo,
-        EssayQuestionRepository $essayQuestionRepo
+        OptionBasedItemRepository $optionBasedItemRepo,
+        EssayItemRepository $essayItemRepo
     ) {
         $this->assessmentMaterialRepo = $assessmentMaterialRepo;
-        $this->optionBasedQuestionRepo = $optionBasedQuestionRepo;
-        $this->essayQuestionRepo = $essayQuestionRepo;
+        $this->optionBasedItemRepo = $optionBasedItemRepo;
+        $this->essayItemRepo = $essayItemRepo;
     }
 
     public function getAll(array $filters)
@@ -35,102 +35,88 @@ class AssessmentMaterialService
         ));
     }
 
-    public function findById(string $id)
-    {
-        return new AssessmentMaterialResource($this->assessmentMaterialRepo->findById($id));
-    }
+    public function processBulk(array $formData) {}
 
-    public function create(array $formData)
-    {
-        $materialType = $formData['material_type'];
+    // public function create(array $formData)
+    // {
+    //     $materialType = $formData['material_type'];
 
-        switch ($materialType) {
-            case 'option_based_question':
-                $newOptionBasedQ = $this->optionBasedQuestionRepo->create($formData['material']['option_based_question']);
-                $newAsmtMaterial = $this->assessmentMaterialRepo->create([
-                    ...$formData,
-                    'materialable_id' => $newOptionBasedQ->id,
-                    'materialable_type' => OptionBasedQuestion::class
-                ]);
-                break;
+    //     switch ($materialType) {
+    //         case 'option_based_question':
+    //             $newOptionBasedQ = $this->optionBasedItemRepo->create($formData['material']['option_based_question']);
+    //             $newAsmtMaterial = $this->assessmentMaterialRepo->create([
+    //                 ...$formData,
+    //                 'materialable_id' => $newOptionBasedQ->id,
+    //                 'materialable_type' => OptionBasedItem::class
+    //             ]);
+    //             break;
 
-            case 'essay_question':
-                $newEssayQ = $this->essayQuestionRepo->create($formData['material']['essay_question']);
-                $newAsmtMaterial = $this->assessmentMaterialRepo->create([
-                    ...$formData,
-                    'materialable_id' => $newEssayQ->id,
-                    'materialable_type' => EssayQuestion::class
-                ]);
-                break;
-        }
-        return new AssessmentMaterialResource($this->assessmentMaterialRepo->getFresh($newAsmtMaterial));
-    }
+    //         case 'essay_question':
+    //             $newEssayQ = $this->essayItemRepo->create($formData['material']['essay_question']);
+    //             $newAsmtMaterial = $this->assessmentMaterialRepo->create([
+    //                 ...$formData,
+    //                 'materialable_id' => $newEssayQ->id,
+    //                 'materialable_type' => EssayItem::class
+    //             ]);
+    //             break;
+    //     }
+    //     return new AssessmentMaterialResource($this->assessmentMaterialRepo->getFresh($newAsmtMaterial));
+    // }
 
-    public function updateById(string $id, array $formData)
-    {
-        $asmtMaterial = $this->assessmentMaterialRepo->findById($id);
+    // public function updateById(string $id, array $formData)
+    // {
+    //     $asmtMaterial = $this->assessmentMaterialRepo->findById($id);
 
-        if (!$formData['is_material_updated']) {
-            return new AssessmentMaterialResource($this->assessmentMaterialRepo->updateById($id, $formData));
-        }
+    //     if (!$formData['is_material_updated']) {
+    //         return new AssessmentMaterialResource($this->assessmentMaterialRepo->updateById($id, $formData));
+    //     }
 
-        $prevMaterialType = match ($asmtMaterial->materialable_type) {
-            OptionBasedQuestion::class => 'option_based_question',
-            EssayQuestion::class => 'essay_question'
-        };
+    //     $prevMaterialType = match ($asmtMaterial->materialable_type) {
+    //         OptionBasedItem::class => 'option_based_question',
+    //         EssayItem::class => 'essay_question'
+    //     };
 
-        if ($prevMaterialType !== $formData['material_type']) {
-            //if user changed material type
-            //delete the previous material
-            $this->assessmentMaterialRepo->deleteMorph(
-                morphType: $asmtMaterial->materialable_type,
-                morphId: $asmtMaterial->materialable_id
-            );
+    //     if ($prevMaterialType !== $formData['material_type']) {
+    //         //if user changed material type
+    //         //delete the previous material
+    //         $this->assessmentMaterialRepo->deleteMorph(
+    //             morphType: $asmtMaterial->materialable_type,
+    //             morphId: $asmtMaterial->materialable_id
+    //         );
 
-            switch ($formData['material_type']) {
-                case 'option_based_question':
-                    $newOptionBasedQ = $this->optionBasedQuestionRepo->create($formData['material']['option_based_question']);
-                    $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
-                        ...$formData,
-                        'materialable_id' => $newOptionBasedQ->id,
-                        'materialable_type' => OptionBasedQuestion::class
-                    ]);
-                    break;
+    //         switch ($formData['material_type']) {
+    //             case 'option_based_question':
+    //                 $newOptionBasedQ = $this->optionBasedItemRepo->create($formData['material']['option_based_question']);
+    //                 $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
+    //                     ...$formData,
+    //                     'materialable_id' => $newOptionBasedQ->id,
+    //                     'materialable_type' => OptionBasedItem::class
+    //                 ]);
+    //                 break;
 
-                case 'essay_question':
-                    $newEssayQ = $this->essayQuestionRepo->create($formData['material']['essay_question']);
-                    $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
-                        ...$formData,
-                        'materialable_id' => $newEssayQ->id,
-                        'materialable_type' => EssayQuestion::class
-                    ]);
-                    break;
-            }
-        } else {
-            //if material type is unchanged
-            switch ($formData['material_type']) {
-                case 'option_based_question':
-                    $this->optionBasedQuestionRepo->updateById($asmtMaterial->materialable_id, $formData['material']['option_based_question']);
-                    $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, $formData);
-                    break;
+    //             case 'essay_question':
+    //                 $newEssayQ = $this->essayItemRepo->create($formData['material']['essay_question']);
+    //                 $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, [
+    //                     ...$formData,
+    //                     'materialable_id' => $newEssayQ->id,
+    //                     'materialable_type' => EssayItem::class
+    //                 ]);
+    //                 break;
+    //         }
+    //     } else {
+    //         //if material type is unchanged
+    //         switch ($formData['material_type']) {
+    //             case 'option_based_question':
+    //                 $this->optionBasedItemRepo->updateById($asmtMaterial->materialable_id, $formData['material']['option_based_question']);
+    //                 $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, $formData);
+    //                 break;
 
-                case 'essay_question':
-                    $this->essayQuestionRepo->updateById($asmtMaterial->materialable_id, $formData['material']['essay_question']);
-                    $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, $formData);
-                    break;
-            }
-        }
-        return new AssessmentMaterialResource($this->assessmentMaterialRepo->getFresh($updatedAsmtMaterial));
-    }
-
-    public function deleteById(string $id)
-    {
-        $asmtMaterial = $this->assessmentMaterialRepo->findById($id);
-        //delete material
-        $this->assessmentMaterialRepo->deleteMorph(
-            morphType: $asmtMaterial->materialable_type,
-            morphId: $asmtMaterial->materialable_id
-        );
-        return $this->assessmentMaterialRepo->deleteById($id);
-    }
+    //             case 'essay_question':
+    //                 $this->essayItemRepo->updateById($asmtMaterial->materialable_id, $formData['material']['essay_question']);
+    //                 $updatedAsmtMaterial = $this->assessmentMaterialRepo->updateById($id, $formData);
+    //                 break;
+    //         }
+    //     }
+    //     return new AssessmentMaterialResource($this->assessmentMaterialRepo->getFresh($updatedAsmtMaterial));
+    // }
 }
