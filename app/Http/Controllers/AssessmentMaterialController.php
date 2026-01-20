@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AssessmentMaterial\Index;
-use App\Http\Requests\AssessmentMaterial\Store;
-use App\Http\Requests\AssessmentMaterial\Update;
 use App\Http\Requests\LectureMaterial\ProcessBulk;
 use App\Http\Services\AssessmentMaterialService;
 

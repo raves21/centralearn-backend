@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class FileAttachment extends Model
 {
@@ -38,6 +39,7 @@ class FileAttachment extends Model
     protected static function booted()
     {
         static::deleting(function ($file) {
+            Log::info('Deleting file attachment', $file->toArray());
             Storage::disk('public')->delete($file->path);
         });
     }
