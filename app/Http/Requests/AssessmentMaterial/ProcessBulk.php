@@ -30,8 +30,8 @@ class ProcessBulk extends FormRequest
             'materials.*.question.question_text' => ['required', 'string'],
 
             // Existing files we want to KEEP (Array of URLs/Strings)
-            'materials.*.question.kept_file_urls' => ['nullable', 'array'],
-            'materials.*.question.kept_file_urls.*' => ['string'],
+            'materials.*.question.kept_question_file_urls' => ['nullable', 'array'],
+            'materials.*.question.kept_question_file_urls.*' => ['string'],
 
             // New files we want to UPLOAD (Array of Binary Files)
             'materials.*.question.new_question_files' => ['nullable', 'array'],

@@ -11,7 +11,6 @@ class OptionBasedItem extends Model
     use HasUuids;
 
     protected $fillable = [
-        'point_worth',
         'is_multiple_choice'
     ];
 

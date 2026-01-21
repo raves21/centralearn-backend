@@ -7,9 +7,11 @@ use App\Http\Repositories\AssessmentMaterialRepository;
 use App\Http\Repositories\EssayItemRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Repositories\IdentificationItemRepository;
+use App\Http\Repositories\OptionBasedItemOptionRepository;
 use App\Http\Repositories\OptionBasedItemRepository;
 use App\Http\Resources\AssessmentMaterialResource;
 use App\Models\EssayItem;
+use App\Models\FileAttachment;
 use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +22,7 @@ class AssessmentMaterialService
     private $optionBasedItemRepo;
     private $essayItemRepo;
     private $identificationItemRepo;
+    private $optionBasedItemOptionRepo;
     private $assessmentMaterialQuestionRepo;
     private $fileAttachmentRepo;
 
@@ -29,12 +32,14 @@ class AssessmentMaterialService
         EssayItemRepository $essayItemRepo,
         IdentificationItemRepository $identificationItemRepo,
         AssessmentMaterialQuestionRepository $assessmentMaterialQuestionRepo,
+        OptionBasedItemOptionRepository $optionBasedItemOptionRepo,
         FileAttachmentRepository $fileAttachmentRepo
     ) {
         $this->assessmentMaterialRepo = $assessmentMaterialRepo;
         $this->optionBasedItemRepo = $optionBasedItemRepo;
         $this->essayItemRepo = $essayItemRepo;
         $this->identificationItemRepo = $identificationItemRepo;
+        $this->optionBasedItemOptionRepo = $optionBasedItemOptionRepo;
         $this->assessmentMaterialQuestionRepo = $assessmentMaterialQuestionRepo;
         $this->fileAttachmentRepo = $fileAttachmentRepo;
     }
@@ -101,33 +106,30 @@ class AssessmentMaterialService
                 // Prepare Question Files
                 $questionRecord = null;
                 $currentUrls = [];
-                $keptUrls = $materialData['question']['kept_file_urls'] ?? [];
+                $keptUrls = $materialData['question']['kept_question_file_urls'] ?? [];
                 $newFiles = $materialData['question']['new_question_files'] ?? [];
 
                 if (isset($materialData['id'])) {
                     // --- UPDATE ---
                     $id = $materialData['id'];
-                    $existingAM = $this->assessmentMaterialRepo->findById($id);
-
-                    if (!$existingAM) continue;
+                    $existingAssessmentMaterial = $this->assessmentMaterialRepo->findById($id);
 
                     // A. Handle Type Switching
-                    $currentType = match ($existingAM->materialable_type) {
+                    $currentType = match ($existingAssessmentMaterial->materialable_type) {
                         EssayItem::class => 'essay_item',
                         OptionBasedItem::class => 'option_based_item',
                         IdentificationItem::class => 'identification_item',
-                        default => 'unknown'
                     };
 
                     $newType = $materialData['material_type'];
-                    $materialableId = $existingAM->materialable_id;
-                    $materialableType = $existingAM->materialable_type;
+                    $materialableId = $existingAssessmentMaterial->materialable_id;
+                    $materialableType = $existingAssessmentMaterial->materialable_type;
 
                     if ($currentType !== $newType) {
                         // Delete old specific item
                         $this->assessmentMaterialRepo->deleteMorph(
-                            morphType: $existingAM->materialable_type,
-                            morphId: $existingAM->materialable_id
+                            morphType: $existingAssessmentMaterial->materialable_type,
+                            morphId: $existingAssessmentMaterial->materialable_id
                         );
 
                         // Create new specific item
@@ -204,22 +206,18 @@ class AssessmentMaterialService
         $deletedUrls = array_diff($currentUrls, $keptUrls);
 
         foreach ($deletedUrls as $url) {
-            $attachment = DB::table('file_attachments')->where('path', $url)->orWhere('url', $url)->first();
-            if ($attachment) {
-                $this->fileAttachmentRepo->deleteById($attachment->id);
-            }
+            $this->fileAttachmentRepo->deleteByFilter(['url' => $url]);
         }
 
         // 2. Upload New
         $newUploadedUrls = [];
         foreach ($newFiles as $file) {
             $attachment = $this->fileAttachmentRepo->uploadAndCreate($file);
-            // using 'url' or 'path' depending on what your system prefers for frontend display
             $newUploadedUrls[] = $attachment->url;
         }
 
         // 3. Return Merged List
-        return array_merge($keptUrls, $newUploadedUrls);
+        return [...$keptUrls, ...$newUploadedUrls];
     }
 
     private function createSpecificItem($type, $data)
@@ -250,16 +248,13 @@ class AssessmentMaterialService
         // Create options
         $options = $data['options'] ?? [];
         foreach ($options as $optionData) {
-            $fileUrl = $this->syncOptionFile(null, $optionData);
+            $newFileUrl = $this->syncOptionFile(null, $optionData);
 
-            DB::table('option_based_item_options')->insert([
-                'id' => \Illuminate\Support\Str::uuid(),
+            $this->optionBasedItemOptionRepo->create([
                 'option_based_item_id' => $optionBasedItem->id,
                 'option_text' => $optionData['option_text'] ?? null,
-                'option_file_url' => $fileUrl,
+                'option_file_url' => $newFileUrl,
                 'is_correct' => $optionData['is_correct'] ?? false,
-                'created_at' => now(),
-                'updated_at' => now(),
             ]);
         }
 
@@ -277,9 +272,7 @@ class AssessmentMaterialService
         $incomingOptions = $data['options'] ?? [];
 
         // Get existing option IDs
-        $existingOptions = DB::table('option_based_item_options')
-            ->where('option_based_item_id', $id)
-            ->get();
+        $existingOptions = $this->optionBasedItemOptionRepo->getAll(filters: ['option_based_item_id' => $id]);
         $existingIds = $existingOptions->pluck('id')->toArray();
 
         // Get incoming option IDs (filter nulls)
@@ -291,9 +284,9 @@ class AssessmentMaterialService
             $option = $existingOptions->firstWhere('id', $optionId);
             if ($option && $option->option_file_url) {
                 // Delete the file attachment
-                $this->deleteFileByUrl($option->option_file_url);
+                $this->fileAttachmentRepo->deleteByFilter(['url' => $option->option_file_url]);
             }
-            DB::table('option_based_item_options')->where('id', $optionId)->delete();
+            $this->optionBasedItemOptionRepo->deleteById($optionId);
         }
 
         // Create or update options
@@ -304,26 +297,20 @@ class AssessmentMaterialService
                 $currentUrl = $existingOption->option_file_url ?? null;
                 $fileUrl = $this->syncOptionFile($currentUrl, $optionData);
 
-                DB::table('option_based_item_options')
-                    ->where('id', $optionData['id'])
-                    ->update([
-                        'option_text' => $optionData['option_text'] ?? null,
-                        'option_file_url' => $fileUrl,
-                        'is_correct' => $optionData['is_correct'] ?? false,
-                        'updated_at' => now(),
-                    ]);
+                $this->optionBasedItemOptionRepo->updateById($optionData['id'], [
+                    'option_text' => $optionData['option_text'] ?? null,
+                    'option_file_url' => $fileUrl,
+                    'is_correct' => $optionData['is_correct'] ?? false,
+                ]);
             } else {
                 // Create new option
                 $fileUrl = $this->syncOptionFile(null, $optionData);
 
-                DB::table('option_based_item_options')->insert([
-                    'id' => \Illuminate\Support\Str::uuid(),
+                $this->optionBasedItemOptionRepo->create([
                     'option_based_item_id' => $id,
                     'option_text' => $optionData['option_text'] ?? null,
                     'option_file_url' => $fileUrl,
                     'is_correct' => $optionData['is_correct'] ?? false,
-                    'created_at' => now(),
-                    'updated_at' => now(),
                 ]);
             }
         }
@@ -334,37 +321,26 @@ class AssessmentMaterialService
         $keptUrl = $optionData['kept_option_file_url'] ?? null;
         $newFile = $optionData['new_option_file'] ?? null;
 
-        // If there's a new file, delete the old one and upload the new one
-        if ($newFile) {
-            if ($currentUrl) {
-                $this->deleteFileByUrl($currentUrl);
-            }
-            $attachment = $this->fileAttachmentRepo->uploadAndCreate($newFile);
-            return $attachment->url;
-        }
-
         // If keeping the existing file
         if ($keptUrl) {
             return $keptUrl;
         }
 
+        // If there's a new file and has old one, delete the old one and upload the new one
+        // If there's a new file but doesnt have old one, upload the new file
+        if ($newFile) {
+            if ($currentUrl) {
+                $this->fileAttachmentRepo->deleteByFilter(['url' => $currentUrl]);
+            }
+            $newFile = $this->fileAttachmentRepo->uploadAndCreate($newFile);
+            return $newFile->url;
+        }
+
         // If no file (deleted or never had one)
         if ($currentUrl && !$keptUrl) {
-            $this->deleteFileByUrl($currentUrl);
+            $this->fileAttachmentRepo->deleteByFilter(['url' => $currentUrl]);
         }
 
         return null;
-    }
-
-    private function deleteFileByUrl(string $url): void
-    {
-        $attachment = DB::table('file_attachments')
-            ->where('path', $url)
-            ->orWhere('url', $url)
-            ->first();
-
-        if ($attachment) {
-            $this->fileAttachmentRepo->deleteById($attachment->id);
-        }
     }
 }
