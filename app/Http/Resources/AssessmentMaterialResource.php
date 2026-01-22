@@ -5,6 +5,7 @@ namespace App\Http\Resources;
 use App\Models\FileAttachment;
 use App\Models\TextAttachment;
 use App\Models\EssayItem;
+use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -27,14 +28,12 @@ class AssessmentMaterialResource extends JsonResource
             'material' => $this->whenLoaded('materialable', function () {
                 $material = $this->materialable;
                 switch ($this->materialable_type) {
-                    case TextAttachment::class:
-                        return new TextAttachmentResource($material);
-                    case FileAttachment::class:
-                        return new FileAttachmentResource($material);
                     case OptionBasedItem::class:
                         return new OptionBasedItemResource($material);
                     case EssayItem::class:
                         return new EssayItemResource($material);
+                    case IdentificationItem::class:
+                        return new IdentificationItemResource($material);
                 }
             })
         ];

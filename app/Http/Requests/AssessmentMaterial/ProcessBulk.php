@@ -59,6 +59,7 @@ class ProcessBulk extends FormRequest
             'materials.*.option_based_item.options' => ['required_if:materials.*.material_type,option_based_item', 'array', 'min:2'],
 
             'materials.*.option_based_item.options.*.id' => ['nullable', 'exists:option_based_item_options,id'],
+            'materials.*.option_based_item.options.*.order' => ['required', 'integer', 'min:1'],
             'materials.*.option_based_item.options.*.is_correct' => ['nullable', 'boolean'],
             'materials.*.option_based_item.options.*.option_text' => ['nullable', 'string'],
 
@@ -111,11 +112,25 @@ class ProcessBulk extends FormRequest
                     $material['material_type'] === 'option_based_item' &&
                     isset($material['option_based_item']['options'])
                 ) {
+                    $optionOrders = [];
+
                     foreach ($material['option_based_item']['options'] as $optIndex => $option) {
                         $optId = $option['id'] ?? null;
                         $optText = $option['option_text'] ?? null;
                         $keptFileUrl = $option['kept_option_file_url'] ?? null;
                         $newFile = isset($option['new_option_file']); // check if file is present in upload
+                        $optOrder = $option['order'] ?? null;
+
+                        // Validate option order uniqueness within this option_based_item
+                        if ($optOrder) {
+                            if (in_array($optOrder, $optionOrders)) {
+                                $validator->errors()->add(
+                                    "materials.{$index}.option_based_item.options.{$optIndex}.order",
+                                    "The option order {$optOrder} is duplicated within this question."
+                                );
+                            }
+                            $optionOrders[] = $optOrder;
+                        }
 
                         // For NEW options (no ID), require text OR file
                         if (!$optId) {

@@ -2,8 +2,6 @@
 
 namespace App\Http\Resources;
 
-use App\Models\FileAttachment;
-use App\Models\TextAttachment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -20,18 +18,9 @@ class OptionBasedItemOptionResource extends JsonResource
             'id' => $this->id,
             'optionBasedItemId' => $this->option_based_item_id,
             'order' => $this->order,
+            'optionText' => $this->option_text,
+            'optionFileUrl' => $this->option_file_url,
             'isCorrect' => (bool) $this->is_correct,
-            'optionType' => $this->optionable_type,
-            'optionId' => $this->optionable_id,
-            'option' => $this->whenLoaded('optionable', function () {
-                $option = $this->optionable;
-                switch ($this->optionable_type) {
-                    case TextAttachment::class:
-                        return new TextAttachmentResource($option);
-                    case FileAttachment::class;
-                        return new FileAttachmentResource($option);
-                }
-            })
         ];
     }
 }

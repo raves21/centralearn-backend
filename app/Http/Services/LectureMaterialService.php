@@ -9,6 +9,7 @@ use App\Http\Resources\LectureMaterialResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\FileAttachment;
+use App\Models\LectureMaterial;
 use App\Models\TextAttachment;
 use Illuminate\Support\Arr;
 
@@ -103,8 +104,7 @@ class LectureMaterialService
             // 2. Process Upserts (Create & Update)
             if (!empty($incomingIds)) {
                 // Temporarily negate orders to avoid unique constraint violations during reordering
-                DB::table('lecture_materials')
-                    ->whereIn('id', $incomingIds)
+                LectureMaterial::whereIn('id', $incomingIds)
                     ->update(['order' => DB::raw('`order` * -1')]);
             }
 

@@ -2,7 +2,7 @@
 
 namespace App\Http\Repositories;
 
-use App\Models\OptionBaseditem;
+use App\Models\OptionBasedItem;
 
 class OptionBasedItemRepository extends BaseRepository
 {

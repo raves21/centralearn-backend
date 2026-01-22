@@ -16,8 +16,8 @@ class IdentificationItemResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'accepted_answers' => $this->accepted_answers,
-            'point_worth' => $this->point_worth,
+            'acceptedAnswers' => $this->accepted_answers,
+            'pointWorth' => $this->point_worth,
         ];
     }
 }

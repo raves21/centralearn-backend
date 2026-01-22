@@ -14,6 +14,7 @@ use App\Models\EssayItem;
 use App\Models\FileAttachment;
 use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
+use App\Models\OptionBasedItemOption;
 use Illuminate\Support\Facades\DB;
 
 class AssessmentMaterialService
@@ -254,6 +255,7 @@ class AssessmentMaterialService
                 'option_based_item_id' => $optionBasedItem->id,
                 'option_text' => $optionData['option_text'] ?? null,
                 'option_file_url' => $newFileUrl,
+                'order' => $optionData['order'],
                 'is_correct' => $optionData['is_correct'] ?? false,
             ]);
         }
@@ -289,6 +291,12 @@ class AssessmentMaterialService
             $this->optionBasedItemOptionRepo->deleteById($optionId);
         }
 
+        // Temporarily negate orders to avoid unique constraint violations during reordering
+        if (!empty($incomingIds)) {
+            OptionBasedItemOption::whereIn('id', $incomingIds)
+                ->update(['order' => DB::raw('`order` * -1')]);
+        }
+
         // Create or update options
         foreach ($incomingOptions as $optionData) {
             if (isset($optionData['id'])) {
@@ -300,6 +308,7 @@ class AssessmentMaterialService
                 $this->optionBasedItemOptionRepo->updateById($optionData['id'], [
                     'option_text' => $optionData['option_text'] ?? null,
                     'option_file_url' => $fileUrl,
+                    'order' => $optionData['order'],
                     'is_correct' => $optionData['is_correct'] ?? false,
                 ]);
             } else {
@@ -310,6 +319,7 @@ class AssessmentMaterialService
                     'option_based_item_id' => $id,
                     'option_text' => $optionData['option_text'] ?? null,
                     'option_file_url' => $fileUrl,
+                    'order' => $optionData['order'],
                     'is_correct' => $optionData['is_correct'] ?? false,
                 ]);
             }
