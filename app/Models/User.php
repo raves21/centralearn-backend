@@ -20,13 +20,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'first_name',
-        'last_name',
-        'address',
-        'email',
-        'password',
-    ];
+    protected $guarded = ['id'];
 
     public function admin()
     {

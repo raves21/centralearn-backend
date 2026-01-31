@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('option_based_item_id')->constrained()->cascadeOnDelete();
             $table->string('option_text')->nullable();
-            $table->string('option_file_url')->nullable();
+            $table->json('option_file')->nullable();
             $table->integer('order');
             $table->boolean('is_correct');
             $table->timestamps();

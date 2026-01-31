@@ -10,6 +10,8 @@ class Lecture extends Model
 {
     use HasUuids;
 
+    protected $guarded = ['id'];
+
     public function chapterContent()
     {
         return $this->morphOne(ChapterContent::class, 'contentable');

@@ -8,11 +8,7 @@ class ClassStudentEnrollment extends Model
 {
     protected $table = 'class_student_enrollment';
 
-    protected $fillable = [
-        'student_id',
-        'course_class_id',
-        'final_grade'
-    ];
+    protected $guarded = ['id'];
 
     public function student()
     {

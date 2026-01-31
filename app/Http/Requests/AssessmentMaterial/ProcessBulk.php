@@ -29,9 +29,9 @@ class ProcessBulk extends FormRequest
             'materials.*.question' => ['required', 'array'],
             'materials.*.question.question_text' => ['required', 'string'],
 
-            // Existing files we want to KEEP (Array of URLs/Strings)
-            'materials.*.question.kept_question_file_urls' => ['nullable', 'array'],
-            'materials.*.question.kept_question_file_urls.*' => ['string'],
+            // Existing files we want to KEEP (Array of Objects)
+            'materials.*.question.kept_question_files' => ['nullable', 'array'],
+            'materials.*.question.kept_question_files.*' => ['array'],
 
             // New files we want to UPLOAD (Array of Binary Files)
             'materials.*.question.new_question_files' => ['nullable', 'array'],
@@ -64,7 +64,7 @@ class ProcessBulk extends FormRequest
             'materials.*.option_based_item.options.*.option_text' => ['nullable', 'string'],
 
             // Option File: Split strategy for sync
-            'materials.*.option_based_item.options.*.kept_option_file_url' => ['nullable', 'string'],
+            'materials.*.option_based_item.options.*.kept_option_file' => ['nullable', 'array'],
             'materials.*.option_based_item.options.*.new_option_file' => ['nullable', 'file', 'mimes:jpg,jpeg,png', 'max:51200'],
         ];
     }
@@ -117,7 +117,7 @@ class ProcessBulk extends FormRequest
                     foreach ($material['option_based_item']['options'] as $optIndex => $option) {
                         $optId = $option['id'] ?? null;
                         $optText = $option['option_text'] ?? null;
-                        $keptFileUrl = $option['kept_option_file_url'] ?? null;
+                        $keptFile = $option['kept_option_file'] ?? null;
                         $newFile = isset($option['new_option_file']); // check if file is present in upload
                         $optOrder = $option['order'] ?? null;
 
@@ -134,7 +134,7 @@ class ProcessBulk extends FormRequest
 
                         // For NEW options (no ID), require text OR file
                         if (!$optId) {
-                            $hasFile = $newFile || !empty($keptFileUrl);
+                            $hasFile = $newFile || !empty($keptFile);
                             if (!$optText && !$hasFile) {
                                 $validator->errors()->add(
                                     "materials.{$index}.option_based_item.options.{$optIndex}",

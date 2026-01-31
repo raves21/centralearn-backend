@@ -9,13 +9,7 @@ class AssessmentMaterial extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'assessment_id',
-        'materialable_id',
-        'materialable_type',
-        'order',
-        'point_worth'
-    ];
+    protected $guarded = ['id'];
 
     protected $with = ['materialable'];
 

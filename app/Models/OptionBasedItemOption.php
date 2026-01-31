@@ -10,12 +10,11 @@ class OptionBasedItemOption extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'option_based_item_id',
-        'option_text',
-        'option_file_url',
-        'is_correct',
-        'order',
+    protected $guarded = ['id'];
+
+    protected $casts = [
+        'option_file' => 'array',
+        'is_correct' => 'boolean',
     ];
 
     public function optionBasedItem()

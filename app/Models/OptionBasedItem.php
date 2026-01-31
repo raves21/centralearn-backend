@@ -10,9 +10,7 @@ class OptionBasedItem extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'is_multiple_choice'
-    ];
+    protected $guarded = ['id'];
 
     protected $with = ['optionBasedItemOptions'];
 

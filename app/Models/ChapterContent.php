@@ -10,17 +10,7 @@ class ChapterContent extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'chapter_id',
-        'name',
-        'publishes_at',
-        'contentable_id',
-        'contentable_type',
-        'opens_at',
-        'closes_at',
-        'description',
-        'order'
-    ];
+    protected $guarded = ['id'];
 
     protected $with = ['contentable'];
 

@@ -10,15 +10,7 @@ class AssessmentSubmission extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'student_id',
-        'assessment_id',
-        'attempt_number',
-        'answers_json',
-        'submitted_at',
-        'total_score',
-        'graded_at'
-    ];
+    protected $guarded = ['id'];
 
     public function student()
     {

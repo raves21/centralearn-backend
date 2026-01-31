@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignUuid('assessment_material_id')->constrained()->cascadeOnDelete();
             $table->string('question_text')->nullable();
-            $table->json('question_file_urls')->nullable();
+            $table->json('question_files')->nullable();
             $table->timestamps();
         });
     }

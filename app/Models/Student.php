@@ -10,7 +10,7 @@ class Student extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['user_id', 'program_id'];
+    protected $guarded = ['id'];
 
     protected $with = ['user'];
 

@@ -11,15 +11,7 @@ class FileAttachment extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'path',
-        'url',
-        'type',
-        'extension',
-        'name',
-        'mime',
-        'size'
-    ];
+    protected $guarded = ['id'];
 
     public function lectureMaterial()
     {

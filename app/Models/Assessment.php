@@ -9,18 +9,7 @@ class Assessment extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'is_open',
-        'opens_at',
-        'closes_at',
-        'time_limit',
-        'max_achievable_score',
-        'is_answers_viewable_after_submit',
-        'is_score_viewable_after_submit',
-        'is_multi_attempts',
-        'max_attempts',
-        'multi_attempt_grading_type'
-    ];
+    protected $guarded = ['id'];
 
     public function submissions()
     {

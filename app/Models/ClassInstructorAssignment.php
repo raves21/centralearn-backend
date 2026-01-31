@@ -9,11 +9,7 @@ class ClassInstructorAssignment extends Model
 {
     protected $table = 'class_instructor_assignment';
 
-    protected $fillable = [
-        'instructor_id',
-        'course_class_id',
-        'semester_id'
-    ];
+    protected $guarded = ['id'];
 
     public function instructor()
     {

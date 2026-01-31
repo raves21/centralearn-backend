@@ -10,14 +10,7 @@ class Chapter extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'course_class_id',
-        'name',
-        'description',
-        'order',
-        'published_at',
-        'course_class_id'
-    ];
+    protected $guarded = ['id'];
 
     public function courseClass()
     {

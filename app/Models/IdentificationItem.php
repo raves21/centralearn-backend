@@ -6,10 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class IdentificationItem extends Model
 {
-    protected $fillable = [
-        'point_worth',
-        'accepted_answers'
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'accepted_answers' => 'json'

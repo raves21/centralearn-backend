@@ -10,9 +10,7 @@ class TextAttachment extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'content'
-    ];
+    protected $guarded = ['id'];
 
     public function lectureMaterial()
     {

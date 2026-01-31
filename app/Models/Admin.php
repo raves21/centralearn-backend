@@ -9,7 +9,7 @@ class Admin extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['user_id', 'job_title'];
+    protected $guarded = ['id'];
 
     protected $with = ['user'];
 

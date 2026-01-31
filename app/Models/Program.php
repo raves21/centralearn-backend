@@ -11,13 +11,7 @@ class Program extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'department_id',
-        'name',
-        'description',
-        'image_url',
-        'code'
-    ];
+    protected $guarded = ['id'];
 
     public function department()
     {

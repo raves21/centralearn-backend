@@ -93,8 +93,8 @@ class AssessmentMaterialService
 
                     // Cleanup Question Files
                     $question = $this->assessmentMaterialQuestionRepo->findByFilter(['assessment_material_id' => $id]);
-                    if ($question && !empty($question->question_file_urls)) {
-                        $this->syncQuestionFiles($question->question_file_urls, [], []);
+                    if ($question && !empty($question->question_files)) {
+                        $this->syncQuestionFiles($question->question_files, [], []);
                     }
 
                     $this->assessmentMaterialRepo->deleteById($id);
@@ -106,8 +106,8 @@ class AssessmentMaterialService
             foreach ($incomingMaterials as $materialData) {
                 // Prepare Question Files
                 $questionRecord = null;
-                $currentUrls = [];
-                $keptUrls = $materialData['question']['kept_question_file_urls'] ?? [];
+                $currentFiles = [];
+                $keptFiles = $materialData['question']['kept_question_files'] ?? [];
                 $newFiles = $materialData['question']['new_question_files'] ?? [];
 
                 if (isset($materialData['id'])) {
@@ -169,7 +169,7 @@ class AssessmentMaterialService
                     $questionRecord = $this->assessmentMaterialQuestionRepo->create([
                         'assessment_material_id' => $newAM->id,
                         'question_text' => $materialData['question']['question_text'],
-                        'question_file_urls' => []
+                        'question_files' => []
                     ]);
 
                     $results['created']++;
@@ -177,14 +177,14 @@ class AssessmentMaterialService
 
                 // C. Handle Question Files
                 if ($questionRecord) {
-                    $currentUrls = $questionRecord->question_file_urls ?? [];
+                    $currentFiles = $questionRecord->question_files ?? [];
 
                     // Sync: Delete removed, Upload new, Return final list
-                    $finalUrls = $this->syncQuestionFiles($currentUrls, $keptUrls, $newFiles);
+                    $finalFiles = $this->syncQuestionFiles($currentFiles, $keptFiles, $newFiles);
 
                     $this->assessmentMaterialQuestionRepo->updateById($questionRecord->id, [
                         'question_text' => $materialData['question']['question_text'],
-                        'question_file_urls' => $finalUrls
+                        'question_files' => $finalFiles
                     ]);
                 }
             }
@@ -200,10 +200,16 @@ class AssessmentMaterialService
         }
     }
 
-    private function syncQuestionFiles(array $currentUrls, array $keptUrls, array $newFiles): array
+    private function syncQuestionFiles(array $currentFiles, array $keptFiles, array $newFiles): array
     {
         // 1. Identify Deleted
-        // If a current URL is NOT in the kept list, it's deleted
+        // Compare current files (from DB) against kept files (from Request)
+        // We'll use 'url' as the unique identifier for comparison, but 'id' also works if available.
+        // Files in $currentFiles that are NOT in $keptFiles are considered deleted.
+
+        $keptUrls = array_column($keptFiles, 'url');
+        $currentUrls = array_column($currentFiles, 'url');
+
         $deletedUrls = array_diff($currentUrls, $keptUrls);
 
         foreach ($deletedUrls as $url) {
@@ -211,14 +217,15 @@ class AssessmentMaterialService
         }
 
         // 2. Upload New
-        $newUploadedUrls = [];
+        $newUploadedFiles = [];
         foreach ($newFiles as $file) {
-            $attachment = $this->fileAttachmentRepo->uploadAndCreate($file);
-            $newUploadedUrls[] = $attachment->url;
+            $newFile = $this->fileAttachmentRepo->uploadAndCreate($file);
+            // Convert to array to match the shape of kept files
+            $newUploadedFiles[] = $newFile->toArray();
         }
 
         // 3. Return Merged List
-        return [...$keptUrls, ...$newUploadedUrls];
+        return [...$keptFiles, ...$newUploadedFiles];
     }
 
     private function createSpecificItem($type, $data)
@@ -249,12 +256,12 @@ class AssessmentMaterialService
         // Create options
         $options = $data['options'] ?? [];
         foreach ($options as $optionData) {
-            $newFileUrl = $this->syncOptionFile(null, $optionData);
+            $newFile = $this->syncOptionFile(null, $optionData);
 
             $this->optionBasedItemOptionRepo->create([
                 'option_based_item_id' => $optionBasedItem->id,
                 'option_text' => $optionData['option_text'] ?? null,
-                'option_file_url' => $newFileUrl,
+                'option_file' => $newFile,
                 'order' => $optionData['order'],
                 'is_correct' => $optionData['is_correct'] ?? false,
             ]);
@@ -284,9 +291,12 @@ class AssessmentMaterialService
         $idsToDelete = array_diff($existingIds, $incomingIds);
         foreach ($idsToDelete as $optionId) {
             $option = $existingOptions->firstWhere('id', $optionId);
-            if ($option && $option->option_file_url) {
+            if ($option && $option->option_file) {
                 // Delete the file attachment
-                $this->fileAttachmentRepo->deleteByFilter(['url' => $option->option_file_url]);
+                $url = $option->option_file['url'] ?? null;
+                if ($url) {
+                    $this->fileAttachmentRepo->deleteByFilter(['url' => $url]);
+                }
             }
             $this->optionBasedItemOptionRepo->deleteById($optionId);
         }
@@ -302,23 +312,23 @@ class AssessmentMaterialService
             if (isset($optionData['id'])) {
                 // Update existing option
                 $existingOption = $existingOptions->firstWhere('id', $optionData['id']);
-                $currentUrl = $existingOption->option_file_url ?? null;
-                $fileUrl = $this->syncOptionFile($currentUrl, $optionData);
+                $currentFile = $existingOption->option_file ?? null;
+                $file = $this->syncOptionFile($currentFile, $optionData);
 
                 $this->optionBasedItemOptionRepo->updateById($optionData['id'], [
                     'option_text' => $optionData['option_text'] ?? null,
-                    'option_file_url' => $fileUrl,
+                    'option_file' => $file,
                     'order' => $optionData['order'],
                     'is_correct' => $optionData['is_correct'] ?? false,
                 ]);
             } else {
                 // Create new option
-                $fileUrl = $this->syncOptionFile(null, $optionData);
+                $file = $this->syncOptionFile(null, $optionData);
 
                 $this->optionBasedItemOptionRepo->create([
                     'option_based_item_id' => $id,
                     'option_text' => $optionData['option_text'] ?? null,
-                    'option_file_url' => $fileUrl,
+                    'option_file' => $file,
                     'order' => $optionData['order'],
                     'is_correct' => $optionData['is_correct'] ?? false,
                 ]);
@@ -326,29 +336,35 @@ class AssessmentMaterialService
         }
     }
 
-    private function syncOptionFile(?string $currentUrl, array $optionData): ?string
+    private function syncOptionFile(?array $currentFile, array $optionData): ?array
     {
-        $keptUrl = $optionData['kept_option_file_url'] ?? null;
+        $keptFile = $optionData['kept_option_file'] ?? null;
         $newFile = $optionData['new_option_file'] ?? null;
 
         // If keeping the existing file
-        if ($keptUrl) {
-            return $keptUrl;
+        if ($keptFile) {
+            return $keptFile;
         }
 
         // If there's a new file and has old one, delete the old one and upload the new one
         // If there's a new file but doesnt have old one, upload the new file
         if ($newFile) {
-            if ($currentUrl) {
-                $this->fileAttachmentRepo->deleteByFilter(['url' => $currentUrl]);
+            if ($currentFile) {
+                $url = $currentFile['url'] ?? null;
+                if ($url) {
+                    $this->fileAttachmentRepo->deleteByFilter(['url' => $url]);
+                }
             }
-            $newFile = $this->fileAttachmentRepo->uploadAndCreate($newFile);
-            return $newFile->url;
+            $attachment = $this->fileAttachmentRepo->uploadAndCreate($newFile);
+            return $attachment->toArray();
         }
 
         // If no file (deleted or never had one)
-        if ($currentUrl && !$keptUrl) {
-            $this->fileAttachmentRepo->deleteByFilter(['url' => $currentUrl]);
+        if ($currentFile && !$keptFile) {
+            $url = $currentFile['url'] ?? null;
+            if ($url) {
+                $this->fileAttachmentRepo->deleteByFilter(['url' => $url]);
+            }
         }
 
         return null;

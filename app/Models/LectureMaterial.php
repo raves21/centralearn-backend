@@ -10,12 +10,7 @@ class LectureMaterial extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'lecture_id',
-        'materialable_id',
-        'materialable_type',
-        'order'
-    ];
+    protected $guarded = ['id'];
 
     protected $with = ['materialable'];
 

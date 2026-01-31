@@ -10,7 +10,7 @@ class Semester extends Model
 {
     use HasUuids;
 
-    protected $fillable = ['name', 'start_date', 'end_date'];
+    protected $guarded = ['id'];
 
     public function courseClasses()
     {

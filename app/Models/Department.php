@@ -12,12 +12,7 @@ class Department extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'name',
-        'description',
-        'image_url',
-        'code'
-    ];
+    protected $guarded = ['id'];
 
     public function programs()
     {

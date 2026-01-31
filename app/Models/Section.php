@@ -9,9 +9,7 @@ class Section extends Model
 {
     use HasUuids;
 
-    protected $fillable = [
-        'name'
-    ];
+    protected $guarded = ['id'];
 
     public function courseClass()
     {
