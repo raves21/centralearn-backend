@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('option_based_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->boolean('is_multiple_choice')->default(false);
+            $table->boolean('is_options_alphabetical')->default(true);
             $table->timestamps();
         });
     }

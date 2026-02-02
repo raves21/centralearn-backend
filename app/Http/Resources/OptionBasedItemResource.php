@@ -17,7 +17,8 @@ class OptionBasedItemResource extends JsonResource
         return [
             'id' => $this->id,
             'pointWorth' => $this->point_worth,
-            'options' => $this->whenLoaded('options', fn() => OptionBasedItemOptionResource::collection($this->options))
+            'options' => $this->whenLoaded('options', fn() => OptionBasedItemOptionResource::collection($this->options)),
+            'isOptionsAlphabetical' => $this->is_options_alphabetical,
         ];
     }
 }
