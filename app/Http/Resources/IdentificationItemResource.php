@@ -18,6 +18,7 @@ class IdentificationItemResource extends JsonResource
             'id' => $this->id,
             'acceptedAnswers' => $this->accepted_answers,
             'pointWorth' => $this->point_worth,
+            'isCaseSensitive' => $this->is_case_sensitive,
         ];
     }
 }

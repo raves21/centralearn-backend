@@ -250,7 +250,7 @@ class AssessmentMaterialService
     {
         // Create the OptionBasedItem
         $optionBasedItem = $this->optionBasedItemRepo->create([
-            'is_multiple_choice' => $data['is_multiple_choice'] ?? false,
+            'is_options_alphabetical' => $data['is_options_alphabetical'] ?? false,
         ]);
 
         // Create options

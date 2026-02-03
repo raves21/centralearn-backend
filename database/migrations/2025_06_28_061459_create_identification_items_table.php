@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('identification_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->json('accepted_answers');
+            $table->boolean('is_case_sensitive')->default(false);
             $table->timestamps();
         });
     }

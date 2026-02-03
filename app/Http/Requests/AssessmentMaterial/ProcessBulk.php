@@ -52,10 +52,11 @@ class ProcessBulk extends FormRequest
             'materials.*.identification_item' => ['required_if:materials.*.material_type,identification_item', 'array'],
             'materials.*.identification_item.accepted_answers' => ['required_if:materials.*.material_type,identification_item', 'array', 'min:1'],
             'materials.*.identification_item.accepted_answers.*' => ['string'],
+            'materials.*.identification_item.is_case_sensitive' => ['nullable', 'boolean'],
 
             // Type-Specific: Option Based
             'materials.*.option_based_item' => ['required_if:materials.*.material_type,option_based_item', 'array'],
-            'materials.*.option_based_item.is_multiple_choice' => ['nullable', 'boolean'],
+            'materials.*.option_based_item.is_options_alphabetical' => ['nullable', 'boolean'],
             'materials.*.option_based_item.options' => ['required_if:materials.*.material_type,option_based_item', 'array', 'min:2'],
 
             'materials.*.option_based_item.options.*.id' => ['nullable', 'exists:option_based_item_options,id'],
