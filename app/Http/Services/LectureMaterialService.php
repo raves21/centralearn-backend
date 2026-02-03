@@ -132,7 +132,7 @@ class LectureMaterialService
                                 $newAttachment = $this->textAttachmentRepo->create(['content' => $material['material_content']]);
                                 $morphClass = TextAttachment::class;
                             } else {
-                                $newAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']);
+                                $newAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']['new_file']);
                                 $morphClass = FileAttachment::class;
                             }
 
@@ -153,9 +153,9 @@ class LectureMaterialService
                                 );
                             } else {
                                 // File: Only update if new file provided
-                                if (isset($material['material_file'])) {
+                                if (isset($material['material_file']['new_file'])) {
                                     $this->fileAttachmentRepo->deleteById($lectureMaterial->materialable_id);
-                                    $newAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']);
+                                    $newAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']['new_file']);
                                     $this->lectureMaterialRepo->updateById($id, [
                                         'materialable_id' => $newAttachment->id
                                     ]);
@@ -177,7 +177,7 @@ class LectureMaterialService
                             ]);
                             break;
                         case 'file':
-                            $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']);
+                            $newFileAttachment = $this->fileAttachmentRepo->uploadAndCreate($material['material_file']['new_file']);
                             $this->lectureMaterialRepo->create([
                                 'lecture_id' => $lectureId,
                                 'order' => $material['order'],

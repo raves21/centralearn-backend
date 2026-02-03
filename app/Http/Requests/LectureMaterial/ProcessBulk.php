@@ -30,13 +30,14 @@ class ProcessBulk extends FormRequest
                 'string'
             ],
 
-            // File validation
-            'materials.*.material_file' => [
+            'materials.*.material_file' => ['required_if:materials.*.material_type,file', 'array'],
+            'materials.*.material_file.kept_file' => ['nullable', 'string'],
+            'materials.*.material_file.new_file' => [
                 'nullable',
                 'file',
                 'mimes:pdf,doc,docx,xlsx,mkv,mp4,jpg,jpeg,png',
                 'max:307200'
-            ],
+            ]
         ];
     }
 
@@ -50,16 +51,32 @@ class ProcessBulk extends FormRequest
             $orders = [];
 
             foreach ($materials as $index => $material) {
-                // 1. Validate 'material_file' requirement for NEW file materials
+                // 1. Validate 'material_file' requirement
                 $type = $material['material_type'] ?? null;
                 $id = $material['id'] ?? null;
-                $hasFile = isset($material['material_file']); // Check if file is uploaded
 
-                if ($type === 'file' && is_null($id) && !$hasFile) {
-                    $validator->errors()->add(
-                        "materials.{$index}.material_file",
-                        "File is required for new file materials."
-                    );
+                if ($type === 'file') {
+                    $fileData = $material['material_file'] ?? null;
+                    $newFile = $fileData['new_file'] ?? null;
+                    $keptFile = $fileData['kept_file'] ?? null;
+
+                    if (is_null($id)) {
+                        // Case A: New Material -> Must have new_file
+                        if (!$newFile) {
+                            $validator->errors()->add(
+                                "materials.{$index}.material_file.new_file",
+                                "A file is required for new materials."
+                            );
+                        }
+                    } else {
+                        // Case B: Existing Material -> Must have kept_file OR new_file
+                        if (!$keptFile && !$newFile) {
+                            $validator->errors()->add(
+                                "materials.{$index}.material_file",
+                                "Either keep the existing file or upload a new one."
+                            );
+                        }
+                    }
                 }
 
                 // 2. Validate valid ID ownership (Security check)
