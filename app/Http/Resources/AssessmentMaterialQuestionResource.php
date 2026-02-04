@@ -5,7 +5,7 @@ namespace App\Http\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class EssayItemResource extends JsonResource
+class AssessmentMaterialQuestionResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,8 @@ class EssayItemResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'minCharacterCount' => $this->min_character_count,
-            'maxCharacterCount' => $this->max_character_count,
-            'minWordCount' => $this->min_word_count,
-            'maxWordCount' => $this->max_word_count,
+            'questionText' => $this->question_text,
+            'questionFiles' => $this->question_files,
         ];
     }
 }

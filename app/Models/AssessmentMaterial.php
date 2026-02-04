@@ -11,11 +11,16 @@ class AssessmentMaterial extends Model
 
     protected $guarded = ['id'];
 
-    protected $with = ['materialable'];
+    protected $with = ['materialable', 'assessmentMaterialQuestion'];
 
     public function assessment()
     {
         return $this->belongsTo(Assessment::class);
+    }
+
+    public function assessmentMaterialQuestion()
+    {
+        return $this->hasOne(AssessmentMaterialQuestion::class);
     }
 
     public function materialable()

@@ -25,6 +25,8 @@ class AssessmentMaterialResource extends JsonResource
             'order' => $this->order,
             'materialType' => $this->materialable_type,
             'materialId' => $this->materialable_id,
+            'question' => $this->whenLoaded('assessmentMaterialQuestion', fn() => new AssessmentMaterialQuestionResource($this->assessmentMaterialQuestion)),
+            'pointWorth' => $this->point_worth,
             'material' => $this->whenLoaded('materialable', function () {
                 $material = $this->materialable;
                 switch ($this->materialable_type) {

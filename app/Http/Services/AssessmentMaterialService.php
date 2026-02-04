@@ -231,18 +231,18 @@ class AssessmentMaterialService
     private function createSpecificItem($type, $data)
     {
         return match ($type) {
-            'essay_item' => $this->essayItemRepo->create($data['essay_item']),
-            'identification_item' => $this->identificationItemRepo->create($data['identification_item']),
-            'option_based_item' => $this->createOptionBasedItem($data['option_based_item']),
+            'essay_item' => $this->essayItemRepo->create($data['essay_item'] ?? []),
+            'identification_item' => $this->identificationItemRepo->create($data['identification_item'] ?? []),
+            'option_based_item' => $this->createOptionBasedItem($data['option_based_item'] ?? []),
         };
     }
 
     private function updateSpecificItem($type, $id, $data)
     {
         match ($type) {
-            'essay_item' => $this->essayItemRepo->updateById($id, $data['essay_item']),
-            'identification_item' => $this->identificationItemRepo->updateById($id, $data['identification_item']),
-            'option_based_item' => $this->updateOptionBasedItem($id, $data['option_based_item']),
+            'essay_item' => $this->essayItemRepo->updateById($id, $data['essay_item'] ?? []),
+            'identification_item' => $this->identificationItemRepo->updateById($id, $data['identification_item'] ?? []),
+            'option_based_item' => $this->updateOptionBasedItem($id, $data['option_based_item'] ?? []),
         };
     }
 
