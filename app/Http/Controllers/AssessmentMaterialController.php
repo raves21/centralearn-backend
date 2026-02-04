@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AssessmentMaterial\Index;
-use App\Http\Requests\LectureMaterial\ProcessBulk;
+use App\Http\Requests\AssessmentMaterial\ProcessBulk;
 use App\Http\Services\AssessmentMaterialService;
 
 class AssessmentMaterialController extends Controller

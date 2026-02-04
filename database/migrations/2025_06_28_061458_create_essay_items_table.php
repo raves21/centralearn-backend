@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('essay_items', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('question_text');
             $table->integer('min_character_count')->nullable();
             $table->integer('max_character_count')->nullable();
             $table->integer('min_word_count')->nullable();

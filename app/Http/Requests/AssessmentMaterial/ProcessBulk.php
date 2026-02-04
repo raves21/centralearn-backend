@@ -42,20 +42,20 @@ class ProcessBulk extends FormRequest
             ],
 
             // Type-Specific: Essay
-            'materials.*.essay_item' => ['required_if:materials.*.material_type,essay_item', 'array'],
+            'materials.*.essay_item' => ['nullable', 'array'],
             'materials.*.essay_item.min_character_count' => ['nullable', 'integer', 'min:0'],
             'materials.*.essay_item.max_character_count' => ['nullable', 'integer', 'min:0'],
             'materials.*.essay_item.min_word_count' => ['nullable', 'integer', 'min:0'],
             'materials.*.essay_item.max_word_count' => ['nullable', 'integer', 'min:0'],
 
             // Type-Specific: Identification
-            'materials.*.identification_item' => ['required_if:materials.*.material_type,identification_item', 'array'],
+            'materials.*.identification_item' => ['nullable', 'array'],
             'materials.*.identification_item.accepted_answers' => ['required_if:materials.*.material_type,identification_item', 'array', 'min:1'],
             'materials.*.identification_item.accepted_answers.*' => ['string'],
             'materials.*.identification_item.is_case_sensitive' => ['nullable', 'boolean'],
 
             // Type-Specific: Option Based
-            'materials.*.option_based_item' => ['required_if:materials.*.material_type,option_based_item', 'array'],
+            'materials.*.option_based_item' => ['nullable', 'array'],
             'materials.*.option_based_item.is_options_alphabetical' => ['nullable', 'boolean'],
             'materials.*.option_based_item.options' => ['required_if:materials.*.material_type,option_based_item', 'array', 'min:2'],
 
@@ -157,7 +157,6 @@ class ProcessBulk extends FormRequest
             'materials.*.material_type.in' => 'Material type must be one of: essay_item, identification_item, option_based_item.',
             'materials.*.question.question_text.required' => 'Question text is required.',
 
-            'materials.*.essay_item.required_if' => 'Essay item details are required.',
             'materials.*.identification_item.required_if' => 'Identification item details are required.',
             'materials.*.identification_item.accepted_answers.required_if' => 'Accepted answers are required.',
             'materials.*.option_based_item.required_if' => 'Option details are required.',
