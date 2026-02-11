@@ -74,7 +74,7 @@ class ProcessBulk extends FormRequest
     {
         $validator->after(function ($validator) {
             $assessmentId = $this->input('assessment_id');
-            $materials = $this->input('materials', []);
+            $materials = $this->all()['materials'] ?? [];
 
             $orders = [];
 
