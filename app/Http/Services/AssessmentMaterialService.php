@@ -4,6 +4,7 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\AssessmentMaterialQuestionRepository;
 use App\Http\Repositories\AssessmentMaterialRepository;
+use App\Http\Repositories\AssessmentRepository;
 use App\Http\Repositories\EssayItemRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Repositories\IdentificationItemRepository;
@@ -26,6 +27,7 @@ class AssessmentMaterialService
     private $optionBasedItemOptionRepo;
     private $assessmentMaterialQuestionRepo;
     private $fileAttachmentRepo;
+    private $assessmentRepo;
 
     public function __construct(
         AssessmentMaterialRepository $assessmentMaterialRepo,
@@ -34,7 +36,8 @@ class AssessmentMaterialService
         IdentificationItemRepository $identificationItemRepo,
         AssessmentMaterialQuestionRepository $assessmentMaterialQuestionRepo,
         OptionBasedItemOptionRepository $optionBasedItemOptionRepo,
-        FileAttachmentRepository $fileAttachmentRepo
+        FileAttachmentRepository $fileAttachmentRepo,
+        AssessmentRepository $assessmentRepo
     ) {
         $this->assessmentMaterialRepo = $assessmentMaterialRepo;
         $this->optionBasedItemRepo = $optionBasedItemRepo;
@@ -43,6 +46,7 @@ class AssessmentMaterialService
         $this->optionBasedItemOptionRepo = $optionBasedItemOptionRepo;
         $this->assessmentMaterialQuestionRepo = $assessmentMaterialQuestionRepo;
         $this->fileAttachmentRepo = $fileAttachmentRepo;
+        $this->assessmentRepo = $assessmentRepo;
     }
 
     public function getAll(array $filters)
@@ -189,6 +193,7 @@ class AssessmentMaterialService
                 }
             }
 
+            $this->assessmentRepo->updateMaxAchievableScore($formData['assessment_id']);
             DB::commit();
             return [
                 'message' => 'Bulk operations completed successfully',

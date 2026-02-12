@@ -10,4 +10,21 @@ class AssessmentRepository extends BaseRepository
     {
         parent::__construct($assessment);
     }
+
+    public function updateMaxAchievableScore(string $assessmentId)
+    {
+        $assessment = Assessment::findOrFail($assessmentId);
+
+        $total = 0;
+
+        foreach ($assessment->assessmentMaterials as $assessmentMaterial) {
+            $total += $assessmentMaterial->point_worth;
+        }
+
+        $assessment->update([
+            'max_achievable_score' => $total
+        ]);
+
+        return $total;
+    }
 }
