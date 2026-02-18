@@ -17,6 +17,7 @@ return new class extends Migration
             $table->foreignUuid('assessment_id')->constrained()->cascadeOnDelete();
             $table->integer('attempt_number');
             $table->enum('status', ['ongoing', 'submitted']);
+            $table->timestamp('started_at');
             $table->timestamp('submitted_at')->nullable();
             $table->double('score')->nullable();
             $table->timestamps();

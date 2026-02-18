@@ -6,5 +6,5 @@ use Illuminate\Http\Request;
 
 class StudentAssessmentAttemptController extends Controller
 {
-    //
+    public function submitAttempt() {}
 }
