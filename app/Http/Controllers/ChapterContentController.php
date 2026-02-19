@@ -10,12 +10,9 @@ use App\Http\Services\ChapterContentService;
 
 class ChapterContentController extends Controller
 {
-    private $chapterContentService;
-
-    public function __construct(ChapterContentService $chapterContentService)
-    {
-        $this->chapterContentService = $chapterContentService;
-    }
+    public function __construct(
+        private ChapterContentService $chapterContentService
+    ) {}
 
     public function index(Index $request)
     {

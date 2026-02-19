@@ -12,12 +12,9 @@ use Illuminate\Http\Request;
 
 class DepartmentController extends Controller
 {
-    private $departmentService;
-
-    public function __construct(DepartmentService $departmentService)
-    {
-        $this->departmentService = $departmentService;
-    }
+    public function __construct(
+        private DepartmentService $departmentService
+    ) {}
     /**
      * Display a listing of the resource.
      */

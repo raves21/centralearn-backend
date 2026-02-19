@@ -12,12 +12,9 @@ use Illuminate\Http\Request;
 
 class ProgramController extends Controller
 {
-    private $programService;
-
-    public function __construct(ProgramService $programService)
-    {
-        $this->programService = $programService;
-    }
+    public function __construct(
+        private ProgramService $programService
+    ) {}
     /**
      * Display a listing of the resource.
      */

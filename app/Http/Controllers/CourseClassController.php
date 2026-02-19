@@ -9,12 +9,9 @@ use App\Http\Services\CourseClassService;
 
 class CourseClassController extends Controller
 {
-    private $courseClassService;
-
-    public function __construct(CourseClassService $courseClassService)
-    {
-        $this->courseClassService = $courseClassService;
-    }
+    public function __construct(
+        private CourseClassService $courseClassService
+    ) {}
 
     public function index(Index $request)
     {

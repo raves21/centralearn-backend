@@ -9,13 +9,9 @@ use Illuminate\Support\Arr;
 
 class ChapterService
 {
-    private $chapterRepo;
-
     public function __construct(
-        ChapterRepository $chapterRepo,
-    ) {
-        $this->chapterRepo = $chapterRepo;
-    }
+        private ChapterRepository $chapterRepo,
+    ) {}
 
     public function getAll(array $filters)
     {

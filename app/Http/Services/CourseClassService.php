@@ -9,16 +9,10 @@ use Illuminate\Support\Arr;
 
 class CourseClassService
 {
-    private $courseClassRepo;
-    private $fileAttachmentRepo;
-
     public function __construct(
-        CourseClassRepository $courseClassRepo,
-        FileAttachmentRepository $fileAttachmentRepo,
-    ) {
-        $this->courseClassRepo = $courseClassRepo;
-        $this->fileAttachmentRepo = $fileAttachmentRepo;
-    }
+        private CourseClassRepository $courseClassRepo,
+        private FileAttachmentRepository $fileAttachmentRepo,
+    ) {}
 
     public function getAll(array $filters)
     {

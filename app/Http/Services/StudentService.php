@@ -17,25 +17,13 @@ use DeepCopy\Filter\Filter;
 class StudentService
 {
 
-    private $studentRepo;
-    private $semesterRepo;
-    private $courseClassRepo;
-    private $classStudentEnrollmentRepo;
-    private $userRepo;
-
     public function __construct(
-        StudentRepository $studentRepo,
-        SemesterRepository $semesterRepo,
-        CourseClassRepository $courseClassRepo,
-        ClassStudentEnrollmentRepository $classStudentEnrollmentRepo,
-        UserRepository $userRepo
-    ) {
-        $this->studentRepo = $studentRepo;
-        $this->semesterRepo = $semesterRepo;
-        $this->courseClassRepo = $courseClassRepo;
-        $this->classStudentEnrollmentRepo = $classStudentEnrollmentRepo;
-        $this->userRepo = $userRepo;
-    }
+        private StudentRepository $studentRepo,
+        private SemesterRepository $semesterRepo,
+        private CourseClassRepository $courseClassRepo,
+        private ClassStudentEnrollmentRepository $classStudentEnrollmentRepo,
+        private UserRepository $userRepo
+    ) {}
 
     public function getAll(array $filters)
     {

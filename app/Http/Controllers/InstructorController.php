@@ -13,12 +13,9 @@ use App\Http\Services\InstructorService;
 
 class InstructorController extends Controller
 {
-    private $instructorService;
-
-    public function __construct(InstructorService $instructorService)
-    {
-        $this->instructorService = $instructorService;
-    }
+    public function __construct(
+        private InstructorService $instructorService
+    ) {}
     /**
      * Display a listing of the resource.
      */

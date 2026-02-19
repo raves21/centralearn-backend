@@ -8,12 +8,9 @@ use Illuminate\Support\Facades\Storage;
 
 class FileAttachmentService
 {
-    private $fileAttachmentRepository;
-
-    public function __construct(FileAttachmentRepository $fileAttachmentRepository)
-    {
-        $this->fileAttachmentRepository = $fileAttachmentRepository;
-    }
+    public function __construct(
+        private FileAttachmentRepository $fileAttachmentRepository
+    ) {}
 
     public static function getRandomDefaultImageUrl()
     {

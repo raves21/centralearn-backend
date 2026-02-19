@@ -9,16 +9,10 @@ use Illuminate\Support\Arr;
 
 class ProgramService
 {
-    private $programRepo;
-    private $fileAttachmentRepo;
-
     public function __construct(
-        ProgramRepository $programRepo,
-        FileAttachmentRepository $fileAttachmentRepo
-    ) {
-        $this->programRepo = $programRepo;
-        $this->fileAttachmentRepo = $fileAttachmentRepo;
-    }
+        private ProgramRepository $programRepo,
+        private FileAttachmentRepository $fileAttachmentRepo
+    ) {}
 
     public function getAll(array $filters)
     {

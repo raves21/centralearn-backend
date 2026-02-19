@@ -8,12 +8,9 @@ use App\Http\Services\AssessmentMaterialService;
 
 class AssessmentMaterialController extends Controller
 {
-    private $assessmentMaterialService;
-
-    public function __construct(AssessmentMaterialService $assessmentMaterialService)
-    {
-        $this->assessmentMaterialService = $assessmentMaterialService;
-    }
+    public function __construct(
+        private AssessmentMaterialService $assessmentMaterialService
+    ) {}
     /**
      * Display a listing of the resource.
      */

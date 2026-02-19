@@ -14,12 +14,9 @@ use App\Http\Services\StudentService;
 class StudentController extends Controller
 {
 
-    private $studentService;
-
-    public function __construct(StudentService $studentService)
-    {
-        $this->studentService = $studentService;
-    }
+    public function __construct(
+        private StudentService $studentService
+    ) {}
     /**
      * Display a listing of the resource.
      */

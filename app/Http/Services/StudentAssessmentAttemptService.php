@@ -2,17 +2,16 @@
 
 namespace App\Http\Services;
 
+use App\Http\Repositories\AssessmentRepository;
 use App\Http\Repositories\StudentAssessmentAttemptRepository;
 use App\Http\Resources\StudentAssessmentAttemptResource;
 
 class StudentAssessmentAttemptService
 {
-    private $studentAssessmentAttemptRepo;
-
-    public function __construct(StudentAssessmentAttemptRepository $studentAssessmentAttemptRepo)
-    {
-        $this->studentAssessmentAttemptRepo = $studentAssessmentAttemptRepo;
-    }
+    public function __construct(
+        private StudentAssessmentAttemptRepository $studentAssessmentAttemptRepo,
+        private AssessmentRepository $assessmentRepo
+    ) {}
 
     public function getAll()
     {
@@ -37,5 +36,10 @@ class StudentAssessmentAttemptService
     public function deleteById(string $id)
     {
         return $this->studentAssessmentAttemptRepo->deleteById($id);
+    }
+
+    public function submitAttempt(array $formData)
+    {
+        $assessment = $this->assessmentRepo->findById($formData['assessment_id']);
     }
 }

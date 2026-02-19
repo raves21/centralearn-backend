@@ -9,12 +9,9 @@ use Illuminate\Support\Arr;
 class SemesterService
 {
 
-    private $semesterRepo;
-
-    public function __construct(SemesterRepository $semesterRepo)
-    {
-        $this->semesterRepo = $semesterRepo;
-    }
+    public function __construct(
+        private SemesterRepository $semesterRepo
+    ) {}
 
     public function getAll(array $filters)
     {

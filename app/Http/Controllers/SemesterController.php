@@ -10,12 +10,9 @@ use App\Http\Services\SemesterService;
 
 class SemesterController extends Controller
 {
-    private $semesterService;
-
-    public function __construct(SemesterService $semesterService)
-    {
-        $this->semesterService = $semesterService;
-    }
+    public function __construct(
+        private SemesterService $semesterService
+    ) {}
 
     /**
      * Display a listing of the resource.

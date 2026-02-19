@@ -13,19 +13,11 @@ use Illuminate\Support\Facades\DB;
 
 class ChapterContentService
 {
-    private $chapterContentRepo;
-    private $assessmentRepo;
-    private $lectureRepo;
-
     public function __construct(
-        ChapterContentRepository $chapterContentRepo,
-        AssessmentRepository $assessmentRepo,
-        LectureRepository $lectureRepo,
-    ) {
-        $this->chapterContentRepo = $chapterContentRepo;
-        $this->assessmentRepo = $assessmentRepo;
-        $this->lectureRepo = $lectureRepo;
-    }
+        private ChapterContentRepository $chapterContentRepo,
+        private AssessmentRepository $assessmentRepo,
+        private LectureRepository $lectureRepo,
+    ) {}
 
     public function getAll(array $filters)
     {

@@ -11,12 +11,9 @@ use Illuminate\Http\Request;
 
 class CourseController extends Controller
 {
-    private $courseService;
-
-    public function __construct(CourseService $courseService)
-    {
-        $this->courseService = $courseService;
-    }
+    public function __construct(
+        private CourseService $courseService
+    ) {}
     /**
      * Display a listing of the resource.
      */

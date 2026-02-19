@@ -9,12 +9,9 @@ use App\Http\Services\LectureMaterialService;
 class LectureMaterialController extends Controller
 {
 
-    private $lectureMaterialService;
-
-    public function __construct(LectureMaterialService $lectureMaterialService)
-    {
-        $this->lectureMaterialService = $lectureMaterialService;
-    }
+    public function __construct(
+        private LectureMaterialService $lectureMaterialService
+    ) {}
 
     public function index(Index $request)
     {

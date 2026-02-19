@@ -15,19 +15,11 @@ use Illuminate\Support\Arr;
 
 class LectureMaterialService
 {
-    private $lectureMaterialRepo;
-    private $textAttachmentRepo;
-    private $fileAttachmentRepo;
-
     public function __construct(
-        LectureMaterialRepository $lectureMaterialRepo,
-        TextAttachmentRepository $textAttachmentRepo,
-        FileAttachmentRepository $fileAttachmentRepo
-    ) {
-        $this->lectureMaterialRepo = $lectureMaterialRepo;
-        $this->textAttachmentRepo = $textAttachmentRepo;
-        $this->fileAttachmentRepo = $fileAttachmentRepo;
-    }
+        private LectureMaterialRepository $lectureMaterialRepo,
+        private TextAttachmentRepository $textAttachmentRepo,
+        private FileAttachmentRepository $fileAttachmentRepo
+    ) {}
 
     public function getAll(array $filters)
     {

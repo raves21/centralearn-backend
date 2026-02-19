@@ -7,12 +7,9 @@ use App\Http\Resources\SectionResource;
 
 class SectionService
 {
-    private $sectionRepo;
-
-    public function __construct(SectionRepository $sectionRepo)
-    {
-        $this->sectionRepo = $sectionRepo;
-    }
+    public function __construct(
+        private SectionRepository $sectionRepo
+    ) {}
 
     public function getAll(array $filters)
     {

@@ -17,28 +17,14 @@ use Illuminate\Support\Facades\Log;
 
 class InstructorService
 {
-    private $instructorRepo;
-    private $semesterRepo;
-    private $courseClassRepo;
-    private $classInstructorAssignmentRepo;
-    private $userRepo;
-    private $adminRepo;
-
     public function __construct(
-        InstructorRepository $instructorRepo,
-        SemesterRepository $semesterRepo,
-        CourseClassRepository $courseClassRepo,
-        ClassInstructorAssignmentRepository $classInstructorAssignmentRepo,
-        UserRepository $userRepo,
-        AdminRepository $adminRepo
-    ) {
-        $this->instructorRepo = $instructorRepo;
-        $this->semesterRepo = $semesterRepo;
-        $this->courseClassRepo = $courseClassRepo;
-        $this->classInstructorAssignmentRepo = $classInstructorAssignmentRepo;
-        $this->userRepo = $userRepo;
-        $this->adminRepo = $adminRepo;
-    }
+        private InstructorRepository $instructorRepo,
+        private SemesterRepository $semesterRepo,
+        private CourseClassRepository $courseClassRepo,
+        private ClassInstructorAssignmentRepository $classInstructorAssignmentRepo,
+        private UserRepository $userRepo,
+        private AdminRepository $adminRepo
+    ) {}
 
     public function getAll(array $filters)
     {

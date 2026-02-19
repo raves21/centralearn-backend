@@ -10,16 +10,10 @@ use Illuminate\Support\Arr;
 
 class DepartmentService
 {
-    private $departmentRepo;
-    private $fileAttachmentRepo;
-
     public function __construct(
-        DepartmentRepository $departmentRepo,
-        FileAttachmentRepository $fileAttachmentRepo
-    ) {
-        $this->departmentRepo = $departmentRepo;
-        $this->fileAttachmentRepo = $fileAttachmentRepo;
-    }
+        private DepartmentRepository $departmentRepo,
+        private FileAttachmentRepository $fileAttachmentRepo
+    ) {}
 
     public function getAll(array $filters)
     {

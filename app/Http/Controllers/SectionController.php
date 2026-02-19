@@ -9,12 +9,9 @@ use App\Http\Services\SectionService;
 
 class SectionController extends Controller
 {
-    private $sectionService;
-
-    public function __construct(SectionService $sectionService)
-    {
-        $this->sectionService = $sectionService;
-    }
+    public function __construct(
+        private SectionService $sectionService
+    ) {}
     /**
      * Display a listing of the resource.
      */

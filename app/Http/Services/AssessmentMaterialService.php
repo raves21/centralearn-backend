@@ -20,34 +20,16 @@ use Illuminate\Support\Facades\DB;
 
 class AssessmentMaterialService
 {
-    private $assessmentMaterialRepo;
-    private $optionBasedItemRepo;
-    private $essayItemRepo;
-    private $identificationItemRepo;
-    private $optionBasedItemOptionRepo;
-    private $assessmentMaterialQuestionRepo;
-    private $fileAttachmentRepo;
-    private $assessmentRepo;
-
     public function __construct(
-        AssessmentMaterialRepository $assessmentMaterialRepo,
-        OptionBasedItemRepository $optionBasedItemRepo,
-        EssayItemRepository $essayItemRepo,
-        IdentificationItemRepository $identificationItemRepo,
-        AssessmentMaterialQuestionRepository $assessmentMaterialQuestionRepo,
-        OptionBasedItemOptionRepository $optionBasedItemOptionRepo,
-        FileAttachmentRepository $fileAttachmentRepo,
-        AssessmentRepository $assessmentRepo
-    ) {
-        $this->assessmentMaterialRepo = $assessmentMaterialRepo;
-        $this->optionBasedItemRepo = $optionBasedItemRepo;
-        $this->essayItemRepo = $essayItemRepo;
-        $this->identificationItemRepo = $identificationItemRepo;
-        $this->optionBasedItemOptionRepo = $optionBasedItemOptionRepo;
-        $this->assessmentMaterialQuestionRepo = $assessmentMaterialQuestionRepo;
-        $this->fileAttachmentRepo = $fileAttachmentRepo;
-        $this->assessmentRepo = $assessmentRepo;
-    }
+        private AssessmentMaterialRepository $assessmentMaterialRepo,
+        private OptionBasedItemRepository $optionBasedItemRepo,
+        private EssayItemRepository $essayItemRepo,
+        private IdentificationItemRepository $identificationItemRepo,
+        private AssessmentMaterialQuestionRepository $assessmentMaterialQuestionRepo,
+        private OptionBasedItemOptionRepository $optionBasedItemOptionRepo,
+        private FileAttachmentRepository $fileAttachmentRepo,
+        private AssessmentRepository $assessmentRepo
+    ) {}
 
     public function getAll(array $filters)
     {

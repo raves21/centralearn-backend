@@ -10,14 +10,10 @@ use Illuminate\Support\Facades\Log;
 
 class AdminService
 {
-    private $adminRepo;
-    private $userRepo;
-
-    public function __construct(AdminRepository $adminRepo, UserRepository $userRepo)
-    {
-        $this->adminRepo = $adminRepo;
-        $this->userRepo = $userRepo;
-    }
+    public function __construct(
+        private AdminRepository $adminRepo,
+        private UserRepository $userRepo
+    ) {}
 
     public function getAll(array $filters)
     {

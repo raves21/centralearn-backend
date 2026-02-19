@@ -7,12 +7,9 @@ use App\Http\Resources\AssessmentVersionResource;
 
 class AssessmentVersionService
 {
-    private $assessmentVersionRepo;
-
-    public function __construct(AssessmentVersionRepository $assessmentVersionRepo)
-    {
-        $this->assessmentVersionRepo = $assessmentVersionRepo;
-    }
+    public function __construct(
+        private AssessmentVersionRepository $assessmentVersionRepo
+    ) {}
 
     public function getAll()
     {

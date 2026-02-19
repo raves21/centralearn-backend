@@ -10,16 +10,10 @@ use Illuminate\Support\Facades\Log;
 
 class CourseService
 {
-    private $courseRepo;
-    private $fileAttachmentRepo;
-
     public function __construct(
-        CourseRepository $courseRepo,
-        FileAttachmentRepository $fileAttachmentRepo
-    ) {
-        $this->courseRepo = $courseRepo;
-        $this->fileAttachmentRepo = $fileAttachmentRepo;
-    }
+        private CourseRepository $courseRepo,
+        private FileAttachmentRepository $fileAttachmentRepo
+    ) {}
 
     public function getAll(array $filters)
     {

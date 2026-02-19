@@ -10,12 +10,9 @@ use Illuminate\Support\Facades\Log;
 
 class AdminController extends Controller
 {
-    private $adminService;
-
-    public function __construct(AdminService $adminService)
-    {
-        $this->adminService = $adminService;
-    }
+    public function __construct(
+        private AdminService $adminService
+    ) {}
     /**
      * Display a listing of the resource.
      */
