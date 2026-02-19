@@ -14,13 +14,21 @@ return new class extends Migration
         Schema::create('student_assessment_attempts', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('student_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('assessment_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('assessment_version_id')->constrained()->cascadeOnDelete();
+            $table->json('answers');
             $table->integer('attempt_number');
             $table->enum('status', ['ongoing', 'submitted']);
             $table->timestamp('started_at');
+
+            //contains the questionnaire with student's answers and point/s earned per item and whether its correct/wrong
+            //this should only be filled if the attempt has been submitted
+            $table->json('submission_summary')->nullable();
+
             $table->timestamp('submitted_at')->nullable();
-            $table->double('score')->nullable();
+            $table->double('total_score')->nullable();
             $table->timestamps();
+
+            $table->unique(['student_id', 'assessment_version_id', 'attempt_number']);
         });
     }
 

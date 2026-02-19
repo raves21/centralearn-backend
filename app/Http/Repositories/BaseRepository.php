@@ -35,6 +35,21 @@ class BaseRepository
         $this->model->findOrFail($id);
     }
 
+    public function getCount()
+    {
+        return $this->model->count();
+    }
+
+    public function getCountByFilter(array $filters)
+    {
+        return $this->model->where(function ($q) use ($filters) {
+            foreach ($filters as $column => $value) {
+                $q->where($column, $value);
+            }
+        })
+            ->count();
+    }
+
     public function updateById(string $id, array $formData, array $relationships = [])
     {
         $record = $this->model->findOrFail($id);

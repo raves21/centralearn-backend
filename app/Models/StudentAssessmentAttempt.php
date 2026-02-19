@@ -8,13 +8,18 @@ class StudentAssessmentAttempt extends Model
 {
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'answers',
+        'submission_summary'
+    ];
+
     public function student()
     {
         return $this->belongsTo(Student::class);
     }
 
-    public function assessment()
+    public function assessmentVersion()
     {
-        return $this->belongsTo(Assessment::class);
+        return $this->belongsTo(AssessmentVersion::class);
     }
 }
