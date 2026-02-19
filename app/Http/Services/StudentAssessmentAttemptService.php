@@ -49,6 +49,10 @@ class StudentAssessmentAttemptService
 
         $submissionSummary = [];
 
+        $totalPointsEarned = 0;
+
+        $hasEssayItem = collect($answers)->contains('material_type', 'essayItem');
+
         foreach ($answers as $answer) {
             $materialId = $answer['material_id'];
             $materialType = $answer['material_type'];
@@ -59,6 +63,8 @@ class StudentAssessmentAttemptService
                     $correctAnswer = $answerKey[$materialId]['correct_answer'];
                     $isCorrect = $answerContent === $correctAnswer;
                     $pointsEarned = $isCorrect ? $answerKey[$materialId]['point_worth'] : 0;
+
+                    if ($isCorrect) $totalPointsEarned += 0;
 
                     $submissionSummary[$materialId] = [
                         'answer_content' => $answerContent,
@@ -73,6 +79,8 @@ class StudentAssessmentAttemptService
                     $isCorrect = in_array($answerContent, $acceptedAnswers);
                     $pointsEarned = $isCorrect ? $answerKey[$materialId]['point_worth'] : 0;
 
+                    if ($isCorrect) $totalPointsEarned += 0;
+
                     $submissionSummary[$materialId] = [
                         'answer_content' => $answerContent,
                         'accepted_answers' => $acceptedAnswers,
@@ -83,9 +91,21 @@ class StudentAssessmentAttemptService
                 case 'essayItem':
                     $submissionSummary[$materialId] = [
                         'answer_content' => $answerContent,
-                        'points_earned' => null
+                        'points_earned' => null //ungraded initially, this will be manually checked by instructor
                     ];
             }
         }
+
+        $this->studentAssessmentAttemptRepo->updateById($attempt->id, [
+            'submission_summary' => $submissionSummary,
+            'submitted_at' => now(),
+            'status' => 'submitted',
+            //essay items cannot be auto-graded
+            'total_score' => $hasEssayItem ? null : $totalPointsEarned
+        ]);
+
+        return [
+            'message' => 'attempt submitted successfully.'
+        ];
     }
 }

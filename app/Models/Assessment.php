@@ -25,4 +25,9 @@ class Assessment extends Model
     {
         return $this->hasMany(AssessmentMaterial::class);
     }
+
+    public function assessmentVersions()
+    {
+        return $this->hasMany(AssessmentVersion::class);
+    }
 }

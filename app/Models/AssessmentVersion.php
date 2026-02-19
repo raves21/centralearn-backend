@@ -12,4 +12,14 @@ class AssessmentVersion extends Model
         'questionnaire',
         'answer_key'
     ];
+
+    public function assessment()
+    {
+        return $this->belongsTo(Assessment::class);
+    }
+
+    public function studentAssessmentAttempts()
+    {
+        return $this->hasMany(StudentAssessmentAttempt::class);
+    }
 }
