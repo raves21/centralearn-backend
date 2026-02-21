@@ -30,4 +30,9 @@ class Assessment extends Model
     {
         return $this->hasMany(AssessmentVersion::class);
     }
+
+    public function assessmentResults()
+    {
+        return $this->hasMany(AssessmentResult::class);
+    }
 }

@@ -20,7 +20,6 @@ class AssessmentResource extends JsonResource
             'maxAchievableScore' => $this->max_achievable_score,
             'isAnswersViewableAfterSubmit' => (bool) $this->is_answers_viewable_after_submit,
             'isScoreViewableAfterSubmit' => (bool) $this->is_score_viewable_after_submit,
-            'isMultiAttempts' => (bool) $this->is_multi_attempts,
             'maxAttempts' => $this->max_attempts,
             'multiAttemptGradingType' => $this->multi_attempt_grading_type
         ];

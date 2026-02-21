@@ -52,9 +52,12 @@ class Store extends FormRequest
                 'content.time_limit' => ['required', 'integer', 'min:1'],
                 'content.is_answers_viewable_after_submit' => ['required', 'boolean'],
                 'content.is_score_viewable_after_submit' => ['required', 'boolean'],
-                'content.is_multi_attempts' => ['required', 'boolean'],
-                'content.max_attempts' => ['nullable', 'required_if:content.is_multi_attempts,true', 'integer', 'min:2'],
-                'content.multi_attempt_grading_type' => ['nullable', 'required_if:content.is_multi_attempts,true', 'in:avg_score,highest_score'],
+                'content.max_attempts' => ['required', 'integer', 'min:1'],
+                'content.multi_attempt_grading_type' => [
+                    'nullable',
+                    Rule::requiredIf(fn() => data_get($this->input(), 'content.max_attempts') > 1),
+                    'in:avg_score,highest_score'
+                ],
             ];
         }
 

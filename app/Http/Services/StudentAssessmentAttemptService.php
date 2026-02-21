@@ -3,16 +3,19 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\AssessmentRepository;
+use App\Http\Repositories\AssessmentResultRepository;
 use App\Http\Repositories\AssessmentVersionRepository;
 use App\Http\Repositories\StudentAssessmentAttemptRepository;
 use App\Http\Resources\StudentAssessmentAttemptResource;
+use App\Models\StudentAssessmentAttempt;
 
 class StudentAssessmentAttemptService
 {
     public function __construct(
         private StudentAssessmentAttemptRepository $studentAssessmentAttemptRepo,
         private AssessmentRepository $assessmentRepo,
-        private AssessmentVersionRepository $assessmentVersionRepo
+        private AssessmentVersionRepository $assessmentVersionRepo,
+        private AssessmentResultRepository $assessmentResultRepo
     ) {}
 
     public function getAll()
@@ -43,7 +46,7 @@ class StudentAssessmentAttemptService
     public function submitAttempt(array $formData)
     {
 
-        $attempt = $this->studentAssessmentAttemptRepo->findById($formData['attempt_id']);
+        $attempt = $this->studentAssessmentAttemptRepo->findById($formData['attempt_id'], ['assessmentVersion.assessment']);
         $answerKey = $attempt->assessmentVersion->answer_key;
         $answers = $formData['answers'];
 
@@ -103,6 +106,46 @@ class StudentAssessmentAttemptService
             //essay items cannot be auto-graded
             'total_score' => $hasEssayItem ? null : $totalPointsEarned
         ]);
+
+        $attempts = StudentAssessmentAttempt::where('student_id', $attempt->student_id)
+            ->whereHas('assessmentVersion', function ($q) use ($attempt) {
+                $q->where('id', $attempt->assesmentVersion->assessment_id);
+            })
+            ->pluck('final_score');
+
+        $assessment = $attempt->assessmentVersion->assessment;
+        $assessmentResult = $this->assessmentResultRepo->findByFilter([
+            'assessment_id' => $assessment->id,
+            'student_id' => $attempt->student_id
+        ]);
+
+        if (!$hasEssayItem) {
+            if ($assessmentResult) {
+                if ($assessment->max_attempts > 1) {
+                    $this->assessmentResultRepo->updateById($assessmentResult->id, [
+                        'final_score' => $assessment->multi_attempt_grading_type === 'avg_score' ? $attempts->avg() : $attempts->max()
+                    ]);
+                } else {
+                    $this->assessmentResultRepo->updateById($assessmentResult->id, [
+                        'final_score' => $totalPointsEarned
+                    ]);
+                }
+            } else {
+                $this->assessmentResultRepo->create([
+                    'student_id' => $attempt->student_id,
+                    'assessment_id' => $assessment->id,
+                    'final_score' => $totalPointsEarned
+                ]);
+            }
+        } else {
+            if (!$assessmentResult) {
+                $this->assessmentResultRepo->create([
+                    'student_id' => $attempt->student_id,
+                    'assessment_id' => $assessment->id,
+                    'final_score' => null
+                ]);
+            }
+        }
 
         return [
             'message' => 'attempt submitted successfully.'

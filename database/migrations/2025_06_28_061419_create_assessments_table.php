@@ -17,8 +17,7 @@ return new class extends Migration
             $table->float('max_achievable_score')->nullable();
             $table->boolean('is_answers_viewable_after_submit');
             $table->boolean('is_score_viewable_after_submit');
-            $table->boolean('is_multi_attempts')->boolean();
-            $table->integer('max_attempts')->nullable();
+            $table->integer('max_attempts')->default(1);
             $table->enum('multi_attempt_grading_type', ['avg_score', 'highest_score'])->nullable();
             $table->timestamps();
         });
