@@ -16,6 +16,7 @@ use App\Models\FileAttachment;
 use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
 use App\Models\OptionBasedItemOption;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class AssessmentMaterialService
@@ -45,8 +46,9 @@ class AssessmentMaterialService
     {
         DB::beginTransaction();
 
+
+
         try {
-            $assessmentId = $formData['assessment_id'];
             $incomingMaterials = $formData['materials'] ?? [];
 
             $results = [
@@ -55,11 +57,17 @@ class AssessmentMaterialService
                 'deleted' => 0,
             ];
 
-            // 1. Identify Deletions
+            $assessmentId = $formData['assessment_id'];
+
             $existingMaterials = $this->assessmentMaterialRepo->getAll(
                 filters: ['assessment_id' => $assessmentId],
                 paginate: false
             );
+
+            //check if anything has changed
+            $this->compareAssessmentMaterialsHash($existingMaterials->toArray(), $incomingMaterials);
+
+            // 1. Identify Deletions
             $existingIds = $existingMaterials->pluck('id')->toArray();
 
             // Filter nulls to get only updated IDs
@@ -355,5 +363,58 @@ class AssessmentMaterialService
         }
 
         return null;
+    }
+
+    private function createExistingAssessmentMaterialsHash(array $existingMaterials)
+    {
+
+        $formattedMaterials = [];
+
+        foreach ($existingMaterials as $material) {
+            $materialContent = [];
+
+            switch ($material['materialable_type']) {
+                case OptionBasedItem::class:
+                    $materialContent['option_based_item'] = [
+                        'is_options_alphabetical' => (string)$material['materialable']['is_options_alphabetical'],
+                        'options' => array_map(function ($existingOption) {
+                            return array_filter([
+                                'id' => $existingOption ?? null,
+                                'order' => (string)$existingOption['order'],
+                                'is_correct' => (string)(int)$existingOption['is_correct'],
+                                'option_text' => $existingOption['option_text'] ?? null,
+                                'option_file' => $existingOption['option_file'] ?? null
+                            ]);
+                        }, $material['materialable']['option_based_item_options'])
+                    ];
+                    break;
+
+                case IdentificationItem::class:
+            }
+
+            $data = array_filter([
+                'id' => $material['id'] ?? null,
+                'material_type' => match ($material['materialable_type']) {
+                    OptionBasedItem::class => 'option_based_item',
+                    IdentificationItem::class => 'identification_item',
+                    EssayItem::class => 'essay_item'
+                },
+                'order' => $material['order'],
+                'point_worth' => $material['point_worth'],
+                'question' => array_filter([
+                    'question_text' => $material['assessment_material_question']['question_text'] ?? null,
+                    'question_files' => $material['assessment_material_question']['question_files'] ?? null
+                ]),
+            ]);
+        }
+    }
+
+
+    private function compareAssessmentMaterialsHash(array $existingMaterials, array $incomingMaterials)
+    {
+        dd([
+            'existing' => $existingMaterials,
+            'incoming' => $incomingMaterials
+        ]);
     }
 }

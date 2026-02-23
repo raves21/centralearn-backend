@@ -45,7 +45,6 @@ class StudentAssessmentAttemptService
 
     public function submitAttempt(array $formData)
     {
-
         $attempt = $this->studentAssessmentAttemptRepo->findById($formData['attempt_id'], ['assessmentVersion.assessment']);
         $answerKey = $attempt->assessmentVersion->answer_key;
         $answers = $formData['answers'];
@@ -60,14 +59,15 @@ class StudentAssessmentAttemptService
             $materialId = $answer['material_id'];
             $materialType = $answer['material_type'];
             $answerContent = $answer['content'];
+            $materialPointWorth = $answerKey[$materialId]['point_worth'];
 
             switch ($materialType) {
                 case 'optionBasedItem':
                     $correctAnswer = $answerKey[$materialId]['correct_answer'];
                     $isCorrect = $answerContent === $correctAnswer;
-                    $pointsEarned = $isCorrect ? $answerKey[$materialId]['point_worth'] : 0;
+                    $pointsEarned = $isCorrect ? $materialPointWorth : 0;
 
-                    if ($isCorrect) $totalPointsEarned += 0;
+                    if ($isCorrect) $totalPointsEarned += $materialPointWorth;
 
                     $submissionSummary[$materialId] = [
                         'answer_content' => $answerContent,
@@ -80,7 +80,7 @@ class StudentAssessmentAttemptService
                 case 'identificationItem':
                     $acceptedAnswers = $answerKey[$materialId]['accepted_answers'];
                     $isCorrect = in_array($answerContent, $acceptedAnswers);
-                    $pointsEarned = $isCorrect ? $answerKey[$materialId]['point_worth'] : 0;
+                    $pointsEarned = $isCorrect ? $materialPointWorth : 0;
 
                     if ($isCorrect) $totalPointsEarned += 0;
 
@@ -122,11 +122,11 @@ class StudentAssessmentAttemptService
         if (!$hasEssayItem) {
             if ($assessmentResult) {
                 if ($assessment->max_attempts > 1) {
-                    $this->assessmentResultRepo->updateById($assessmentResult->id, [
+                    $assessmentResult->update([
                         'final_score' => $assessment->multi_attempt_grading_type === 'avg_score' ? $attempts->avg() : $attempts->max()
                     ]);
                 } else {
-                    $this->assessmentResultRepo->updateById($assessmentResult->id, [
+                    $assessmentResult->update([
                         'final_score' => $totalPointsEarned
                     ]);
                 }
