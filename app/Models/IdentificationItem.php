@@ -11,6 +11,7 @@ class IdentificationItem extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'accepted_answers' => 'json'
+        'accepted_answers' => 'array',
+        'is_case_sensitive' => 'boolean'
     ];
 }

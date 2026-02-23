@@ -370,51 +370,77 @@ class AssessmentMaterialService
 
         $formattedMaterials = [];
 
-        foreach ($existingMaterials as $material) {
-            $materialContent = [];
+        foreach ($existingMaterials as $existingMaterial) {
 
-            switch ($material['materialable_type']) {
+            $optionBasedItem = null;
+            $essayItem = null;
+            $identificationItem = null;
+
+            $materialQuestion = $existingMaterial['assessment_material_question'];
+            $materialable = $existingMaterial['materialable'];
+
+            switch ($existingMaterial['materialable_type']) {
                 case OptionBasedItem::class:
-                    $materialContent['option_based_item'] = [
-                        'is_options_alphabetical' => (string)$material['materialable']['is_options_alphabetical'],
+                    $optionBasedItem = [
+                        'is_options_alphabetical' => (string)$materialable['is_options_alphabetical'],
                         'options' => array_map(function ($existingOption) {
                             return array_filter([
-                                'id' => $existingOption ?? null,
+                                'id' => $existingOption['id'] ?? null,
                                 'order' => (string)$existingOption['order'],
-                                'is_correct' => (string)(int)$existingOption['is_correct'],
+                                'is_correct' => (string)(int)$existingOption['is_correct'] ?? "0",
                                 'option_text' => $existingOption['option_text'] ?? null,
                                 'option_file' => $existingOption['option_file'] ?? null
-                            ]);
-                        }, $material['materialable']['option_based_item_options'])
+                            ], fn($value) => $value !== null);
+                        }, $materialable['option_based_item_options'])
                     ];
                     break;
 
                 case IdentificationItem::class:
+                    $identificationItem = array_filter([
+                        'accepted_answers' => $materialable['accepted_answers'],
+                        'is_case_sensitive' => $materialable['is_case_sensitive'] ?: "0"
+                    ], fn($value) => $value !== null);
+                    break;
+                case EssayItem::class:
+                    $essayItem = array_filter([
+                        'min_word_count' => (string)$materialable['min_word_count'] ?? null,
+                        'max_word_count' => (string)$materialable['max_word_count'] ?? null,
+                        'min_character_count' => (string)$materialable['min_character_count'] ?? null,
+                        'max_character_count' => (string)$materialable['max_character_count'] ?? null,
+                    ]);
+                    break;
             }
 
-            $data = array_filter([
-                'id' => $material['id'] ?? null,
-                'material_type' => match ($material['materialable_type']) {
+            $formattedMaterials[] = array_filter([
+                'id' => $existingMaterial['id'] ?? null,
+                'material_type' => match ($existingMaterial['materialable_type']) {
                     OptionBasedItem::class => 'option_based_item',
                     IdentificationItem::class => 'identification_item',
                     EssayItem::class => 'essay_item'
                 },
-                'order' => $material['order'],
-                'point_worth' => $material['point_worth'],
+                'order' => (string)$existingMaterial['order'],
+                'point_worth' => number_format($existingMaterial['point_worth'], 2),
                 'question' => array_filter([
-                    'question_text' => $material['assessment_material_question']['question_text'] ?? null,
-                    'question_files' => $material['assessment_material_question']['question_files'] ?? null
+                    'question_text' => $materialQuestion['question_text'] ?? null,
+                    'question_files' => $materialQuestion['question_files'] ?? null
                 ]),
-            ]);
+                'option_based_item' => $optionBasedItem ?? null,
+                'essay_item' => $essayItem ?? null,
+                'identification_item' => $identificationItem ?? null,
+            ], fn($value) => $value !== null);
         }
+
+        return [
+            'formatted' => $formattedMaterials,
+            'hash' => hash('sha256', json_encode($formattedMaterials))
+        ];
     }
 
-
-    private function compareAssessmentMaterialsHash(array $existingMaterials, array $incomingMaterials)
+    private function compareAssessmentMaterialsHash(string $existingMaterialsHash, array $incomingMaterials)
     {
-        dd([
-            'existing' => $existingMaterials,
-            'incoming' => $incomingMaterials
-        ]);
+        if ($existingMaterialsHash === hash('sha256', json_encode($incomingMaterials))) {
+            return true;
+        }
+        return false;
     }
 }

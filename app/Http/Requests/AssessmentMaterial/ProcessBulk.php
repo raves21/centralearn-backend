@@ -17,7 +17,7 @@ class ProcessBulk extends FormRequest
     {
         return [
             'assessment_id' => ['required', 'exists:assessments,id'],
-            'materials' => ['present', 'array'],
+            'materials' => ['nullable', 'array'],
 
             // Common Material Fields
             'materials.*.id' => ['nullable', 'exists:assessment_materials,id'],
