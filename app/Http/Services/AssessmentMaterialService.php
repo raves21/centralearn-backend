@@ -5,18 +5,19 @@ namespace App\Http\Services;
 use App\Http\Repositories\AssessmentMaterialQuestionRepository;
 use App\Http\Repositories\AssessmentMaterialRepository;
 use App\Http\Repositories\AssessmentRepository;
+use App\Http\Repositories\AssessmentVersionRepository;
 use App\Http\Repositories\EssayItemRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Repositories\IdentificationItemRepository;
 use App\Http\Repositories\OptionBasedItemOptionRepository;
 use App\Http\Repositories\OptionBasedItemRepository;
+use App\Http\Repositories\StudentAssessmentAttemptRepository;
 use App\Http\Resources\AssessmentMaterialResource;
 use App\Models\EssayItem;
-use App\Models\FileAttachment;
 use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
 use App\Models\OptionBasedItemOption;
-use Illuminate\Support\Collection;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class AssessmentMaterialService
@@ -29,7 +30,10 @@ class AssessmentMaterialService
         private AssessmentMaterialQuestionRepository $assessmentMaterialQuestionRepo,
         private OptionBasedItemOptionRepository $optionBasedItemOptionRepo,
         private FileAttachmentRepository $fileAttachmentRepo,
-        private AssessmentRepository $assessmentRepo
+        private AssessmentRepository $assessmentRepo,
+        private StudentAssessmentAttemptRepository $studentAssessmentAttemptRepo,
+        private AssessmentVersionService $assessmentVersionService,
+        private AssessmentVersionRepository $assessmentVersionRepo
     ) {}
 
     public function getAll(array $filters)
@@ -57,13 +61,21 @@ class AssessmentMaterialService
 
             $assessmentId = $formData['assessment_id'];
 
+            $assessment = $this->assessmentRepo->findById($assessmentId);
+
             $existingMaterials = $this->assessmentMaterialRepo->getAll(
                 filters: ['assessment_id' => $assessmentId],
                 paginate: false
             );
 
-            //check if anything has changed
-            $this->compareAssessmentMaterialsHash($existingMaterials->toArray(), $incomingMaterials);
+            //Only proceed to db transactions if there are changes.
+            if ($assessment->assessment_materials_hash) {
+                if ($this->isAssessmentMaterialsHashEqual($assessment->assessment_materials_hash, $incomingMaterials)) {
+                    return [
+                        'message' => 'no changes.'
+                    ];
+                }
+            }
 
             // 1. Identify Deletions
             $existingIds = $existingMaterials->pluck('id')->toArray();
@@ -183,6 +195,38 @@ class AssessmentMaterialService
 
             $this->assessmentRepo->updateMaxAchievableScore($formData['assessment_id']);
             DB::commit();
+
+            //retrieve fresh instance (with new asmt materials) from db
+            $assessment = $this->assessmentRepo->getFresh($assessment);
+
+            //update assessment_materials_hash since we updated the assessment materials
+            $this->assessmentRepo->updateById($assessment->id, [
+                'assessment_materials_hash' => $this->createExistingAssessmentMaterialsHash($assessment->assessmentMaterials->toArray())['hash']
+            ]);
+
+            //if this is an update of assessmentMaterials
+            if ($assessment->assesmentVersions()->exists()) {
+                $assessmentTotalOngoingAttempts = $this->studentAssessmentAttemptRepo->countAssessmentOngoingAttempts($assessment->id);
+
+                //if assessment is closed
+                if (!$assessment->opens_at || Carbon::parse($assessment->opens_at)->lt(now())) {
+                    //edit the version 1 questionnaire and answer key
+                }
+
+                //if assessment is open and there are no ongoing attempts yet
+                if (Carbon::parse($assessment->opens_at)->gte(now()) && $assessmentTotalOngoingAttempts === 0) {
+                    //edit the version 1 questionnaire and answer key
+                } else {
+                    //if there are already ongoing attempts, create a new version
+                    $this->assessmentVersionService->createFromAssessment(assessmentId: $assessment->id, isVersion1: false);
+                }
+            }
+
+            //if this is the first time the assessment will have materials
+            else {
+                $this->assessmentVersionService->createFromAssessment(assessmentId: $assessment->id, isVersion1: true);
+            }
+
             return [
                 'message' => 'Bulk operations completed successfully',
                 'results' => $results
@@ -433,19 +477,20 @@ class AssessmentMaterialService
         ];
     }
 
-    private function compareAssessmentMaterialsHash(array $existingMaterials, array $incomingMaterials)
+    private function isAssessmentMaterialsHashEqual(string $existingMaterialsHash, array $incomingMaterials)
     {
-        dd([
-            'hashedData' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hashedData'],
-            'incoming' => $incomingMaterials,
-            'hash' => [
-                'existing' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hash'],
-                'incoming' => hash('sha256', json_encode($incomingMaterials))
-            ]
-        ]);
-        // if ($existingMaterialsHash === hash('sha256', json_encode($incomingMaterials))) {
-        //     return true;
-        // }
-        // return false;
+        // dd([
+        //     'existing' => $existingMaterials,
+        //     'hashedData' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hashedData'],
+        //     'incoming' => $incomingMaterials,
+        //     'hash' => [
+        //         'existing' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hash'],
+        //         'incoming' => hash('sha256', json_encode($incomingMaterials))
+        //     ]
+        // ]);
+        if ($existingMaterialsHash === hash('sha256', json_encode($incomingMaterials))) {
+            return true;
+        }
+        return false;
     }
 }

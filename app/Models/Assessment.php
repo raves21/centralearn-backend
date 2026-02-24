@@ -11,11 +11,6 @@ class Assessment extends Model
 
     protected $guarded = ['id'];
 
-    public function submissions()
-    {
-        return $this->hasMany(AssessmentSubmission::class);
-    }
-
     public function chapterContent()
     {
         return $this->morphOne(ChapterContent::class, 'contentable');

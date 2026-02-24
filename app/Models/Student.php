@@ -24,11 +24,6 @@ class Student extends Model
         return $this->belongsTo(Program::class);
     }
 
-    public function assessmentSubmissions()
-    {
-        return $this->hasMany(AssessmentSubmission::class);
-    }
-
     public function courseEnrollments()
     {
         return $this->hasMany(ClassStudentEnrollment::class);

@@ -83,12 +83,6 @@ class RolePermissionSeeder extends Seeder
             'delete program' => $superadminOnly,
             'view program' => $allRoles,
 
-            //assessment_submission
-            'create assessment_submission' => $studentAndAdmin,
-            'update assessment_submission' => $instructorAndAdmin,
-            'delete assessment_submission' => $adminOnly,
-            'view assessment_submission' => $allRoles,
-
         ];
 
         //create roles

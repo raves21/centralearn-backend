@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('assessment_versions', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('assessment_id')->constrained();
-            $table->string('version_hash')->nullable();
             $table->integer('version_number')->default(1);
-            $table->json('questionnaire')->nullable(); //json array of assessmentMaterials (without the answers)
+            $table->json('questionnaire_snapshot')->nullable(); //json array of assessmentMaterials (without the answers)
             $table->json('answer_key')->nullable(); //json array of answer keys of questionnaire
             $table->timestamps();
         });
