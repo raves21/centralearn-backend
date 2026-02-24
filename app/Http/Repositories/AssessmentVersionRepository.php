@@ -10,4 +10,11 @@ class AssessmentVersionRepository extends BaseRepository
     {
         parent::__construct($assessmentVersion);
     }
+
+    public function getLatestAssessmentVersion(string $assessmentId)
+    {
+        return AssessmentVersion::whereHas('assessment', fn($q) => $q->where('id', $assessmentId))
+            ->latest('version_number')
+            ->pluck('version_number');
+    }
 }

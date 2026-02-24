@@ -2,13 +2,16 @@
 
 namespace App\Http\Services;
 
+use App\Http\Repositories\AssessmentRepository;
 use App\Http\Repositories\AssessmentVersionRepository;
 use App\Http\Resources\AssessmentVersionResource;
+use App\Models\Assessment;
 
 class AssessmentVersionService
 {
     public function __construct(
-        private AssessmentVersionRepository $assessmentVersionRepo
+        private AssessmentVersionRepository $assessmentVersionRepo,
+        private AssessmentRepository $assessmentRepo
     ) {}
 
     public function getAll()
@@ -23,11 +26,15 @@ class AssessmentVersionService
 
     public function create(array $formData)
     {
-        // $this->assessmentVersionRepo->create([
-        //     'assessment_id' => $formData['assessment_id'],
-        //     'version_number' => $formData['']
-        // ])
+        return new AssessmentVersionResource($this->assessmentVersionRepo->create($formData));
     }
+
+    public function createFromAssessment(string $assessmentId)
+    {
+        $questionnaire = $this->buildQuestionnareSnapshot($this->assessmentRepo->findById($assessmentId));
+    }
+
+    public function buildQuestionnareSnapshot(Assessment $assessment) {}
 
     public function updateById(string $id, array $formData)
     {

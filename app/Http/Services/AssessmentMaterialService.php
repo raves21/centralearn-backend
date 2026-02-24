@@ -46,8 +46,6 @@ class AssessmentMaterialService
     {
         DB::beginTransaction();
 
-
-
         try {
             $incomingMaterials = $formData['materials'] ?? [];
 
@@ -367,7 +365,6 @@ class AssessmentMaterialService
 
     private function createExistingAssessmentMaterialsHash(array $existingMaterials)
     {
-
         $formattedMaterials = [];
 
         foreach ($existingMaterials as $existingMaterial) {
@@ -387,7 +384,7 @@ class AssessmentMaterialService
                             return array_filter([
                                 'id' => $existingOption['id'] ?? null,
                                 'order' => (string)$existingOption['order'],
-                                'is_correct' => (string)(int)$existingOption['is_correct'] ?? "0",
+                                'is_correct' => (string)$existingOption['is_correct'] ?: "0",
                                 'option_text' => $existingOption['option_text'] ?? null,
                                 'option_file' => $existingOption['option_file'] ?? null
                             ], fn($value) => $value !== null);
@@ -398,7 +395,7 @@ class AssessmentMaterialService
                 case IdentificationItem::class:
                     $identificationItem = array_filter([
                         'accepted_answers' => $materialable['accepted_answers'],
-                        'is_case_sensitive' => $materialable['is_case_sensitive'] ?: "0"
+                        'is_case_sensitive' => (string)$materialable['is_case_sensitive'] ?: "0"
                     ], fn($value) => $value !== null);
                     break;
                 case EssayItem::class:
@@ -431,16 +428,24 @@ class AssessmentMaterialService
         }
 
         return [
-            'formatted' => $formattedMaterials,
+            'hashedData' => $formattedMaterials,
             'hash' => hash('sha256', json_encode($formattedMaterials))
         ];
     }
 
-    private function compareAssessmentMaterialsHash(string $existingMaterialsHash, array $incomingMaterials)
+    private function compareAssessmentMaterialsHash(array $existingMaterials, array $incomingMaterials)
     {
-        if ($existingMaterialsHash === hash('sha256', json_encode($incomingMaterials))) {
-            return true;
-        }
-        return false;
+        dd([
+            'hashedData' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hashedData'],
+            'incoming' => $incomingMaterials,
+            'hash' => [
+                'existing' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hash'],
+                'incoming' => hash('sha256', json_encode($incomingMaterials))
+            ]
+        ]);
+        // if ($existingMaterialsHash === hash('sha256', json_encode($incomingMaterials))) {
+        //     return true;
+        // }
+        // return false;
     }
 }
