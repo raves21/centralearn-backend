@@ -11,10 +11,8 @@ class AssessmentRepository extends BaseRepository
         parent::__construct($assessment);
     }
 
-    public function updateMaxAchievableScore(string $assessmentId)
+    public function updateMaxAchievableScore(Assessment $assessment)
     {
-        $assessment = Assessment::findOrFail($assessmentId);
-
         $total = 0;
 
         foreach ($assessment->assessmentMaterials as $assessmentMaterial) {

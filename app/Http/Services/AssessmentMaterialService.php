@@ -6,6 +6,7 @@ use App\Http\Repositories\AssessmentMaterialQuestionRepository;
 use App\Http\Repositories\AssessmentMaterialRepository;
 use App\Http\Repositories\AssessmentRepository;
 use App\Http\Repositories\AssessmentVersionRepository;
+use App\Http\Repositories\ChapterContentRepository;
 use App\Http\Repositories\EssayItemRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Repositories\IdentificationItemRepository;
@@ -32,8 +33,8 @@ class AssessmentMaterialService
         private FileAttachmentRepository $fileAttachmentRepo,
         private AssessmentRepository $assessmentRepo,
         private StudentAssessmentAttemptRepository $studentAssessmentAttemptRepo,
-        private AssessmentVersionService $assessmentVersionService,
-        private AssessmentVersionRepository $assessmentVersionRepo
+        private AssessmentVersionRepository $assessmentVersionRepo,
+        private ChapterContentRepository $chapterContentRepo
     ) {}
 
     public function getAll(array $filters)
@@ -193,11 +194,13 @@ class AssessmentMaterialService
                 }
             }
 
-            $this->assessmentRepo->updateMaxAchievableScore($formData['assessment_id']);
             DB::commit();
 
             //retrieve fresh instance (with new asmt materials) from db
             $assessment = $this->assessmentRepo->getFresh($assessment);
+
+            //get chaptercontent
+            $chapterContent = $this->chapterContentRepo->findById($assessment->chapter_content_id);
 
             //update assessment_materials_hash since we updated the assessment materials
             $this->assessmentRepo->updateById($assessment->id, [
@@ -205,26 +208,28 @@ class AssessmentMaterialService
             ]);
 
             //if this is an update of assessmentMaterials
-            if ($assessment->assesmentVersions()->exists()) {
+            if ($assessment->assessmentVersions()->exists()) {
                 $assessmentTotalOngoingAttempts = $this->studentAssessmentAttemptRepo->countAssessmentOngoingAttempts($assessment->id);
 
                 //if assessment is closed
-                if (!$assessment->opens_at || Carbon::parse($assessment->opens_at)->lt(now())) {
+                if (!$chapterContent->opens_at || Carbon::parse($chapterContent->opens_at)->lt(now())) {
                     //edit the version 1 questionnaire and answer key
+                    $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment);
                 }
 
                 //if assessment is open and there are no ongoing attempts yet
-                if (Carbon::parse($assessment->opens_at)->gte(now()) && $assessmentTotalOngoingAttempts === 0) {
+                if (Carbon::parse($chapterContent->opens_at)->gte(now()) && $assessmentTotalOngoingAttempts === 0) {
                     //edit the version 1 questionnaire and answer key
+                    $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment);
                 } else {
                     //if there are already ongoing attempts, create a new version
-                    $this->assessmentVersionService->createFromAssessment(assessmentId: $assessment->id, isVersion1: false);
+                    $this->assessmentVersionRepo->createFromAssessment(assessment: $assessment, isVersion1: false);
                 }
             }
 
             //if this is the first time the assessment will have materials
             else {
-                $this->assessmentVersionService->createFromAssessment(assessmentId: $assessment->id, isVersion1: true);
+                $this->assessmentVersionRepo->createFromAssessment(assessment: $assessment, isVersion1: true);
             }
 
             return [
@@ -477,17 +482,21 @@ class AssessmentMaterialService
         ];
     }
 
+    private function ddAssessmentMaterials(array $existingMaterials, array $incomingMaterials)
+    {
+        dd([
+            'existing' => $existingMaterials,
+            'hashedData' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hashedData'],
+            'incoming' => $incomingMaterials,
+            'hash' => [
+                'existing' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hash'],
+                'incoming' => hash('sha256', json_encode($incomingMaterials))
+            ]
+        ]);
+    }
+
     private function isAssessmentMaterialsHashEqual(string $existingMaterialsHash, array $incomingMaterials)
     {
-        // dd([
-        //     'existing' => $existingMaterials,
-        //     'hashedData' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hashedData'],
-        //     'incoming' => $incomingMaterials,
-        //     'hash' => [
-        //         'existing' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hash'],
-        //         'incoming' => hash('sha256', json_encode($incomingMaterials))
-        //     ]
-        // ]);
         if ($existingMaterialsHash === hash('sha256', json_encode($incomingMaterials))) {
             return true;
         }
