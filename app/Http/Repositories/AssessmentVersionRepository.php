@@ -26,27 +26,22 @@ class AssessmentVersionRepository extends BaseRepository
     {
         $questionnaireAndAnswerKey = $this->buildQuestionnareAndAnswerKey($assessment);
 
-        $updated = AssessmentVersion::where('version_number', 1)->first()->update([
+        AssessmentVersion::where('version_number', 1)->first()->update([
             'questionnaire_snapshot' => $questionnaireAndAnswerKey['questionnaire'],
             'answer_key' => $questionnaireAndAnswerKey['answerKey'],
         ]);
-
-        return $updated;
     }
 
     public function createFromAssessment(Assessment $assessment, bool $isVersion1)
     {
         $questionnaireAndAnswerKey = $this->buildQuestionnareAndAnswerKey($assessment);
-        $data = [
+
+        AssessmentVersion::create([
             'assessment_id' => $assessment->id,
             'version_number' => $isVersion1 ? 1 : $this->getLatestAssessmentVersion($assessment->id) + 1,
             'questionnaire_snapshot' => $questionnaireAndAnswerKey['questionnaire'],
             'answer_key' => $questionnaireAndAnswerKey['answerKey']
-        ];
-
-        // dd($data);
-
-        AssessmentVersion::create($data);
+        ]);
     }
 
     public function buildQuestionnareAndAnswerKey(Assessment $assessment)

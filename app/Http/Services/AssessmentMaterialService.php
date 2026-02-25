@@ -14,6 +14,8 @@ use App\Http\Repositories\OptionBasedItemOptionRepository;
 use App\Http\Repositories\OptionBasedItemRepository;
 use App\Http\Repositories\StudentAssessmentAttemptRepository;
 use App\Http\Resources\AssessmentMaterialResource;
+use App\Models\Assessment;
+use App\Models\ChapterContent;
 use App\Models\EssayItem;
 use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
@@ -68,6 +70,8 @@ class AssessmentMaterialService
                 filters: ['assessment_id' => $assessmentId],
                 paginate: false
             );
+
+            // $this->ddAssessmentMaterials($existingMaterials->toArray(), $incomingMaterials);
 
             //Only proceed to db transactions if there are changes.
             if ($assessment->assessment_materials_hash) {
@@ -200,37 +204,15 @@ class AssessmentMaterialService
             $assessment = $this->assessmentRepo->getFresh($assessment);
 
             //get chaptercontent
-            $chapterContent = $this->chapterContentRepo->findById($assessment->chapter_content_id);
+            $chapterContent = $this->chapterContentRepo->findByFilter(['contentable_id' => $assessment->id]);
 
             //update assessment_materials_hash since we updated the assessment materials
             $this->assessmentRepo->updateById($assessment->id, [
                 'assessment_materials_hash' => $this->createExistingAssessmentMaterialsHash($assessment->assessmentMaterials->toArray())['hash']
             ]);
 
-            //if this is an update of assessmentMaterials
-            if ($assessment->assessmentVersions()->exists()) {
-                $assessmentTotalOngoingAttempts = $this->studentAssessmentAttemptRepo->countAssessmentOngoingAttempts($assessment->id);
-
-                //if assessment is closed
-                if (!$chapterContent->opens_at || Carbon::parse($chapterContent->opens_at)->lt(now())) {
-                    //edit the version 1 questionnaire and answer key
-                    $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment);
-                }
-
-                //if assessment is open and there are no ongoing attempts yet
-                if (Carbon::parse($chapterContent->opens_at)->gte(now()) && $assessmentTotalOngoingAttempts === 0) {
-                    //edit the version 1 questionnaire and answer key
-                    $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment);
-                } else {
-                    //if there are already ongoing attempts, create a new version
-                    $this->assessmentVersionRepo->createFromAssessment(assessment: $assessment, isVersion1: false);
-                }
-            }
-
-            //if this is the first time the assessment will have materials
-            else {
-                $this->assessmentVersionRepo->createFromAssessment(assessment: $assessment, isVersion1: true);
-            }
+            //edit the version 1 or create a new assessment version
+            $this->syncAssessmentVersion($assessment, $chapterContent);
 
             return [
                 'message' => 'Bulk operations completed successfully',
@@ -470,9 +452,9 @@ class AssessmentMaterialService
                     'question_text' => $materialQuestion['question_text'] ?? null,
                     'question_files' => $materialQuestion['question_files'] ?? null
                 ]),
-                'option_based_item' => $optionBasedItem ?? null,
-                'essay_item' => $essayItem ?? null,
-                'identification_item' => $identificationItem ?? null,
+                'option_based_item' => $optionBasedItem ?: null,
+                'essay_item' => $essayItem ?: null,
+                'identification_item' => $identificationItem ?: null,
             ], fn($value) => $value !== null);
         }
 
@@ -484,12 +466,13 @@ class AssessmentMaterialService
 
     private function ddAssessmentMaterials(array $existingMaterials, array $incomingMaterials)
     {
+        $hashInfo = $this->createExistingAssessmentMaterialsHash($existingMaterials);
         dd([
             'existing' => $existingMaterials,
-            'hashedData' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hashedData'],
+            'hashedData' => $hashInfo['hashedData'],
             'incoming' => $incomingMaterials,
             'hash' => [
-                'existing' => $this->createExistingAssessmentMaterialsHash($existingMaterials)['hash'],
+                'existing' => $hashInfo['hash'],
                 'incoming' => hash('sha256', json_encode($incomingMaterials))
             ]
         ]);
@@ -501,5 +484,33 @@ class AssessmentMaterialService
             return true;
         }
         return false;
+    }
+
+    private function syncAssessmentVersion(Assessment $assessment, ChapterContent $chapterContent)
+    {
+        //if this is an update of assessmentMaterials
+        if ($assessment->assessmentVersions()->exists()) {
+            $assessmentTotalOngoingAttempts = $this->studentAssessmentAttemptRepo->countAssessmentOngoingAttempts($assessment->id);
+
+            //if assessment is closed
+            if (!$chapterContent->opens_at || Carbon::parse($chapterContent->opens_at)->gt(now())) {
+                //edit the version 1 questionnaire and answer key
+                $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment);
+            }
+
+            //if assessment is open and there are no ongoing attempts yet
+            if (Carbon::parse($chapterContent->opens_at)->lte(now()) && $assessmentTotalOngoingAttempts === 0) {
+                //edit the version 1 questionnaire and answer key
+                $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment);
+            } else {
+                //if there are already ongoing attempts, create a new version
+                $this->assessmentVersionRepo->createFromAssessment(assessment: $assessment, isVersion1: false);
+            }
+        }
+
+        //if this is the first time the assessment will have assessmentMaterials
+        else {
+            $this->assessmentVersionRepo->createFromAssessment(assessment: $assessment, isVersion1: true);
+        }
     }
 }
