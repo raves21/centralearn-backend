@@ -87,7 +87,8 @@ class ChapterContentService
 
     public function reorderBulk(array $formData)
     {
-        return DB::transaction(function () use ($formData) {
+        try {
+            DB::transaction();
             // First pass: set to temporary negative order to avoid unique constraint violations
             foreach ($formData['contents'] as $content) {
                 // Use a negative value derived from the new order to ensure temporary uniqueness
@@ -102,21 +103,10 @@ class ChapterContentService
             }
 
             return ['message' => 'reorder bulk success.'];
-        });
-    }
-
-    public function updateAssessmentMaxAchievableScore(string $id)
-    {
-        $chapterContent = $this->chapterContentRepo->findById($id);
-
-        if ($chapterContent->contentable_type !== Assessment::class) {
-            abort(400, 'Chaptercontent given is not an assessment.');
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
         }
-
-        $this->assessmentRepo->updateById($chapterContent->contentable_id, [
-            'max_achievable_score' => $chapterContent->contentable->max_achievable_score
-        ]);
-
-        return ['message' => 'update assessment max achievable score success.'];
     }
 }

@@ -196,7 +196,8 @@ class AssessmentMaterialService
                 }
             }
 
-            DB::commit();
+            //update max achievable score after everything is done
+            $this->assessmentRepo->updateMaxAchievableScore($assessment);
 
             //retrieve fresh instance (with new asmt materials) from db
             $assessment = $this->assessmentRepo->getFresh($assessment);
@@ -211,6 +212,8 @@ class AssessmentMaterialService
 
             //edit the version 1 or create a new assessment version
             $this->syncAssessmentVersion($assessment, $chapterContent);
+
+            DB::commit();
 
             return [
                 'message' => 'Bulk operations completed successfully',
