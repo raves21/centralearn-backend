@@ -74,12 +74,10 @@ class AssessmentMaterialService
             // $this->ddAssessmentMaterials($existingMaterials->toArray(), $incomingMaterials);
 
             //Only proceed to db transactions if there are changes.
-            if ($assessment->assessment_materials_hash) {
-                if ($this->isAssessmentMaterialsHashEqual($assessment->assessment_materials_hash, $incomingMaterials)) {
-                    return [
-                        'message' => 'no changes.'
-                    ];
-                }
+            if ($assessment->assessment_materials_hash && $this->isAssessmentMaterialsHashEqual($assessment->assessment_materials_hash, $incomingMaterials)) {
+                return [
+                    'message' => 'no changes.'
+                ];
             }
 
             // 1. Identify Deletions
