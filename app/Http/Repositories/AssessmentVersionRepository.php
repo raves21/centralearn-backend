@@ -53,7 +53,7 @@ class AssessmentVersionRepository extends BaseRepository
             $question = $assessmentMaterial->assessmentMaterialQuestion;
             $materialable = $assessmentMaterial->materialable;
 
-            $questionnaireFormatted = [
+            $materialFormatted = [
                 'id' => $assessmentMaterial->id,
                 'assessmentId' => $assessmentMaterial->assessment_id,
                 'order' => $assessmentMaterial->order,
@@ -73,7 +73,7 @@ class AssessmentVersionRepository extends BaseRepository
             switch ($assessmentMaterial->materialable_type) {
                 case OptionBasedItem::class:
                     //copy format of OptionBasedItemResource
-                    $questionnaireFormatted['materialable'] = [
+                    $materialFormatted['materialable'] = [
                         'id' => $materialable->id,
                         'options' => $materialable->optionBasedItemOptions->map(function ($opt) {
                             return [
@@ -95,7 +95,7 @@ class AssessmentVersionRepository extends BaseRepository
                     break;
                 case EssayItem::class:
                     //copy format of EssayItemResource
-                    $questionnaireFormatted['materialable'] = [
+                    $materialFormatted['materialable'] = [
                         'id' => $materialable->id,
                         'minCharacterCount' => $materialable->min_character_count,
                         'maxCharacterCount' => $materialable->max_character_count,
@@ -105,7 +105,7 @@ class AssessmentVersionRepository extends BaseRepository
                     break;
                 case IdentificationItem::class:
                     //copy format of IdentificationItemResource
-                    $questionnaireFormatted['materialable'] = [
+                    $materialFormatted['materialable'] = [
                         'id' => $materialable->id,
                         'acceptedAnswers' => $materialable->accepted_answers,
                         'isCaseSensitive' => $materialable->is_case_sensitive,
@@ -117,7 +117,7 @@ class AssessmentVersionRepository extends BaseRepository
                     break;
             }
 
-            $questionnaire[] = $questionnaireFormatted;
+            $questionnaire[] = $materialFormatted;
         }
 
         return [
