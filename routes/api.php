@@ -14,6 +14,7 @@ use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AssessmentMaterialController;
 use App\Http\Controllers\SectionController;
+use App\Http\Controllers\StudentAssessmentAttemptController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -92,4 +93,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('assessment-materials', [AssessmentMaterialController::class, 'index']);
     Route::post('assessment-materials/process-bulk', [AssessmentMaterialController::class, 'processBulk']);
+
+    Route::controller(StudentAssessmentAttemptController::class)->prefix('student-assessment-attempts')->group(function () {
+        Route::get('/start-attempt', 'startAttempt');
+        Route::get('/submit-attempt', 'submitAttempt');
+        Route::get('/update-attempt-answers', 'updateAttemptAnswers');
+        Route::get('/student-assessment-attempt-info', 'getStudentAssessmentAttemptInfo');
+    });
 });

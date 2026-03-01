@@ -15,11 +15,12 @@ class AssessmentVersionRepository extends BaseRepository
         parent::__construct($assessmentVersion);
     }
 
-    public function getLatestAssessmentVersion(string $assessmentId)
+    public function getLatestAssessmentVersionNumber(string $assessmentId)
     {
         return AssessmentVersion::whereHas('assessment', fn($q) => $q->where('id', $assessmentId))
             ->latest('version_number')
-            ->pluck('version_number')[0];
+            ->pluck('version_number')
+            ->first();
     }
 
     public function editVersion1QuestionnaireAndAnswerKey(Assessment $assessment)
@@ -38,7 +39,7 @@ class AssessmentVersionRepository extends BaseRepository
 
         AssessmentVersion::create([
             'assessment_id' => $assessment->id,
-            'version_number' => $isVersion1 ? 1 : $this->getLatestAssessmentVersion($assessment->id) + 1,
+            'version_number' => $isVersion1 ? 1 : $this->getLatestAssessmentVersionNumber($assessment->id) + 1,
             'questionnaire_snapshot' => $questionnaireAndAnswerKey['questionnaire'],
             'answer_key' => $questionnaireAndAnswerKey['answerKey']
         ]);

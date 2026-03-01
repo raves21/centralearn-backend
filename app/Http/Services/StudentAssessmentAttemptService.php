@@ -2,9 +2,7 @@
 
 namespace App\Http\Services;
 
-use App\Http\Repositories\AssessmentRepository;
 use App\Http\Repositories\AssessmentResultRepository;
-use App\Http\Repositories\AssessmentVersionRepository;
 use App\Http\Repositories\StudentAssessmentAttemptRepository;
 use App\Http\Resources\StudentAssessmentAttemptResource;
 use App\Models\StudentAssessmentAttempt;
@@ -13,8 +11,6 @@ class StudentAssessmentAttemptService
 {
     public function __construct(
         private StudentAssessmentAttemptRepository $studentAssessmentAttemptRepo,
-        private AssessmentRepository $assessmentRepo,
-        private AssessmentVersionRepository $assessmentVersionRepo,
         private AssessmentResultRepository $assessmentResultRepo
     ) {}
 
@@ -151,4 +147,16 @@ class StudentAssessmentAttemptService
             'message' => 'attempt submitted successfully.'
         ];
     }
+
+    public function getStudentAssessmentAttemptInfo(string $studentId, string $assessmentId)
+    {
+        return $this->studentAssessmentAttemptRepo->getStudentAssessmentAttemptInfo($studentId, $assessmentId);
+    }
+
+    public function startAttempt(string $studentId, string $assessmentId)
+    {
+        return new StudentAssessmentAttemptResource($this->studentAssessmentAttemptRepo->startAttempt($studentId, $assessmentId));
+    }
+
+    public function updateAttemptAnswers(string $attemptId, array $formData) {}
 }
