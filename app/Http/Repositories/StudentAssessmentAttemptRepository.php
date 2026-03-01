@@ -24,7 +24,7 @@ class StudentAssessmentAttemptRepository extends BaseRepository
             ->count();
     }
 
-    public function getStudentAssessmentAttemptInfo(string $studentId, string $assessmentId)
+    public function getStudentAssessmentAttemptAvailability(string $studentId, string $assessmentId)
     {
         $assessment = Assessment::findOrFail($assessmentId);
         $maxAttempts = $assessment->max_attempts;
@@ -48,14 +48,22 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         if ($studentAttemptCount < $maxAttempts) {
             return [
                 'attemptsLeft' => $maxAttempts - $studentAttemptCount,
-                'continueAttempt' => $studentLatestOngoingAttempt ? $studentLatestOngoingAttempt->attempt_number : null,
+                'continueAttempt' => $studentLatestOngoingAttempt
+                    ? [
+                        'attemptId' => $studentLatestOngoingAttempt->id,
+                        'attemptNumber' => $studentLatestOngoingAttempt->attempt_number
+                    ] : null,
                 'canStartNewAttempt' => $studentLatestOngoingAttempt ? false : true
             ];
         }
 
         return [
             'attemptsLeft' => 0,
-            'continueAttempt' => $studentLatestOngoingAttempt ? $studentLatestOngoingAttempt->attempt_number : null,
+            'continueAttempt' => $studentLatestOngoingAttempt
+                ? [
+                    'attemptId' => $studentLatestOngoingAttempt->id,
+                    'attemptNumber' => $studentLatestOngoingAttempt->attempt_number
+                ] : null,
             'canStartNewAttempt' => false
         ];;
     }
@@ -73,8 +81,8 @@ class StudentAssessmentAttemptRepository extends BaseRepository
             ->count();
 
         //restrict if student has exceeded max attempts
-        if ($studentAttemptCount < $maxAttempts) {
-            return abort(403, 'Student has exceeded max attempts for this assessment.');
+        if ($studentAttemptCount >= $maxAttempts) {
+            abort(403, 'Student has reached max attempts for this assessment.');
         }
 
         //retrieve ongoing student attempts for this assesment
@@ -87,13 +95,13 @@ class StudentAssessmentAttemptRepository extends BaseRepository
 
         //restrict if student still has an ongoing attempt for this assessment
         if ($hasOngoingAttempts) {
-            return abort(403, 'Student still has has ongoing attempt for this assessment.');
+            abort(403, 'Student still has has ongoing attempt for this assessment.');
         }
 
         //get latest assessment version
         $latestAssessmentVersion = AssessmentVersion::where('assessment_id', $assessmentId)->latest()->first();
 
-        return StudentAssessmentAttempt::create([
+        $newAttempt = StudentAssessmentAttempt::create([
             'student_id' => $studentId,
             'assessment_version_id' => $latestAssessmentVersion->id,
             'attempt_number' => $studentAttemptCount + 1,
@@ -101,5 +109,9 @@ class StudentAssessmentAttemptRepository extends BaseRepository
             'answers' => [],
             'started_at' => now()
         ]);
+
+        $newAttempt->load(['assessmentVersion']);
+
+        return $newAttempt;
     }
 }

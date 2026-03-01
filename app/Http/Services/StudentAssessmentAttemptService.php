@@ -21,7 +21,7 @@ class StudentAssessmentAttemptService
 
     public function findById(string $id)
     {
-        return new StudentAssessmentAttemptResource($this->studentAssessmentAttemptRepo->findById($id));
+        return new StudentAssessmentAttemptResource($this->studentAssessmentAttemptRepo->findById($id, ['assessmentVersion']));
     }
 
     public function create(array $formData)
@@ -148,9 +148,9 @@ class StudentAssessmentAttemptService
         ];
     }
 
-    public function getStudentAssessmentAttemptInfo(string $studentId, string $assessmentId)
+    public function getStudentAssessmentAttemptAvailability(string $studentId, string $assessmentId)
     {
-        return $this->studentAssessmentAttemptRepo->getStudentAssessmentAttemptInfo($studentId, $assessmentId);
+        return $this->studentAssessmentAttemptRepo->getStudentAssessmentAttemptAvailability($studentId, $assessmentId);
     }
 
     public function startAttempt(string $studentId, string $assessmentId)

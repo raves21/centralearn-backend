@@ -17,14 +17,14 @@ class StudentAssessmentAttemptResource extends JsonResource
         return [
             'id' => $this->id,
             'studentId' => $this->student_id,
-            'assessmentVersionId' => $this->assessment_version_id,
+            'assessmentVersion' => new AssessmentVersionResource($this->whenLoaded('assessmentVersion')),
             'attemptNumber' => $this->attempt_number,
             'answers' => $this->answers,
             'submissionSummary' => $this->submission_summary,
             'status' => $this->status,
             'startedAt' => $this->started_at,
             'submittedAt' => $this->submitted_at,
-            'total_score' => $this->total_score
+            'totalScore' => $this->total_score
         ];
     }
 }

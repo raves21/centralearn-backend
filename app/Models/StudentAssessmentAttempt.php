@@ -2,15 +2,18 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class StudentAssessmentAttempt extends Model
 {
+    use HasUuids;
+
     protected $guarded = ['id'];
 
     protected $casts = [
-        'answers',
-        'submission_summary'
+        'answers' => 'array',
+        'submission_summary' => 'array'
     ];
 
     public function student()

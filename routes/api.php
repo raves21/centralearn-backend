@@ -95,9 +95,10 @@ Route::middleware('auth')->group(function () {
     Route::post('assessment-materials/process-bulk', [AssessmentMaterialController::class, 'processBulk']);
 
     Route::controller(StudentAssessmentAttemptController::class)->prefix('student-assessment-attempts')->group(function () {
-        Route::get('/start-attempt', 'startAttempt');
-        Route::get('/submit-attempt', 'submitAttempt');
-        Route::get('/update-attempt-answers', 'updateAttemptAnswers');
-        Route::get('/student-assessment-attempt-info', 'getStudentAssessmentAttemptInfo');
+        Route::post('/start-attempt', 'startAttempt');
+        Route::post('/submit-attempt', 'submitAttempt');
+        Route::post('/update-attempt-answers', 'updateAttemptAnswers');
+        Route::get('/student-assessment-attempt-availability', 'getStudentAssessmentAttemptAvailability');
+        Route::get('/{student_assessment_attempt}', 'show');
     });
 });
