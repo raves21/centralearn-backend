@@ -25,11 +25,21 @@ class StudentAssessmentAttemptService
     {
         $attempt = $this->studentAssessmentAttemptRepo->findById($id, ['assessmentVersion']);
         $attemptAssessment = $attempt->assessmentVersion->assessment;
+        $attemptAssessmentChapterContent = $attemptAssessment->chapterContent;
+        $attemptAssessmentChapterContentChapter = $attemptAssessment->chapterContent->chapter;
         return new StudentAssessmentAttemptResource($attempt)
             ->additional([
                 'assessment' => [
                     'id' => $attemptAssessment->id,
-                    'name' => $attemptAssessment->chapterContent->name,
+                    'maxAchievableScore' => $attemptAssessment->max_achievable_score,
+                    'chapterContent' => [
+                        'id' => $attemptAssessmentChapterContent->id,
+                        'name' => $attemptAssessmentChapterContent->name,
+                        'chapter' => [
+                            'id' => $attemptAssessmentChapterContentChapter->id,
+                            'name' => $attemptAssessmentChapterContentChapter->name
+                        ]
+                    ]
                 ]
             ]);
     }
