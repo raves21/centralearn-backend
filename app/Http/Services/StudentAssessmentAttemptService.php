@@ -4,6 +4,8 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\AssessmentResultRepository;
 use App\Http\Repositories\StudentAssessmentAttemptRepository;
+use App\Http\Resources\AssessmentResource;
+use App\Http\Resources\ChapterContentResource;
 use App\Http\Resources\StudentAssessmentAttemptResource;
 use App\Models\StudentAssessmentAttempt;
 
@@ -21,7 +23,11 @@ class StudentAssessmentAttemptService
 
     public function findById(string $id)
     {
-        return new StudentAssessmentAttemptResource($this->studentAssessmentAttemptRepo->findById($id, ['assessmentVersion']));
+        $attempt = $this->studentAssessmentAttemptRepo->findById($id, ['assessmentVersion.assessment.chapterContent']);
+        return new StudentAssessmentAttemptResource($attempt)
+            ->additional([
+                'assessment' => new AssessmentResource($attempt->assessmentVersion->assessment)
+            ]);
     }
 
     public function create(array $formData)
@@ -41,7 +47,7 @@ class StudentAssessmentAttemptService
 
     public function submitAttempt(array $formData)
     {
-        $attempt = $this->studentAssessmentAttemptRepo->findById($formData['attempt_id'], ['assessmentVersion.assessment']);
+        $attempt = $this->studentAssessmentAttemptRepo->findById($formData['attempt_id'], ['assessmentVersion.assessment.chapterContent']);
         $answerKey = $attempt->assessmentVersion->answer_key;
         $answers = $formData['answers'];
 

@@ -18,7 +18,7 @@ class AssessmentVersionResource extends JsonResource
             'id' => $this->id,
             'assessmentId' => $this->assessment_id,
             'versionNumber' => $this->version_number,
-            'questionnaire' => $this->questionnaire_snapshot
+            'questionnaireSnapshot' => $this->questionnaire_snapshot
         ];
     }
 }

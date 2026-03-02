@@ -16,6 +16,7 @@ class AssessmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
+            'chapterContent' => new ChapterContentResource($this->whenLoaded('chapterContent')),
             'timeLimit' => $this->time_limit,
             'maxAchievableScore' => $this->max_achievable_score,
             'isAnswersViewableAfterSubmit' => (bool) $this->is_answers_viewable_after_submit,
