@@ -23,10 +23,14 @@ class StudentAssessmentAttemptService
 
     public function findById(string $id)
     {
-        $attempt = $this->studentAssessmentAttemptRepo->findById($id, ['assessmentVersion.assessment.chapterContent']);
+        $attempt = $this->studentAssessmentAttemptRepo->findById($id, ['assessmentVersion']);
+        $attemptAssessment = $attempt->assessmentVersion->assessment;
         return new StudentAssessmentAttemptResource($attempt)
             ->additional([
-                'assessment' => new AssessmentResource($attempt->assessmentVersion->assessment)
+                'assessment' => [
+                    'id' => $attemptAssessment->id,
+                    'name' => $attemptAssessment->chapterContent->name,
+                ]
             ]);
     }
 
