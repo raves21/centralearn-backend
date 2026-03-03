@@ -19,7 +19,7 @@ class OptionBasedItemOptionResource extends JsonResource
             'optionBasedItemId' => $this->option_based_item_id,
             'order' => $this->order,
             'optionText' => $this->option_text,
-            'optionFileUrl' => $this->option_file_url,
+            'optionFile' => $this->option_file,
             'isCorrect' => (bool) $this->is_correct,
         ];
     }

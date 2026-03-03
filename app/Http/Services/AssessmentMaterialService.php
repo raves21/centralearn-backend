@@ -21,6 +21,7 @@ use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
 use App\Models\OptionBasedItemOption;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class AssessmentMaterialService
@@ -71,7 +72,7 @@ class AssessmentMaterialService
                 paginate: false
             );
 
-            // $this->ddAssessmentMaterials($existingMaterials->toArray(), $incomingMaterials);
+            $this->ddAssessmentMaterials($existingMaterials->toArray(), $incomingMaterials);
 
             //Only proceed to db transactions if there are changes.
             if ($assessment->assessment_materials_hash && $this->isAssessmentMaterialsHashEqual($assessment->assessment_materials_hash, $incomingMaterials)) {
@@ -465,13 +466,121 @@ class AssessmentMaterialService
         ];
     }
 
+    //incoming materials payload may have 'kept_question_files' and 'kept_option_file'
+    //this method formats 'kept_question_files' into just 'question_files' if the existing and incoming is the same
+    //same thing for kept_option_file
+    private function formatIncomingMaterials(array $incomingMaterials, array $existingMaterials)
+    {
+        //if the length isnt the same dont bother formatting
+        if (count($incomingMaterials) !== count($existingMaterials)) {
+            return $incomingMaterials;
+        }
+
+        $existingMaterialsFormatted = $this->createExistingAssessmentMaterialsHash($existingMaterials)['hashedData'];
+
+        $incomingMaterialsFormatted = [];
+        $didntBother = false;
+
+        foreach ($incomingMaterials as $index => $incomingM) {
+            $data = $incomingM;
+
+            //if new material dont bother formatting
+            if (!isset($incomingM['id'])) {
+                $didntBother = true;
+                break;
+            }
+
+            //if current existingmaterial materialtype isnt the same with the incoming, dont bother formatting
+            if ($existingMaterialsFormatted[$index]['material_type'] !== $incomingM['material_type']) {
+                $didntBother = true;
+                break;
+            }
+
+            if (isset($incomingM['question']['kept_question_files'])) {
+                $incomingMKeptQuestionFilesEncoded = json_encode($incomingM['question']['kept_question_files']);
+                $existingMQuestionFilesEncoded = json_encode($existingMaterialsFormatted[$index]['question']['question_files']);
+
+                if ($incomingMKeptQuestionFilesEncoded === $existingMQuestionFilesEncoded) {
+                    $data = [
+                        ...$incomingM,
+                        'question' => [
+                            ...Arr::except($incomingM['question'], 'kept_question_files'),
+                            'question_files' => $incomingM['question']['kept_question_files']
+                        ]
+                    ];
+                }
+            }
+
+            if ($incomingM['material_type'] === 'option_based_item') {
+                $incomingOptions = $incomingM['option_based_item']['options'];
+                $existingOptions = $existingMaterialsFormatted[$index]['option_based_item']['options'];
+
+                //if the length isnt the same dont bother formatting
+                if (count($incomingOptions) !== count($existingOptions)) {
+                    $didntBother = true;
+                    break;
+                }
+
+                foreach ($incomingOptions as $index => $incomingO) {
+                    $optData = $incomingO;
+
+                    //if new option dont bother formatting
+                    if (!isset($incomingO['id'])) {
+                        $didntBother = true;
+                        break;
+                    }
+
+                    //if theres a new option file dont bother formatting
+                    if (isset($incomingO['new_option_file'])) {
+                        $didntBother = true;
+                        break;
+                    }
+
+                    //if (excluding the option_files) the other data isnt the same, dont bother formatting
+                    if (json_encode(Arr::except($incomingO, ['kept_option_file', 'new_option_file'])) !== json_encode(Arr::except($existingOptions[$index], 'option_file'))) {
+                        $didntBother = true;
+                        break;
+                    }
+
+                    if (isset($incomingO['kept_option_file'])) {
+                        $keptOptionFileEncoded = json_encode($incomingO['kept_option_file']);
+                        $existingOptionFileEncoded = json_encode($existingOptions[$index]['option_file']);
+
+                        if ($keptOptionFileEncoded === $existingOptionFileEncoded) {
+                            $optData = [
+                                ...Arr::except($incomingO, 'kept_option_file'),
+                                'option_file' => $incomingO['kept_option_file']
+                            ];
+                        }
+                    }
+
+                    $data['option_based_item']['options'][] = $optData;
+                }
+            }
+
+            $incomingMaterialsFormatted[] = $data;
+        }
+
+        if ($didntBother === true) {
+            return $incomingMaterials;
+        }
+        return $incomingMaterialsFormatted;
+    }
+
     private function ddAssessmentMaterials(array $existingMaterials, array $incomingMaterials)
     {
         $hashInfo = $this->createExistingAssessmentMaterialsHash($existingMaterials);
+        $incomingFormatted = $this->formatIncomingMaterials($incomingMaterials, $existingMaterials);
+        // $isExistingQFileEqualToIncomingKeptQFile = json_encode($hashInfo['hashedData'][0]['question']['question_files']) === json_encode($incomingMaterials[0]['question']['kept_question_files']);
         dd([
             'existing' => $existingMaterials,
             'hashedData' => $hashInfo['hashedData'],
             'incoming' => $incomingMaterials,
+            // 'dasd' => $isExistingQFileEqualToIncomingKeptQFile,
+            'zz' => [
+                'existingHashInfo' => $hashInfo,
+                'incomingFormatted' => $incomingFormatted
+            ],
             'hash' => [
                 'existing' => $hashInfo['hash'],
                 'incoming' => hash('sha256', json_encode($incomingMaterials))

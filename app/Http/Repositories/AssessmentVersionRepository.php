@@ -82,7 +82,7 @@ class AssessmentVersionRepository extends BaseRepository
                                 'optionBasedItemId' => $opt->option_based_item_id,
                                 'order' => $opt->order,
                                 'optionText' => $opt->option_text,
-                                'optionFileUrl' => $opt->option_file_url,
+                                'optionFile' => $opt->option_file,
                                 'isCorrect' => (bool) $opt->is_correct,
                             ];
                         })->toArray(),
