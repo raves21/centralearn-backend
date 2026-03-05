@@ -78,7 +78,7 @@ class StudentAssessmentAttemptService
             $materialPointWorth = $answerKey[$materialId]['point_worth'];
 
             switch ($materialType) {
-                case 'optionBasedItem':
+                case 'option_based_item':
                     $correctAnswer = $answerKey[$materialId]['correct_answer'];
                     $isCorrect = $answerContent === $correctAnswer;
                     $pointsEarned = $isCorrect ? $materialPointWorth : 0;
@@ -93,7 +93,7 @@ class StudentAssessmentAttemptService
                     ];
                     break;
 
-                case 'identificationItem':
+                case 'identification_item':
                     $acceptedAnswers = $answerKey[$materialId]['accepted_answers'];
                     $isCorrect = in_array($answerContent, $acceptedAnswers);
                     $pointsEarned = $isCorrect ? $materialPointWorth : 0;
@@ -107,7 +107,7 @@ class StudentAssessmentAttemptService
                         'points_earned' => $pointsEarned
                     ];
                     break;
-                case 'essayItem':
+                case 'essay_item':
                     $submissionSummary[$materialId] = [
                         'answer_content' => $answerContent,
                         'points_earned' => null //ungraded initially, this will be manually checked by instructor
@@ -178,5 +178,10 @@ class StudentAssessmentAttemptService
         return new StudentAssessmentAttemptResource($this->studentAssessmentAttemptRepo->startAttempt($studentId, $assessmentId));
     }
 
-    public function updateAttemptAnswers(string $attemptId, array $formData) {}
+    public function updateAttemptAnswers(string $attemptId, array $answers)
+    {
+        return new StudentAssessmentAttemptResource($this->studentAssessmentAttemptRepo->updateById($attemptId, [
+            'answers' => $answers
+        ]));
+    }
 }

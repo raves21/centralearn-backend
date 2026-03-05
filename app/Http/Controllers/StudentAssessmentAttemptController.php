@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StudentAssessmentAttempt\GetStudentAssessmentAttemptAvailability;
 use App\Http\Requests\StudentAssessmentAttempt\StartAttempt;
+use App\Http\Requests\StudentAssessmentAttempt\SubmitAttempt;
+use App\Http\Requests\StudentAssessmentAttempt\UpdateAttemptAnswers;
 use App\Http\Services\StudentAssessmentAttemptService;
 use Illuminate\Http\Request;
 
@@ -16,9 +18,16 @@ class StudentAssessmentAttemptController extends Controller
         return $this->studentAssessmentAttemptService->findById($studentAssessmentAttemptId);
     }
 
-    public function submitAttempt() {}
+    public function submitAttempt(SubmitAttempt $request)
+    {
+        return $this->studentAssessmentAttemptService->submitAttempt($request->validated());
+    }
 
-    public function updateAttemptAnswers() {}
+    public function updateAttemptAnswers(UpdateAttemptAnswers $request)
+    {
+        $validated = $request->validated();
+        return $this->studentAssessmentAttemptService->updateAttemptAnswers($validated['attempt_id'], $validated['answers']);
+    }
 
     public function getStudentAssessmentAttemptAvailability(GetStudentAssessmentAttemptAvailability $request)
     {
