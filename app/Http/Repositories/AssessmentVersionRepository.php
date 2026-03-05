@@ -23,8 +23,9 @@ class AssessmentVersionRepository extends BaseRepository
             ->first();
     }
 
-    public function editVersion1QuestionnaireAndAnswerKey(Assessment $assessment)
+    public function editVersion1QuestionnaireAndAnswerKey(string $assessmentId)
     {
+        $assessment = Assessment::findOrFail($assessmentId);
         $questionnaireAndAnswerKey = $this->buildQuestionnareAndAnswerKey($assessment);
 
         AssessmentVersion::where('version_number', 1)->first()->update([
@@ -33,8 +34,9 @@ class AssessmentVersionRepository extends BaseRepository
         ]);
     }
 
-    public function createFromAssessment(Assessment $assessment, bool $isVersion1)
+    public function createFromAssessment(string $assessmentId, bool $isVersion1)
     {
+        $assessment = Assessment::findOrFail($assessmentId);
         $questionnaireAndAnswerKey = $this->buildQuestionnareAndAnswerKey($assessment);
 
         AssessmentVersion::create([
@@ -50,7 +52,9 @@ class AssessmentVersionRepository extends BaseRepository
         $questionnaire = [];
         $answerKey = [];
 
-        foreach ($assessment->assessmentMaterials as $assessmentMaterial) {
+        $assmtMaterialsSortedByOrder = collect($assessment->assessmentMaterials)->sortBy('order')->values();
+
+        foreach ($assmtMaterialsSortedByOrder as $assessmentMaterial) {
             $question = $assessmentMaterial->assessmentMaterialQuestion;
             $materialable = $assessmentMaterial->materialable;
 

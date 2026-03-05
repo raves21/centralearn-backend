@@ -15,6 +15,7 @@ use App\Http\Repositories\OptionBasedItemRepository;
 use App\Http\Repositories\StudentAssessmentAttemptRepository;
 use App\Http\Resources\AssessmentMaterialResource;
 use App\Models\Assessment;
+use App\Models\AssessmentMaterial;
 use App\Models\ChapterContent;
 use App\Models\EssayItem;
 use App\Models\IdentificationItem;
@@ -72,10 +73,14 @@ class AssessmentMaterialService
                 paginate: false
             );
 
-            $this->ddAssessmentMaterials($existingMaterials->toArray(), $incomingMaterials);
+            // $this->ddAssessmentMaterials($existingMaterials->toArray(), $incomingMaterials);
 
             //Only proceed to db transactions if there are changes.
-            if ($assessment->assessment_materials_hash && $this->isAssessmentMaterialsHashEqual($assessment->assessment_materials_hash, $incomingMaterials)) {
+            if ($assessment->assessment_materials_hash && $this->isAssessmentMaterialsHashEqual(
+                $assessment->assessment_materials_hash,
+                $incomingMaterials,
+                $existingMaterials->toArray()
+            )) {
                 return [
                     'message' => 'no changes.'
                 ];
@@ -108,6 +113,12 @@ class AssessmentMaterialService
                     $this->assessmentMaterialRepo->deleteById($id);
                     $results['deleted']++;
                 }
+            }
+
+            // Temporarily negate orders to avoid unique constraint violations during reordering
+            if (!empty($incomingIds)) {
+                AssessmentMaterial::whereIn('id', $incomingIds)
+                    ->update(['order' => DB::raw('`order` * -1')]);
             }
 
             // 2. Process Upserts
@@ -419,7 +430,10 @@ class AssessmentMaterialService
                                 'order' => (string)$existingOption['order'],
                                 'is_correct' => (string)$existingOption['is_correct'] ?: "0",
                                 'option_text' => $existingOption['option_text'] ?? null,
-                                'option_file' => $existingOption['option_file'] ?? null
+                                'option_file' => $existingOption['option_file'] ?
+                                    collect($existingOption['option_file'])->map(function ($value, $key) {
+                                        return $key === 'size' ? (string) $value : $value;
+                                    })->toArray() : null,
                             ], fn($value) => $value !== null);
                         }, $materialable['option_based_item_options'])
                     ];
@@ -452,7 +466,12 @@ class AssessmentMaterialService
                 'point_worth' => number_format($existingMaterial['point_worth'], 2),
                 'question' => array_filter([
                     'question_text' => $materialQuestion['question_text'] ?? null,
-                    'question_files' => $materialQuestion['question_files'] ?? null
+                    'question_files' => $materialQuestion['question_files'] ? collect($materialQuestion['question_files'])->map(function ($mq) {
+                        return [
+                            ...$mq,
+                            'size' => (string) $mq['size']
+                        ];
+                    })->toArray() : null
                 ]),
                 'option_based_item' => $optionBasedItem ?: null,
                 'essay_item' => $essayItem ?: null,
@@ -460,15 +479,18 @@ class AssessmentMaterialService
             ], fn($value) => $value !== null);
         }
 
+        $sortedByOrder = collect($formattedMaterials)->sortBy('order')->values()->toArray();
+
         return [
-            'hashedData' => $formattedMaterials,
-            'hash' => hash('sha256', json_encode($formattedMaterials))
+            'hashedData' => $sortedByOrder,
+            'hash' => hash('sha256', json_encode($sortedByOrder))
         ];
     }
 
     //incoming materials payload may have 'kept_question_files' and 'kept_option_file'
     //this method formats 'kept_question_files' into just 'question_files' if the existing and incoming is the same
-    //same thing for kept_option_file
+    //same thing for kept_option_file which formats it into just 'option_file'
+    //this is to properly compare existingMaterials and incomingMaterials
     private function formatIncomingMaterials(array $incomingMaterials, array $existingMaterials)
     {
         //if the length isnt the same dont bother formatting
@@ -484,23 +506,29 @@ class AssessmentMaterialService
         foreach ($incomingMaterials as $index => $incomingM) {
             $data = $incomingM;
 
-            //if new material dont bother formatting
+            //if new material dont bother formatting (new materials dont have 'id' property)
             if (!isset($incomingM['id'])) {
                 $didntBother = true;
                 break;
             }
 
-            //if current existingmaterial materialtype isnt the same with the incoming, dont bother formatting
+            //if (current iteration) existingmaterial's materialtype isnt the same with the incoming, dont bother formatting
             if ($existingMaterialsFormatted[$index]['material_type'] !== $incomingM['material_type']) {
                 $didntBother = true;
                 break;
             }
 
-            if (isset($incomingM['question']['kept_question_files'])) {
-                $incomingMKeptQuestionFilesEncoded = json_encode($incomingM['question']['kept_question_files']);
-                $existingMQuestionFilesEncoded = json_encode($existingMaterialsFormatted[$index]['question']['question_files']);
+            //if theres new question files dont bother formatting
+            if (isset($incomingM['question']['new_question_files']) && count($incomingM['question']['new_question_files'])) {
+                $didntBother = true;
+                break;
+            }
 
-                if ($incomingMKeptQuestionFilesEncoded === $existingMQuestionFilesEncoded) {
+            //---HANDLING KEPT_QUESTION_FILES---
+            if (isset($incomingM['question']['kept_question_files'])) {
+                //comparing using loose equality (==) to ignore data types
+                //since incomingM file size is string and existingM file size is int
+                if ($incomingM['question']['kept_question_files'] == $existingMaterialsFormatted[$index]['question']['question_files']) {
                     $data = [
                         ...$incomingM,
                         'question' => [
@@ -511,6 +539,7 @@ class AssessmentMaterialService
                 }
             }
 
+            //---HANDLING KEPT_OPTION_FILE---
             if ($incomingM['material_type'] === 'option_based_item') {
                 $incomingOptions = $incomingM['option_based_item']['options'];
                 $existingOptions = $existingMaterialsFormatted[$index]['option_based_item']['options'];
@@ -521,32 +550,29 @@ class AssessmentMaterialService
                     break;
                 }
 
-                foreach ($incomingOptions as $index => $incomingO) {
+                foreach ($incomingOptions as $optIndex => $incomingO) {
                     $optData = $incomingO;
 
-                    //if new option dont bother formatting
+                    //if new option dont bother formatting (new options dont have 'id' property)
                     if (!isset($incomingO['id'])) {
                         $didntBother = true;
                         break;
                     }
 
                     //if theres a new option file dont bother formatting
-                    if (isset($incomingO['new_option_file'])) {
+                    if (isset($incomingO['new_option_file']) && count($incomingO['new_option_file'])) {
                         $didntBother = true;
                         break;
                     }
 
                     //if (excluding the option_files) the other data isnt the same, dont bother formatting
-                    if (json_encode(Arr::except($incomingO, ['kept_option_file', 'new_option_file'])) !== json_encode(Arr::except($existingOptions[$index], 'option_file'))) {
+                    if (Arr::except($incomingO, ['kept_option_file', 'new_option_file']) != Arr::except($existingOptions[$optIndex], 'option_file')) {
                         $didntBother = true;
                         break;
                     }
 
                     if (isset($incomingO['kept_option_file'])) {
-                        $keptOptionFileEncoded = json_encode($incomingO['kept_option_file']);
-                        $existingOptionFileEncoded = json_encode($existingOptions[$index]['option_file']);
-
-                        if ($keptOptionFileEncoded === $existingOptionFileEncoded) {
+                        if ($incomingO['kept_option_file'] == $existingOptions[$optIndex]['option_file']) {
                             $optData = [
                                 ...Arr::except($incomingO, 'kept_option_file'),
                                 'option_file' => $incomingO['kept_option_file']
@@ -554,7 +580,7 @@ class AssessmentMaterialService
                         }
                     }
 
-                    $data['option_based_item']['options'][] = $optData;
+                    $data['option_based_item']['options'][$optIndex] = $optData;
                 }
             }
 
@@ -570,27 +596,22 @@ class AssessmentMaterialService
     private function ddAssessmentMaterials(array $existingMaterials, array $incomingMaterials)
     {
         $hashInfo = $this->createExistingAssessmentMaterialsHash($existingMaterials);
+        $existingFormatted = $hashInfo['hashedData'];
         $incomingFormatted = $this->formatIncomingMaterials($incomingMaterials, $existingMaterials);
-        // $isExistingQFileEqualToIncomingKeptQFile = json_encode($hashInfo['hashedData'][0]['question']['question_files']) === json_encode($incomingMaterials[0]['question']['kept_question_files']);
         dd([
-            'existing' => $existingMaterials,
-            'hashedData' => $hashInfo['hashedData'],
-            'incoming' => $incomingMaterials,
-            // 'dasd' => $isExistingQFileEqualToIncomingKeptQFile,
-            'zz' => [
-                'existingHashInfo' => $hashInfo,
-                'incomingFormatted' => $incomingFormatted
-            ],
+            'existingFormatted' => $existingFormatted,
+            'incomingFormatted' => $incomingFormatted,
             'hash' => [
                 'existing' => $hashInfo['hash'],
-                'incoming' => hash('sha256', json_encode($incomingMaterials))
+                'incoming' => hash('sha256', json_encode($incomingFormatted))
             ]
         ]);
     }
 
-    private function isAssessmentMaterialsHashEqual(string $existingMaterialsHash, array $incomingMaterials)
+    private function isAssessmentMaterialsHashEqual(string $existingMaterialsHash, array $incomingMaterials, array $existingMaterials)
     {
-        if ($existingMaterialsHash === hash('sha256', json_encode($incomingMaterials))) {
+        $incomingMaterialsFormatted = $this->formatIncomingMaterials($incomingMaterials, $existingMaterials);
+        if ($existingMaterialsHash === hash('sha256', json_encode($incomingMaterialsFormatted))) {
             return true;
         }
         return false;
@@ -601,26 +622,25 @@ class AssessmentMaterialService
         //if this is an update of assessmentMaterials
         if ($assessment->assessmentVersions()->exists()) {
             $assessmentTotalOngoingAttempts = $this->studentAssessmentAttemptRepo->countAssessmentOngoingAttempts($assessment->id);
-
             //if assessment is closed
             if (!$chapterContent->opens_at || Carbon::parse($chapterContent->opens_at)->gt(now())) {
                 //edit the version 1 questionnaire and answer key
-                $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment);
+                $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment->id);
             }
 
             //if assessment is open and there are no ongoing attempts yet
             if (Carbon::parse($chapterContent->opens_at)->lte(now()) && $assessmentTotalOngoingAttempts === 0) {
                 //edit the version 1 questionnaire and answer key
-                $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment);
+                $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment->id);
             } else {
                 //if there are already ongoing attempts, create a new version
-                $this->assessmentVersionRepo->createFromAssessment(assessment: $assessment, isVersion1: false);
+                $this->assessmentVersionRepo->createFromAssessment(assessmentId: $assessment->id, isVersion1: false);
             }
         }
 
-        //if this is the first time the assessment will have assessmentMaterials
+        //if this is the first time the assessment will have assessmentMaterials, create version 1
         else {
-            $this->assessmentVersionRepo->createFromAssessment(assessment: $assessment, isVersion1: true);
+            $this->assessmentVersionRepo->createFromAssessment(assessmentId: $assessment->id, isVersion1: true);
         }
     }
 }
