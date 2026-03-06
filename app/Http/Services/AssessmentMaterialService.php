@@ -218,7 +218,8 @@ class AssessmentMaterialService
             $chapterContent = $this->chapterContentRepo->findByFilter(['contentable_id' => $assessment->id]);
 
             //update assessment_materials_hash since we updated the assessment materials
-            $this->assessmentRepo->updateById($assessment->id, [
+
+            $this->assessmentRepo->updateByRecord($assessment, [
                 'assessment_materials_hash' => $this->createExistingAssessmentMaterialsHash($assessment->assessmentMaterials->toArray())['hash']
             ]);
 

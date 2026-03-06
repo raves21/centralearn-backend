@@ -57,6 +57,11 @@ class BaseRepository
         return $record->load($relationships);
     }
 
+    public function updateByRecord(Model $record, array $formData)
+    {
+        return $record->update($formData);
+    }
+
     public function create(array $formData, array $relationships = [])
     {
         $record = $this->model->create($formData);

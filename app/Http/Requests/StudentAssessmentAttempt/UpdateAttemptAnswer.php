@@ -4,7 +4,7 @@ namespace App\Http\Requests\StudentAssessmentAttempt;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateAttemptAnswers extends FormRequest
+class UpdateAttemptAnswer extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,10 +23,10 @@ class UpdateAttemptAnswers extends FormRequest
     {
         return [
             'attempt_id' => ['required', 'exists:student_assessment_attempts,id'],
-            'answers' => ['nullable', 'array'],
-            'answers.*.asmt_material_id' => ['required', 'exists:assessment_materials,id'],
-            'answers.*.material_type' => ['required', 'in:essay_item,option_based_item,identification_item'],
-            'answers.*.content' => ['required', 'string']
+            'answer' => ['required', 'array'],
+            'answer.asmt_material_id' => ['required', 'exists:assessment_materials,id'],
+            'answer.material_type' => ['required', 'in:option_based_item,essay_item,identification_item'],
+            'answer.content' => ['required', 'string']
         ];
     }
 }

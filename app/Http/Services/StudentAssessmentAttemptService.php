@@ -72,7 +72,7 @@ class StudentAssessmentAttemptService
         $hasEssayItem = collect($answers)->contains('material_type', 'essayItem');
 
         foreach ($answers as $answer) {
-            $materialId = $answer['material_id'];
+            $materialId = $answer['asmt_material_id'];
             $materialType = $answer['material_type'];
             $answerContent = $answer['content'];
             $materialPointWorth = $answerKey[$materialId]['point_worth'];
@@ -180,8 +180,48 @@ class StudentAssessmentAttemptService
 
     public function updateAttemptAnswers(string $attemptId, array $answers)
     {
-        return new StudentAssessmentAttemptResource($this->studentAssessmentAttemptRepo->updateById($attemptId, [
+        $this->studentAssessmentAttemptRepo->updateById($attemptId, [
             'answers' => $answers
-        ]));
+        ]);
+
+        return ['message' => 'answers updated.'];
+    }
+
+    public function updateAttemptAnswer(string $attemptId, array $incomingAnswer)
+    {
+        $attempt = $this->studentAssessmentAttemptRepo->findById($attemptId);
+
+        $foundAnswer = collect($attempt->answers)->first(function ($answer) use ($incomingAnswer) {
+            return $answer['asmt_material_id'] === $incomingAnswer['asmt_material_id'];
+        });
+
+        //if incoming answer not in answers
+        //just add it
+        if (!$foundAnswer) {
+            $this->studentAssessmentAttemptRepo->updateByRecord($attempt,  [
+                'answers' => [
+                    ...$attempt->answers,
+                    $incomingAnswer
+                ]
+            ]);
+
+            return ['message' => 'successfully added new answer.'];
+        }
+
+        $updatedAnswers = collect($attempt->answers)->map(function ($existingAnswer) use ($incomingAnswer) {
+            if ($existingAnswer['asmt_material_id'] === $incomingAnswer['asmt_material_id']) {
+                return [
+                    ...$existingAnswer,
+                    'content' => $incomingAnswer['content']
+                ];
+            }
+            return $existingAnswer;
+        });
+
+        $attempt->update([
+            'answers' => $updatedAnswers->toArray()
+        ]);
+
+        return ['message' => 'successfully updated answer.'];
     }
 }

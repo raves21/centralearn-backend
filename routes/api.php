@@ -98,6 +98,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/start-attempt', 'startAttempt');
         Route::post('/submit-attempt', 'submitAttempt');
         Route::post('/update-attempt-answers', 'updateAttemptAnswers');
+        Route::post('/update-attempt-answer', 'updateAttemptAnswer');
         Route::get('/student-assessment-attempt-availability', 'getStudentAssessmentAttemptAvailability');
         Route::get('/{student_assessment_attempt}', 'show');
     });
