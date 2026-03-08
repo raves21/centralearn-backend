@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('assessment_versions', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->double('max_achievable_score')->nullable();
             $table->foreignUuid('assessment_id')->constrained();
             $table->integer('version_number')->default(1);
             $table->json('questionnaire_snapshot')->nullable(); //json array of assessmentMaterials (without the answers)

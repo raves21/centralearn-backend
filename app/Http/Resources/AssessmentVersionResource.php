@@ -17,6 +17,7 @@ class AssessmentVersionResource extends JsonResource
         return [
             'id' => $this->id,
             'assessmentId' => $this->assessment_id,
+            'maxAchievableScore' => $this->max_achievable_score,
             'versionNumber' => $this->version_number,
             'questionnaireSnapshot' => $this->questionnaire_snapshot
         ];

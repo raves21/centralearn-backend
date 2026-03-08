@@ -30,6 +30,7 @@ class AssessmentVersionRepository extends BaseRepository
 
         AssessmentVersion::where('version_number', 1)->first()->update([
             'questionnaire_snapshot' => $questionnaireAndAnswerKey['questionnaire'],
+            'max_achievable_score' => $assessment->max_achievable_score,
             'answer_key' => $questionnaireAndAnswerKey['answerKey'],
         ]);
     }
@@ -41,6 +42,7 @@ class AssessmentVersionRepository extends BaseRepository
 
         AssessmentVersion::create([
             'assessment_id' => $assessment->id,
+            'max_achievable_score' => $assessment->max_achievable_score,
             'version_number' => $isVersion1 ? 1 : $this->getLatestAssessmentVersionNumber($assessment->id) + 1,
             'questionnaire_snapshot' => $questionnaireAndAnswerKey['questionnaire'],
             'answer_key' => $questionnaireAndAnswerKey['answerKey']

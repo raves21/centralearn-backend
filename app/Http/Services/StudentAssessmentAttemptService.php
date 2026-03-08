@@ -31,7 +31,6 @@ class StudentAssessmentAttemptService
             ->additional([
                 'assessment' => [
                     'id' => $attemptAssessment->id,
-                    'maxAchievableScore' => $attemptAssessment->max_achievable_score,
                     'chapterContent' => [
                         'id' => $attemptAssessmentChapterContent->id,
                         'name' => $attemptAssessmentChapterContent->name,
