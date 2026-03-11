@@ -65,27 +65,30 @@ class StudentAssessmentAttemptService
         $answerKey = $attempt->assessmentVersion->answer_key;
         $answers = $formData['answers'];
 
+        //update the answers
+        $attempt->update([
+            'answers' => $answers
+        ]);
+
         $submissionSummary = [];
 
         $totalPointsEarned = 0;
 
-        $hasEssayItem = collect($answers)->contains('material_type', 'essay_item');
-
         foreach ($answers as $answer) {
-            $materialId = $answer['asmt_material_id'];
+            $asmtMaterialId = $answer['asmt_material_id'];
             $materialType = $answer['material_type'];
-            $answerContent = $answer['content'] ?: null;
-            $materialPointWorth = $answerKey[$materialId]['point_worth'];
+            $answerContent = $answer['content'] ?? null;
+            $materialPointWorth = $answerKey[$asmtMaterialId]['point_worth'];
 
             switch ($materialType) {
                 case 'option_based_item':
-                    $correctAnswer = $answerKey[$materialId]['correct_answer'];
+                    $correctAnswer = $answerKey[$asmtMaterialId]['correct_answer'];
                     $isCorrect = $answerContent === $correctAnswer;
                     $pointsEarned = $isCorrect ? $materialPointWorth : 0;
 
-                    if ($isCorrect) $totalPointsEarned += $materialPointWorth;
+                    if ($pointsEarned) $totalPointsEarned += $pointsEarned;
 
-                    $submissionSummary[$materialId] = [
+                    $submissionSummary[$asmtMaterialId] = [
                         'answer_content' => $answerContent,
                         'correct_answer' => $correctAnswer,
                         'is_correct' => $isCorrect,
@@ -94,13 +97,13 @@ class StudentAssessmentAttemptService
                     break;
 
                 case 'identification_item':
-                    $acceptedAnswers = $answerKey[$materialId]['accepted_answers'];
+                    $acceptedAnswers = $answerKey[$asmtMaterialId]['accepted_answers'];
                     $isCorrect = in_array($answerContent, $acceptedAnswers);
                     $pointsEarned = $isCorrect ? $materialPointWorth : 0;
 
-                    if ($isCorrect) $totalPointsEarned += 0;
+                    if ($pointsEarned) $totalPointsEarned += $pointsEarned;
 
-                    $submissionSummary[$materialId] = [
+                    $submissionSummary[$asmtMaterialId] = [
                         'answer_content' => $answerContent,
                         'accepted_answers' => $acceptedAnswers,
                         'is_correct' => $isCorrect,
@@ -108,19 +111,22 @@ class StudentAssessmentAttemptService
                     ];
                     break;
                 case 'essay_item':
-                    $submissionSummary[$materialId] = [
+                    $submissionSummary[$asmtMaterialId] = [
                         'answer_content' => $answerContent,
-                        'points_earned' => null //ungraded initially, this will be manually checked by instructor
+                        //for essay items,
+                        //if no answer (null), zero points earned. Otherwise set to null (to be graded and changed later by instructor)
+                        'points_earned' => $answerContent ? null : 0
                     ];
             }
         }
+
+        $hasAnswerWithNullPointsEarned = collect($submissionSummary)->first(fn($item) => $item['points_earned'] === null);
 
         $this->studentAssessmentAttemptRepo->updateById($attempt->id, [
             'submission_summary' => $submissionSummary,
             'submitted_at' => now(),
             'status' => 'submitted',
-            //essay items cannot be auto-graded
-            'total_score' => $hasEssayItem ? null : $totalPointsEarned
+            'total_score' => $hasAnswerWithNullPointsEarned ? null : $totalPointsEarned
         ]);
 
         $attempts = StudentAssessmentAttempt::where('student_id', $attempt->student_id)
@@ -135,7 +141,15 @@ class StudentAssessmentAttemptService
             'student_id' => $attempt->student_id
         ]);
 
-        if (!$hasEssayItem) {
+        if ($hasAnswerWithNullPointsEarned) {
+            if (!$assessmentResult) {
+                $this->assessmentResultRepo->create([
+                    'student_id' => $attempt->student_id,
+                    'assessment_id' => $assessment->id,
+                    'final_score' => null
+                ]);
+            }
+        } else {
             if ($assessmentResult) {
                 if ($assessment->max_attempts > 1) {
                     $assessmentResult->update([
@@ -151,14 +165,6 @@ class StudentAssessmentAttemptService
                     'student_id' => $attempt->student_id,
                     'assessment_id' => $assessment->id,
                     'final_score' => $totalPointsEarned
-                ]);
-            }
-        } else {
-            if (!$assessmentResult) {
-                $this->assessmentResultRepo->create([
-                    'student_id' => $attempt->student_id,
-                    'assessment_id' => $assessment->id,
-                    'final_score' => null
                 ]);
             }
         }
@@ -190,23 +196,6 @@ class StudentAssessmentAttemptService
     public function updateAttemptAnswer(string $attemptId, array $incomingAnswer)
     {
         $attempt = $this->studentAssessmentAttemptRepo->findById($attemptId);
-
-        $foundAnswer = collect($attempt->answers)->first(function ($answer) use ($incomingAnswer) {
-            return $answer['asmt_material_id'] === $incomingAnswer['asmt_material_id'];
-        });
-
-        //if incoming answer not in answers
-        //just add it
-        if (!$foundAnswer) {
-            $this->studentAssessmentAttemptRepo->updateByRecord($attempt,  [
-                'answers' => [
-                    ...$attempt->answers,
-                    $incomingAnswer
-                ]
-            ]);
-
-            return ['message' => 'successfully added new answer.'];
-        }
 
         $updatedAnswers = collect($attempt->answers)->map(function ($existingAnswer) use ($incomingAnswer) {
             if ($existingAnswer['asmt_material_id'] === $incomingAnswer['asmt_material_id']) {

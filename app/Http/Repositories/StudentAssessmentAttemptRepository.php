@@ -4,6 +4,9 @@ namespace App\Http\Repositories;
 
 use App\Models\Assessment;
 use App\Models\AssessmentVersion;
+use App\Models\EssayItem;
+use App\Models\IdentificationItem;
+use App\Models\OptionBasedItem;
 use App\Models\Student;
 use App\Models\StudentAssessmentAttempt;
 
@@ -101,12 +104,25 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         //get latest assessment version
         $latestAssessmentVersion = AssessmentVersion::where('assessment_id', $assessmentId)->latest()->first();
 
+        //initialize answers
+        $initialAnswers = collect($latestAssessmentVersion->questionnaire_snapshot)->map(function ($item) {
+            return [
+                'asmt_material_id' => $item['id'],
+                'material_type' => match ($item['materialType']) {
+                    EssayItem::class => 'essay_item',
+                    IdentificationItem::class => 'identification_item',
+                    OptionBasedItem::class => 'option_based_item'
+                },
+                'content' => null
+            ];
+        })->toArray();
+
         $newAttempt = StudentAssessmentAttempt::create([
             'student_id' => $studentId,
             'assessment_version_id' => $latestAssessmentVersion->id,
             'attempt_number' => $studentAttemptCount + 1,
             'status' => 'ongoing',
-            'answers' => [],
+            'answers' => $initialAnswers,
             'started_at' => now()
         ]);
 
