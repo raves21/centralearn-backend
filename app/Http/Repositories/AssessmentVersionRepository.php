@@ -109,6 +109,9 @@ class AssessmentVersionRepository extends BaseRepository
                         'minWordCount' => $materialable->min_word_count,
                         'maxWordCount' => $materialable->max_word_count,
                     ];
+                    $answerKey[$assessmentMaterial->id] = [
+                        'point_worth' => $assessmentMaterial->point_worth,
+                    ];
                     break;
                 case IdentificationItem::class:
                     //copy format of IdentificationItemResource

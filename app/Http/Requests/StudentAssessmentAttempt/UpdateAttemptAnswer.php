@@ -26,7 +26,7 @@ class UpdateAttemptAnswer extends FormRequest
             'answer' => ['required', 'array'],
             'answer.asmt_material_id' => ['required', 'exists:assessment_materials,id'],
             'answer.material_type' => ['required', 'in:option_based_item,essay_item,identification_item'],
-            'answer.content' => ['required', 'string']
+            'answer.content' => ['nullable', 'string']
         ];
     }
 }

@@ -61,6 +61,7 @@ class StudentAssessmentAttemptService
     public function submitAttempt(array $formData)
     {
         $attempt = $this->studentAssessmentAttemptRepo->findById($formData['attempt_id'], ['assessmentVersion.assessment.chapterContent']);
+
         $answerKey = $attempt->assessmentVersion->answer_key;
         $answers = $formData['answers'];
 
@@ -68,12 +69,12 @@ class StudentAssessmentAttemptService
 
         $totalPointsEarned = 0;
 
-        $hasEssayItem = collect($answers)->contains('material_type', 'essayItem');
+        $hasEssayItem = collect($answers)->contains('material_type', 'essay_item');
 
         foreach ($answers as $answer) {
             $materialId = $answer['asmt_material_id'];
             $materialType = $answer['material_type'];
-            $answerContent = $answer['content'];
+            $answerContent = $answer['content'] ?: null;
             $materialPointWorth = $answerKey[$materialId]['point_worth'];
 
             switch ($materialType) {
@@ -124,9 +125,9 @@ class StudentAssessmentAttemptService
 
         $attempts = StudentAssessmentAttempt::where('student_id', $attempt->student_id)
             ->whereHas('assessmentVersion', function ($q) use ($attempt) {
-                $q->where('id', $attempt->assesmentVersion->assessment_id);
+                $q->where('id', $attempt->assessmentVersion->assessment_id);
             })
-            ->pluck('final_score');
+            ->pluck('total_score');
 
         $assessment = $attempt->assessmentVersion->assessment;
         $assessmentResult = $this->assessmentResultRepo->findByFilter([
