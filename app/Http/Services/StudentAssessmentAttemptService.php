@@ -129,9 +129,9 @@ class StudentAssessmentAttemptService
             'total_score' => $hasAnswerWithNullPointsEarned ? null : $totalPointsEarned
         ]);
 
-        $attempts = StudentAssessmentAttempt::where('student_id', $attempt->student_id)
+        $attemptsTotalScores = StudentAssessmentAttempt::where('student_id', $attempt->student_id)
             ->whereHas('assessmentVersion', function ($q) use ($attempt) {
-                $q->where('id', $attempt->assessmentVersion->assessment_id);
+                $q->where('assessment_id', $attempt->assessmentVersion->assessment_id);
             })
             ->pluck('total_score');
 
@@ -141,11 +141,16 @@ class StudentAssessmentAttemptService
             'student_id' => $attempt->student_id
         ]);
 
-        if ($hasAnswerWithNullPointsEarned) {
+        //if has attempt with null total score, final score will be decided later (after instructor grades the essay item/s)
+        if ($attemptsTotalScores->contains(null)) {
             if (!$assessmentResult) {
                 $this->assessmentResultRepo->create([
                     'student_id' => $attempt->student_id,
                     'assessment_id' => $assessment->id,
+                    'final_score' => null
+                ]);
+            } else {
+                $assessmentResult->update([
                     'final_score' => null
                 ]);
             }
@@ -153,7 +158,7 @@ class StudentAssessmentAttemptService
             if ($assessmentResult) {
                 if ($assessment->max_attempts > 1) {
                     $assessmentResult->update([
-                        'final_score' => $assessment->multi_attempt_grading_type === 'avg_score' ? $attempts->avg() : $attempts->max()
+                        'final_score' => $assessment->multi_attempt_grading_type === 'avg_score' ? $attemptsTotalScores->avg() : $attemptsTotalScores->max()
                     ]);
                 } else {
                     $assessmentResult->update([
