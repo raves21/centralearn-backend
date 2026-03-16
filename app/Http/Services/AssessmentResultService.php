@@ -38,4 +38,9 @@ class AssessmentResultService
     {
         return $this->assessmentResultRepo->deleteById($id);
     }
+
+    public function getResultAndAttempts(string $studentId, string $assessmentId)
+    {
+        return $this->assessmentResultRepo->getResultAndAttempts($studentId, $assessmentId);
+    }
 }

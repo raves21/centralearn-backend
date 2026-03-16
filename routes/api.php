@@ -13,6 +13,7 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\SemesterController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\AssessmentMaterialController;
+use App\Http\Controllers\AssessmentResultController;
 use App\Http\Controllers\SectionController;
 use App\Http\Controllers\StudentAssessmentAttemptController;
 use Illuminate\Support\Facades\Route;
@@ -101,5 +102,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/update-attempt-answer', 'updateAttemptAnswer');
         Route::get('/student-assessment-attempt-availability', 'getStudentAssessmentAttemptAvailability');
         Route::get('/{student_assessment_attempt}', 'show');
+    });
+
+    Route::controller(AssessmentResultController::class)->prefix('assessment-results')->group(function () {
+        Route::get('/result-and-attempts', 'getResultAndAttempts');
     });
 });
