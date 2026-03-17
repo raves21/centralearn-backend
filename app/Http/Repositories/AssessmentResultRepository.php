@@ -30,6 +30,7 @@ class AssessmentResultRepository extends BaseRepository
 
         return [
             'id' => $asmtResult->id,
+            'maxScore' => $asmtResult->assessment->max_achievable_score,
             'finalScore' => $asmtResult->final_score,
             'lastRecordedAt' => $asmtResult->updated_at,
             'attempts' => $attempts->map(function ($attempt) {
