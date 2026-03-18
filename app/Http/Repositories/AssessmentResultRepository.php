@@ -29,10 +29,12 @@ class AssessmentResultRepository extends BaseRepository
         }
 
         return [
-            'id' => $asmtResult->id,
-            'maxScore' => $asmtResult->assessment->max_achievable_score,
-            'finalScore' => $asmtResult->final_score,
-            'lastRecordedAt' => $asmtResult->updated_at,
+            'assessmentResult' => [
+                'id' => $asmtResult->id,
+                'maxScore' => $asmtResult->assessment->max_achievable_score,
+                'finalScore' => $asmtResult->final_score,
+                'lastRecordedAt' => $asmtResult->updated_at,
+            ],
             'attempts' => $attempts->map(function ($attempt) {
                 return [
                     'id' => $attempt->id,
@@ -42,6 +44,6 @@ class AssessmentResultRepository extends BaseRepository
                     'submittedAt' => $attempt->submitted_at,
                 ];
             })->toArray()
-        ];
+        ];;
     }
 }
