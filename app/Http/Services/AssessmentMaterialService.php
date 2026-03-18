@@ -208,11 +208,11 @@ class AssessmentMaterialService
                 }
             }
 
-            //update max achievable score after everything is done
-            $this->assessmentRepo->updateMaxAchievableScore($assessment);
-
             //retrieve fresh instance (with new asmt materials) from db
             $assessment = $this->assessmentRepo->getFresh($assessment);
+
+            //update max achievable score after everything is done
+            $this->assessmentRepo->updateMaxAchievableScore($assessment);
 
             //get chaptercontent
             $chapterContent = $this->chapterContentRepo->findByFilter(['contentable_id' => $assessment->id]);

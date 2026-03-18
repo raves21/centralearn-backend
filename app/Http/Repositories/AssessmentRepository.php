@@ -13,16 +13,10 @@ class AssessmentRepository extends BaseRepository
 
     public function updateMaxAchievableScore(Assessment $assessment)
     {
-        $total = 0;
-
-        foreach ($assessment->assessmentMaterials as $assessmentMaterial) {
-            $total += $assessmentMaterial->point_worth;
-        }
+        $totalPoints = $assessment->assessmentMaterials->pluck('point_worth')->sum();
 
         $assessment->update([
-            'max_achievable_score' => $total
+            'max_achievable_score' => $totalPoints
         ]);
-
-        return $total;
     }
 }
