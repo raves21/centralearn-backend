@@ -47,4 +47,9 @@ class StudentAssessmentAttemptController extends Controller
         $validated = $request->validated();
         return $this->studentAssessmentAttemptService->startAttempt($validated['student_id'], $validated['assessment_id']);
     }
+
+    public function getAttemptRemainingTime(string $studentAssessmentAttemptId)
+    {
+        return $this->studentAssessmentAttemptService->getAttemptRemainingTime($studentAssessmentAttemptId);
+    }
 }

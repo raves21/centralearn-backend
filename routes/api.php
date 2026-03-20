@@ -102,6 +102,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/update-attempt-answer', 'updateAttemptAnswer');
         Route::get('/student-assessment-attempt-availability', 'getStudentAssessmentAttemptAvailability');
         Route::get('/{student_assessment_attempt}', 'show');
+        Route::get('/{student_assessment_attempt}/remaining-time', 'getAttemptRemainingTime');
     });
 
     Route::controller(AssessmentResultController::class)->prefix('assessment-results')->group(function () {

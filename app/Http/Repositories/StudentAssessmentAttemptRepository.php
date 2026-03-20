@@ -9,12 +9,22 @@ use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
 use App\Models\Student;
 use App\Models\StudentAssessmentAttempt;
+use Carbon\Carbon;
 
 class StudentAssessmentAttemptRepository extends BaseRepository
 {
     public function __construct(StudentAssessmentAttempt $studentAssessmentAttempt)
     {
         parent::__construct($studentAssessmentAttempt);
+    }
+
+    public function getAttemptsByStudentAndAssessment(string $studentId, string $assessmentId)
+    {
+        return StudentAssessmentAttempt::where('student_id', $studentId)
+            ->whereHas('assessmentVersion', function ($q) use ($assessmentId) {
+                $q->where('assessment_id', $assessmentId);
+            })
+            ->get();
     }
 
     public function countAssessmentOngoingAttempts(string $assessmentId)
@@ -129,5 +139,45 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         $newAttempt->load(['assessmentVersion']);
 
         return $newAttempt;
+    }
+
+    public function getAttemptRemainingTime(string $attemptId)
+    {
+        $attempt = StudentAssessmentAttempt::findOrFail($attemptId);
+
+        $assessment = $attempt->assessmentVersion->assessment;
+        $assessmentTimeLimit = $assessment->time_limit;
+        $assessmentClosesAt = $assessment->chapterContent->closes_at;
+        $assessmentOpensAt = $assessment->chapterContent->opens_at;
+
+        $isAssessmentOpen = true;
+
+        if ($assessmentOpensAt && now()->lt($assessmentOpensAt)) {
+            $isAssessmentOpen = false;
+        }
+
+        if ($assessmentClosesAt && now()->gt($assessmentClosesAt)) {
+            $isAssessmentOpen = false;
+        }
+
+        if (!$isAssessmentOpen) {
+            abort(400, 'This assessment is closed.');
+        }
+
+        if (!$assessmentTimeLimit) {
+            if (!$assessmentClosesAt) {
+                //no time limit, no scheduled close
+                return null;
+            } else {
+                //no time limit but has scheduled close
+                $remainingSeconds = now()->diffInSeconds($assessmentClosesAt);
+                return $remainingSeconds;
+            }
+        } else {
+            //deadline = attempt started_at + allowed duration (time limit)
+            $deadline = $attempt->started_at->copy()->addSeconds($assessmentTimeLimit);
+            $remainingSeconds = now()->diffInSeconds($deadline);
+            return $remainingSeconds;
+        }
     }
 }

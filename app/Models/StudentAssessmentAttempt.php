@@ -13,7 +13,9 @@ class StudentAssessmentAttempt extends Model
 
     protected $casts = [
         'answers' => 'array',
-        'submission_summary' => 'array'
+        'submission_summary' => 'array',
+        'started_at' => 'datetime',
+        'submitted_at' => 'datetime',
     ];
 
     public function student()

@@ -21,7 +21,7 @@ class ChapterContentResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            'isOpen' => $this->opens_at ? Carbon::parse($this->opens_at)->lessThanOrEqualTo(now()) : false,
+            'isOpen' => $this->opens_at ? now()->greaterThanOrEqualTo(Carbon::parse($this->opens_at)) : false,
             'opensAt' => $this->opens_at,
             'closesAt' => $this->closes_at,
             'chapter' => $this->whenLoaded('chapter', fn() => new ChapterResource($this->chapter)),

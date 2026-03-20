@@ -12,6 +12,12 @@ class ChapterContent extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'publishes_at' => 'datetime',
+        'opens_at' => 'datetime',
+        'closes_at' => 'datetime',
+    ];
+
     protected $with = ['contentable'];
 
     public function chapter()

@@ -129,10 +129,8 @@ class StudentAssessmentAttemptService
             'total_score' => $hasAnswerWithNullPointsEarned ? null : $totalPointsEarned
         ]);
 
-        $attemptsTotalScores = StudentAssessmentAttempt::where('student_id', $attempt->student_id)
-            ->whereHas('assessmentVersion', function ($q) use ($attempt) {
-                $q->where('assessment_id', $attempt->assessmentVersion->assessment_id);
-            })
+        $attemptsTotalScores = $this->studentAssessmentAttemptRepo
+            ->getAttemptsByStudentAndAssessment($attempt->student_id, $attempt->assessmentVersion->assessment_id)
             ->pluck('total_score');
 
         $assessment = $attempt->assessmentVersion->assessment;
@@ -217,5 +215,10 @@ class StudentAssessmentAttemptService
         ]);
 
         return ['message' => 'successfully updated answer.'];
+    }
+
+    public function getAttemptRemainingTime(string $attemptId)
+    {
+        return $this->studentAssessmentAttemptRepo->getAttemptRemainingTime($attemptId);
     }
 }
