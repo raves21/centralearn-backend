@@ -31,6 +31,7 @@ class StudentAssessmentAttemptService
             ->additional([
                 'assessment' => [
                     'id' => $attemptAssessment->id,
+                    'timeLimit' => $attemptAssessment->time_limit,
                     'chapterContent' => [
                         'id' => $attemptAssessmentChapterContent->id,
                         'name' => $attemptAssessmentChapterContent->name,
