@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ChapterContent\GetAllLectures;
 use App\Http\Requests\ChapterContent\ReorderBulk;
 use App\Http\Requests\ChapterContent\Index;
 use App\Http\Requests\ChapterContent\Store;
 use App\Http\Requests\ChapterContent\Update;
 use App\Http\Services\ChapterContentService;
+use App\Models\LectureMaterial;
 
 class ChapterContentController extends Controller
 {
@@ -52,8 +54,8 @@ class ChapterContentController extends Controller
         return $this->chapterContentService->reorderBulk($request->validated());
     }
 
-    public function updateAssessmentMaxAchievableScore(string $chapterContentId)
+    public function getAllLectures(GetAllLectures $request)
     {
-        return $this->chapterContentService->updateAssessmentMaxAchievableScore($chapterContentId);
+        return $this->chapterContentService->getAllLectures($request->validated()['chapter_id']);
     }
 }

@@ -29,6 +29,11 @@ class ChapterContentService
         ));
     }
 
+    public function getAllLectures(string $chapterId)
+    {
+        return ChapterContentResource::collection($this->chapterContentRepo->getAllLectures($chapterId));
+    }
+
     public function create(array $formData)
     {
         switch ($formData['content_type']) {

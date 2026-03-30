@@ -84,6 +84,7 @@ Route::middleware('auth')->group(function () {
     Route::post('chapters/reorder-bulk', [ChapterController::class, 'reorderBulk']);
     Route::post('chapters/{chapter}', [ChapterController::class, 'update']);
 
+    Route::get('contents/lectures', [ChapterContentController::class, 'getAllLectures']);
     Route::apiResource('contents', ChapterContentController::class)->except('update');
     Route::post('contents/reorder-bulk', [ChapterContentController::class, 'reorderBulk']);
     Route::post('contents/{content}', [ChapterContentController::class, 'update']);

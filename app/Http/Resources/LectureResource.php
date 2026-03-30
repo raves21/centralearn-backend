@@ -15,7 +15,8 @@ class LectureResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id
+            'id' => $this->id,
+            'lectureMaterials' => $this->whenLoaded('lectureMaterials', fn() => LectureMaterialResource::collection($this->lectureMaterials))
         ];
     }
 }
