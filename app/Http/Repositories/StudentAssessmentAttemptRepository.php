@@ -78,7 +78,8 @@ class StudentAssessmentAttemptRepository extends BaseRepository
                     'attemptNumber' => $studentLatestOngoingAttempt->attempt_number
                 ] : null,
             'canStartNewAttempt' => false
-        ];;
+        ];
+        ;
     }
 
     public function startAttempt(string $studentId, string $assessmentId)
@@ -146,7 +147,7 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         $attempt = StudentAssessmentAttempt::findOrFail($attemptId);
 
         $assessment = $attempt->assessmentVersion->assessment;
-        $assessmentTimeLimit = $assessment->time_limit;
+        $assessmentTimeLimit = $assessment->submission_settings['time_limit'] ?? null;
         $assessmentClosesAt = $assessment->chapterContent->closes_at;
         $assessmentOpensAt = $assessment->chapterContent->opens_at;
 

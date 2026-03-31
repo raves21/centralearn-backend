@@ -16,9 +16,7 @@ return new class extends Migration
             $table->foreignUuid('chapter_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->timestamp('publishes_at')->nullable();
-            $table->timestamp('opens_at')->nullable();
-            $table->timestamp('closes_at')->nullable();
+            $table->json('accessibility_settings');
             $table->string('contentable_type');
             $table->string('contentable_id');
             $table->integer('order');

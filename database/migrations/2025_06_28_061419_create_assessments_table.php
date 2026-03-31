@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,13 +12,13 @@ return new class extends Migration
     {
         Schema::create('assessments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->integer('time_limit')->nullable();
             $table->string('assessment_materials_hash')->nullable();
             $table->float('max_achievable_score')->nullable();
             $table->boolean('is_answers_viewable_after_submit');
             $table->boolean('is_score_viewable_after_submit');
             $table->integer('max_attempts')->default(1);
             $table->enum('multi_attempt_grading_type', ['avg_score', 'highest_score'])->nullable();
+            $table->json('submission_settings');
             $table->timestamps();
         });
     }
