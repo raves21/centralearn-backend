@@ -20,8 +20,6 @@ class ChapterResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'order' => $this->order,
-            'isPublished' => Carbon::parse($this->published_at)->lessThanOrEqualTo(Carbon::now()),
-            'publishedAt' => $this->published_at,
             'contents' => $this->whenLoaded('contents', fn() => ChapterContentResource::collection($this->contents))
         ];
     }

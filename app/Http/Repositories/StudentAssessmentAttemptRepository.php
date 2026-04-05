@@ -78,8 +78,7 @@ class StudentAssessmentAttemptRepository extends BaseRepository
                     'attemptNumber' => $studentLatestOngoingAttempt->attempt_number
                 ] : null,
             'canStartNewAttempt' => false
-        ];
-        ;
+        ];;
     }
 
     public function startAttempt(string $studentId, string $assessmentId)
@@ -147,38 +146,41 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         $attempt = StudentAssessmentAttempt::findOrFail($attemptId);
 
         $assessment = $attempt->assessmentVersion->assessment;
-        $assessmentTimeLimit = $assessment->submission_settings['time_limit'] ?? null;
-        $assessmentClosesAt = $assessment->chapterContent->closes_at;
-        $assessmentOpensAt = $assessment->chapterContent->opens_at;
 
-        $isAssessmentOpen = true;
+        $isAccessible = \App\Http\Services\ChapterContentService::isAccessible($assessment->chapterContent->id);
 
-        if ($assessmentOpensAt && now()->lt($assessmentOpensAt)) {
-            $isAssessmentOpen = false;
-        }
-
-        if ($assessmentClosesAt && now()->gt($assessmentClosesAt)) {
-            $isAssessmentOpen = false;
-        }
-
-        if (!$isAssessmentOpen) {
+        if (!$isAccessible) {
             abort(400, 'This assessment is closed.');
         }
 
-        if (!$assessmentTimeLimit) {
-            if (!$assessmentClosesAt) {
-                //no time limit, no scheduled close
-                return null;
-            } else {
-                //no time limit but has scheduled close
-                $remainingSeconds = now()->diffInSeconds($assessmentClosesAt);
-                return $remainingSeconds;
-            }
-        } else {
-            //deadline = attempt started_at + allowed duration (time limit)
-            $deadline = $attempt->started_at->copy()->addSeconds($assessmentTimeLimit);
-            $remainingSeconds = now()->diffInSeconds($deadline);
-            return $remainingSeconds;
+        $timeLimitSeconds = $assessment->submission_settings['time_limit_seconds'] ?? null;
+        $dueDateStr = $assessment->submission_settings['due_date'] ?? null;
+        $behavior = $assessment->submission_settings['after_due_date_behavior'] ?? null;
+
+        $deadlineA = null;
+        if ($timeLimitSeconds) {
+            $deadlineA = $attempt->started_at->copy()->addSeconds($timeLimitSeconds);
         }
+
+        $deadlineB = null;
+        if ($dueDateStr && $behavior === 'auto_submit') {
+            $deadlineB = Carbon::parse($dueDateStr);
+        }
+
+        $finalDeadline = null;
+        if ($deadlineA && $deadlineB) {
+            $finalDeadline = $deadlineA->min($deadlineB);
+        } elseif ($deadlineA) {
+            $finalDeadline = $deadlineA;
+        } elseif ($deadlineB) {
+            $finalDeadline = $deadlineB;
+        }
+
+        if (!$finalDeadline) {
+            return null;
+        }
+
+        $remainingSeconds = (int) now()->diffInSeconds($finalDeadline, false);
+        return $remainingSeconds > 0 ? $remainingSeconds : 0;
     }
 }

@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->boolean('is_score_viewable_after_submit');
             $table->integer('max_attempts')->default(1);
             $table->enum('multi_attempt_grading_type', ['avg_score', 'highest_score'])->nullable();
-            $table->json('submission_settings');
+            $table->json('submission_settings')->nullable();
             $table->timestamps();
         });
     }

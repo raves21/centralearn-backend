@@ -18,11 +18,12 @@ class ChapterContentSeeder extends Seeder
         ChapterContent::create([
             'chapter_id' => Chapter::first()->id,
             'name' => 'Who is Jose Rizal?',
-            'publishes_at' => now(),
+            'accessibility_settings' => [
+                'visible' => true,
+                'custom' => null
+            ],
             'contentable_id' => Lecture::first()->id,
             'contentable_type' => Lecture::class,
-            'opens_at' => now(),
-            'closes_at' => null,
             'description' => null,
             'order' => 1
         ]);

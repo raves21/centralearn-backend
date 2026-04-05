@@ -37,26 +37,52 @@ class Store extends FormRequest
             'content_type' => ['required', 'in:lecture,assessment'],
             'content' => ['required_if:content_type,assessment'],
 
-            //visibility
-            'publishes_at' => ['nullable', 'date'],
-
-            //accessibility
-            'opens_at' => ['nullable', 'date', Rule::date()->afterOrEqual(today())],
-            'closes_at' => ['nullable', 'date', 'after:opens_at'],
+            //accessibility settings
+            'accessibility_settings' => ['nullable', 'array'],
+            'accessibility_settings.visible' => [
+                'nullable',
+                'boolean',
+                Rule::prohibitedIf(fn() => !is_null(data_get($this->input(), 'accessibility_settings.custom'))),
+            ],
+            'accessibility_settings.custom' => [
+                'nullable',
+                'array',
+                Rule::prohibitedIf(fn() => !is_null(data_get($this->input(), 'accessibility_settings.visible'))),
+            ],
+            'accessibility_settings.custom.access_from' => [
+                Rule::requiredIf(fn() => !is_null(data_get($this->input(), 'accessibility_settings.custom'))),
+                'date',
+            ],
+            'accessibility_settings.custom.access_until' => [
+                'nullable',
+                'date',
+                'after:accessibility_settings.custom.access_from',
+            ],
         ];
 
         // Only apply assessment rules if content_type is assessment
         if ($this->input('content_type') === 'assessment') {
             $rules = [
                 ...$rules,
-                'content.time_limit' => ['required', 'integer', 'min:1'],
+                'content.max_achievable_score' => ['nullable', 'numeric', 'min:0'],
                 'content.is_answers_viewable_after_submit' => ['required', 'boolean'],
                 'content.is_score_viewable_after_submit' => ['required', 'boolean'],
                 'content.max_attempts' => ['required', 'integer', 'min:1'],
                 'content.multi_attempt_grading_type' => [
                     'nullable',
-                    Rule::requiredIf(fn() => data_get($this->input(), 'content.max_attempts') > 1),
+                    Rule::requiredIf(fn() => (int) data_get($this->input(), 'content.max_attempts') > 1),
                     'in:avg_score,highest_score'
+                ],
+
+                // submission settings
+                'content.submission_settings' => ['nullable', 'array'],
+                'content.submission_settings.time_limit_seconds' => ['nullable', 'integer', 'min:1'],
+                'content.submission_settings.due_date' => ['nullable', 'date'],
+                'content.submission_settings.after_due_date_behavior' => [
+                    'nullable',
+                    Rule::requiredIf(fn() => !is_null(data_get($this->input(), 'content.submission_settings.due_date'))),
+                    Rule::prohibitedIf(fn() => is_null(data_get($this->input(), 'content.submission_settings.due_date'))),
+                    'in:auto_submit,block_new_attempts,allow_all',
                 ],
             ];
         }

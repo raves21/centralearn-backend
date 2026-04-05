@@ -11,6 +11,10 @@ class Assessment extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'submission_settings' => 'array'
+    ];
+
     public function chapterContent()
     {
         return $this->morphOne(ChapterContent::class, 'contentable');

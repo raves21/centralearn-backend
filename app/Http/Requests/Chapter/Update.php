@@ -35,7 +35,6 @@ class Update extends FormRequest
                     ->where(fn($q) => $q->where('course_class_id', $courseClassId))
                     ->ignore($this->route('chapter'))
             ],
-            'published_at' => ['nullable', 'date']
         ];
     }
 }

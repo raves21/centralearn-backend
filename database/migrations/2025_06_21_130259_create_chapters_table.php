@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('name');
             $table->integer('order');
             $table->string('description')->nullable();
-            $table->timestamp('published_at')->nullable();
             $table->timestamps();
 
             $table->unique(['order', 'course_class_id']);

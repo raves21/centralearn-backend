@@ -7,12 +7,52 @@ use App\Http\Repositories\ChapterContentRepository;
 use App\Http\Repositories\LectureRepository;
 use App\Http\Resources\ChapterContentResource;
 use App\Models\Assessment;
+use App\Models\ChapterContent;
 use App\Models\Lecture;
+use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 class ChapterContentService
 {
+    public static function isAccessible(string $id): bool
+    {
+        $chapterContent = ChapterContent::find($id);
+
+        if (!$chapterContent) {
+            return false;
+        }
+
+        $settings = $chapterContent->accessibility_settings;
+
+        if (empty($settings)) {
+            return false;
+        }
+
+        if (isset($settings['visible'])) {
+            return (bool) $settings['visible'];
+        }
+
+        if (isset($settings['custom'])) {
+            if (isset($settings['custom']['access_from'])) {
+                $from = Carbon::parse($settings['custom']['access_from']);
+                if (now()->isBefore($from)) {
+                    return false;
+                }
+            }
+
+            if (isset($settings['custom']['access_until'])) {
+                $until = Carbon::parse($settings['custom']['access_until']);
+                if (now()->isAfter($until)) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        return false;
+    }
     public function __construct(
         private ChapterContentRepository $chapterContentRepo,
         private AssessmentRepository $assessmentRepo,

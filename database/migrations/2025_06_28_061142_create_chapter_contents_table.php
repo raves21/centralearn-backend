@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('chapter_id')->constrained()->cascadeOnDelete();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->json('accessibility_settings');
+            $table->json('accessibility_settings')->nullable();
             $table->string('contentable_type');
             $table->string('contentable_id');
             $table->integer('order');

@@ -13,9 +13,7 @@ class ChapterContent extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'publishes_at' => 'datetime',
-        'opens_at' => 'datetime',
-        'closes_at' => 'datetime',
+        'accessibility_settings' => 'array',
     ];
 
     protected $with = ['contentable'];

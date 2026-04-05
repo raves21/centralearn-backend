@@ -27,11 +27,13 @@ class StudentAssessmentAttemptService
         $attemptAssessment = $attempt->assessmentVersion->assessment;
         $attemptAssessmentChapterContent = $attemptAssessment->chapterContent;
         $attemptAssessmentChapterContentChapter = $attemptAssessment->chapterContent->chapter;
+
+        $assessmentSubmissionSettings = $attemptAssessment->submission_settings;
         return new StudentAssessmentAttemptResource($attempt)
             ->additional([
                 'assessment' => [
                     'id' => $attemptAssessment->id,
-                    'timeLimit' => $attemptAssessment->time_limit,
+                    'timeLimit' => $assessmentSubmissionSettings ? $assessmentSubmissionSettings['time_limit_seconds'] : null,
                     'chapterContent' => [
                         'id' => $attemptAssessmentChapterContent->id,
                         'name' => $attemptAssessmentChapterContent->name,

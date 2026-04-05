@@ -19,8 +19,6 @@ class ChapterSeeder extends Seeder
             'name' => 'Module 1',
             'description' => 'This is the first module.',
             'order' => 1,
-            'published_at' => now(),
-            'course_class_id' => CourseClass::first()->id,
         ]);
     }
 }

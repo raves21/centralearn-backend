@@ -623,14 +623,15 @@ class AssessmentMaterialService
         //if this is an update of assessmentMaterials
         if ($assessment->assessmentVersions()->exists()) {
             $assessmentTotalOngoingAttempts = $this->studentAssessmentAttemptRepo->countAssessmentOngoingAttempts($assessment->id);
+            $isAccessible = ChapterContentService::isAccessible($chapterContent->id);
+
             //if assessment is closed
-            if (!$chapterContent->opens_at || Carbon::parse($chapterContent->opens_at)->gt(now())) {
+            if (!$isAccessible) {
                 //edit the version 1 questionnaire and answer key
                 $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment->id);
             }
-
             //if assessment is open and there are no ongoing attempts yet
-            if (Carbon::parse($chapterContent->opens_at)->lte(now()) && $assessmentTotalOngoingAttempts === 0) {
+            elseif ($isAccessible && $assessmentTotalOngoingAttempts === 0) {
                 //edit the version 1 questionnaire and answer key
                 $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment->id);
             } else {
