@@ -25,11 +25,11 @@ class Update extends FormRequest
     public function rules(): array
     {
         // Get the model ID from the route. Key depends on route name (usually 'chapter_content')
-        $chapterContentId = $this->route('chapter_content');
+        $chapterContentId = $this->route('content') ?? $this->route('chapter_content');
         $chapterContent = ChapterContent::find($chapterContentId);
 
         // chapter_id used for uniqueness checks (provided in input or fallback to existing)
-        $chapterId = $this->input('chapter_id');
+        $chapterId = $this->input('chapter_id') ?? $chapterContent?->chapter_id;
 
         $rules = [
             // General info

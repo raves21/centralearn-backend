@@ -23,7 +23,6 @@ class AssessmentResource extends JsonResource
             'isScoreViewableAfterSubmit' => (bool) $this->is_score_viewable_after_submit,
             'maxAttempts' => $this->max_attempts,
             'multiAttemptGradingType' => $this->multi_attempt_grading_type,
-            'submissionSettings' => $this->submission_settings,
         ];
     }
 }
