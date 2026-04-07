@@ -57,7 +57,8 @@ class ChapterContentService
         private ChapterContentRepository $chapterContentRepo,
         private AssessmentRepository $assessmentRepo,
         private LectureRepository $lectureRepo,
-    ) {}
+    ) {
+    }
 
     public function getAll(array $filters)
     {
@@ -76,19 +77,57 @@ class ChapterContentService
 
     public function create(array $formData)
     {
+        $accessibilitySettings = $formData['accessibility_settings'];
+
+        if (isset($accessibilitySettings['visible'])) {
+            $accessibilitySettings = [
+                'visible' => (bool) $accessibilitySettings['visible'],
+                'custom' => null
+            ];
+        } else {
+            $accessibilitySettings = [
+                'visible' => null,
+                'custom' => $accessibilitySettings['custom']
+            ];
+        }
+
         switch ($formData['content_type']) {
             case 'lecture':
                 $newLecture = $this->lectureRepo->create([]);
                 $newChapterContent = $this->chapterContentRepo->create([
                     ...$formData,
+                    'accessibility_settings' => $accessibilitySettings,
                     'contentable_type' => Lecture::class,
                     'contentable_id' => $newLecture->id,
                 ]);
                 break;
             case 'assessment':
-                $newAssessment = $this->assessmentRepo->create($formData['content']);
+                $submissionSettings = $formData['content']['submission_settings'];
+                $timeLimitSeconds = $submissionSettings['time_limit_seconds'];
+                $dueDate = $submissionSettings['due_date'];
+                $afterDueDateBehavior = $submissionSettings['after_due_date_behavior'];
+
+                if (isset($timeLimitSeconds)) {
+                    $submissionSettings = [
+                        ...$submissionSettings,
+                        'time_limit_seconds' => $timeLimitSeconds
+                    ];
+                }
+
+                if (isset($dueDate)) {
+                    $submissionSettings = [
+                        ...$submissionSettings,
+                        'due_date' => $dueDate,
+                        'after_due_date_behavior' => $afterDueDateBehavior
+                    ];
+                }
+                $newAssessment = $this->assessmentRepo->create([
+                    ...$formData['content'],
+                    'submission_settings' => $submissionSettings
+                ]);
                 $newChapterContent = $this->chapterContentRepo->create([
                     ...$formData,
+                    'accessibility_settings' => $accessibilitySettings,
                     'contentable_type' => Assessment::class,
                     'contentable_id' => $newAssessment->id
                 ]);
