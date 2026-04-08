@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class ClassInstructorAssignment extends Model
 {
+    use HasUuids;
+
     protected $table = 'class_instructor_assignment';
 
     protected $guarded = ['id'];

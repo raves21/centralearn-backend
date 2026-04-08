@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('class_student_enrollment', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
             $table->foreignUuid('course_class_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('student_id')->constrained()->cascadeOnDelete();
             $table->float('final_grade')->nullable();
