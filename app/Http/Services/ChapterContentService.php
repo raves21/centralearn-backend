@@ -57,8 +57,7 @@ class ChapterContentService
         private ChapterContentRepository $chapterContentRepo,
         private AssessmentRepository $assessmentRepo,
         private LectureRepository $lectureRepo,
-    ) {
-    }
+    ) {}
 
     public function getAll(array $filters)
     {
@@ -103,7 +102,7 @@ class ChapterContentService
                 break;
             case 'assessment':
                 $submissionSettings = $formData['content']['submission_settings'];
-                $timeLimitSeconds = $submissionSettings['time_limit_seconds'];
+                $timeLimitSeconds = (int) $submissionSettings['time_limit_seconds'];
                 $dueDate = $submissionSettings['due_date'];
                 $afterDueDateBehavior = $submissionSettings['after_due_date_behavior'];
 
@@ -138,12 +137,51 @@ class ChapterContentService
 
     public function updateById(string $id, array $formData)
     {
-        $chapterContent = $this->chapterContentRepo->updateById($id, $formData);
+        $accessibilitySettings = $formData['accessibility_settings'];
+
+        if (isset($accessibilitySettings['visible'])) {
+            $accessibilitySettings = [
+                'visible' => (bool) $accessibilitySettings['visible'],
+                'custom' => null
+            ];
+        } else {
+            $accessibilitySettings = [
+                'visible' => null,
+                'custom' => $accessibilitySettings['custom']
+            ];
+        }
+
+        $chapterContent = $this->chapterContentRepo->updateById($id, [
+            ...$formData,
+            'accessibility_settings' => $accessibilitySettings,
+        ]);
 
         if ($chapterContent->contentable_type === Assessment::class && !empty($formData['content'])) {
+            $submissionSettings = $formData['content']['submission_settings'];
+            $timeLimitSeconds = (int) $submissionSettings['time_limit_seconds'];
+            $dueDate = $submissionSettings['due_date'];
+            $afterDueDateBehavior = $submissionSettings['after_due_date_behavior'];
+
+            if (isset($timeLimitSeconds)) {
+                $submissionSettings = [
+                    ...$submissionSettings,
+                    'time_limit_seconds' => $timeLimitSeconds
+                ];
+            }
+
+            if (isset($dueDate)) {
+                $submissionSettings = [
+                    ...$submissionSettings,
+                    'due_date' => $dueDate,
+                    'after_due_date_behavior' => $afterDueDateBehavior
+                ];
+            }
             $this->assessmentRepo->updateById(
                 $chapterContent->contentable_id,
-                $formData['content']
+                [
+                    ...$formData['content'],
+                    'submission_settings' => $submissionSettings
+                ]
             );
         }
         return new ChapterContentResource($this->chapterContentRepo->getFresh($chapterContent));
@@ -158,14 +196,11 @@ class ChapterContentService
     {
         $chapterContent = $this->chapterContentRepo->findById($id);
 
-        if ($chapterContent->contentable_type === Lecture::class) {
-            $this->lectureRepo->deleteById($chapterContent->contentable_id);
-            //todo: implement scheduled deletion of orphaned textattachments and fileattachments
-        } else {
-            $this->assessmentRepo->deleteById($chapterContent->contentable_id);
-            //todo: implement scheduled deletion of orphaned option_based_questions and text_based_questions
-            //todo: and orphaned textattachments and fileattachments of option_based_item_options
-        }
+        $this->chapterContentRepo->deleteMorph($chapterContent->contentable_type, $chapterContent->contentable_id);
+        //todo: implement scheduled deletion of orphaned textattachments and fileattachments
+
+        //todo: implement scheduled deletion of orphaned option_based_questions and text_based_questions
+        //todo: and orphaned textattachments and fileattachments of option_based_item_options
         $this->chapterContentRepo->deleteById($id);
     }
 
