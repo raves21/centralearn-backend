@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Services;
+namespace {{ namespace }};
 
-{{ repository }}
-use App\Http\Resources\{{ model }}Resource;
+{{ repository_import }}
+{{ resource_import }}
 
 class {{ serviceName }}
 {

@@ -13,11 +13,15 @@ class MakeService extends Command
 
     public function handle()
     {
-
         $name = $this->argument('name');
-        $serviceName = "{$name}Service";
-        $serviceName = str_contains($name, 'Service') ? $name  : "{$name}Service";
-        $servicePath = app_path("Http/Services/{$serviceName}.php");
+        $name = str_replace(['/', '\\'], '/', $name);
+        $parts = explode('/', $name);
+        $baseName = array_pop($parts);
+        $subDir = count($parts) > 0 ? implode('/', $parts) : '';
+
+        $serviceName = str_ends_with($baseName, 'Service') ? $baseName : "{$baseName}Service";
+        $serviceNamespace = "App\\Http\\Services" . ($subDir ? "\\" . str_replace('/', "\\", $subDir) : "");
+        $servicePath = app_path("Http/Services/" . ($subDir ? "{$subDir}/" : "") . "{$serviceName}.php");
 
         if (File::exists($servicePath)) {
             $this->error("Service already exists!");
@@ -26,19 +30,28 @@ class MakeService extends Command
 
         $template = file_get_contents(__DIR__ . '/stubs/service.stub');
 
+        // Try to find a repository to import
+        $repositoryImport = '';
+        $modelName = str_replace('Service', '', $baseName);
+        $repoName = "{$modelName}Repository";
+        
+        // Look for repository in same subfolder first
+        $potentialRepoPath = app_path("Http/Repositories/" . ($subDir ? "{$subDir}/" : "") . "{$repoName}.php");
+        if (File::exists($potentialRepoPath)) {
+             $repoNamespace = "App\\Http\\Repositories" . ($subDir ? "\\" . str_replace('/', "\\", $subDir) : "");
+             $repositoryImport = "use {$repoNamespace}\\{$repoName};";
+        }
+
         // Replace placeholders in the stub
         $template = str_replace(
-            ['{{ serviceName }}'],
-            [$serviceName],
+            ['{{ namespace }}', '{{ serviceName }}', '{{ repository_import }}'],
+            [$serviceNamespace, $serviceName, $repositoryImport],
             $template
         );
 
-        if (!File::isDirectory(app_path('Services'))) {
-            File::makeDirectory(app_path('Services'));
-        }
-
+        File::ensureDirectoryExists(dirname($servicePath));
         File::put($servicePath, $template);
 
-        $this->info("Service {$name} created successfully.");
+        $this->info("Service {$serviceName} created successfully in {$serviceNamespace}.");
     }
 }
