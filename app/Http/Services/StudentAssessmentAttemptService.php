@@ -33,7 +33,7 @@ class StudentAssessmentAttemptService
             ->additional([
                 'assessment' => [
                     'id' => $attemptAssessment->id,
-                    'timeLimit' => $assessmentSubmissionSettings ? $assessmentSubmissionSettings['time_limit_seconds'] : null,
+                    'timeLimitSeconds' => $attemptAssessment->submissionSettings->time_limit_seconds,
                     'chapterContent' => [
                         'id' => $attemptAssessmentChapterContent->id,
                         'name' => $attemptAssessmentChapterContent->name,
@@ -67,11 +67,6 @@ class StudentAssessmentAttemptService
 
         $answerKey = $attempt->assessmentVersion->answer_key;
         $answers = $formData['answers'];
-
-        //update the answers
-        $attempt->update([
-            'answers' => $answers
-        ]);
 
         $submissionSummary = [];
 
@@ -117,7 +112,7 @@ class StudentAssessmentAttemptService
                     $submissionSummary[$asmtMaterialId] = [
                         'answer_content' => $answerContent,
                         //for essay items,
-                        //if no answer (null), zero points earned. Otherwise set to null (to be graded and changed later by instructor)
+                        //if no answer (null), zero points earned. Otherwise set points earned to null (to be graded and changed later by instructor)
                         'points_earned' => $answerContent ? null : 0
                     ];
             }
@@ -128,6 +123,7 @@ class StudentAssessmentAttemptService
         $this->studentAssessmentAttemptRepo->updateById($attempt->id, [
             'submission_summary' => $submissionSummary,
             'submitted_at' => now(),
+            'answers' => $answers,
             'status' => 'submitted',
             'total_score' => $hasAnswerWithNullPointsEarned ? null : $totalPointsEarned
         ]);
@@ -143,7 +139,7 @@ class StudentAssessmentAttemptService
         ]);
 
         //if has attempt with null total score, final score will be decided later (after instructor grades the essay item/s)
-        if ($attemptsTotalScores->contains(null)) {
+        if ($attemptsTotalScores->containsStrict(null)) {
             if (!$assessmentResult) {
                 $this->assessmentResultRepo->create([
                     'student_id' => $attempt->student_id,

@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Http\Repositories\AssessmentRepository;
+use App\Http\Repositories\AssessmentSubmissionSettingsRepository;
 use App\Http\Repositories\ChapterContentRepository;
 use App\Http\Repositories\LectureRepository;
 use App\Http\Resources\ChapterContentResource;
@@ -57,6 +58,7 @@ class ChapterContentService
         private ChapterContentRepository $chapterContentRepo,
         private AssessmentRepository $assessmentRepo,
         private LectureRepository $lectureRepo,
+        private AssessmentSubmissionSettingsRepository $assessmentSubmissionSettingsRepo
     ) {}
 
     public function getAll(array $filters)
@@ -102,28 +104,20 @@ class ChapterContentService
                 break;
             case 'assessment':
                 $submissionSettings = $formData['content']['submission_settings'];
-                $timeLimitSeconds = (int) $submissionSettings['time_limit_seconds'];
-                $dueDate = $submissionSettings['due_date'];
-                $afterDueDateBehavior = $submissionSettings['after_due_date_behavior'];
 
-                if (isset($timeLimitSeconds)) {
-                    $submissionSettings = [
-                        ...$submissionSettings,
-                        'time_limit_seconds' => $timeLimitSeconds
-                    ];
-                }
-
-                if (isset($dueDate)) {
-                    $submissionSettings = [
-                        ...$submissionSettings,
-                        'due_date' => $dueDate,
-                        'after_due_date_behavior' => $afterDueDateBehavior
-                    ];
-                }
+                //create assessment
                 $newAssessment = $this->assessmentRepo->create([
                     ...$formData['content'],
                     'submission_settings' => $submissionSettings
                 ]);
+
+                //create submission_settings for the assessment
+                $this->assessmentSubmissionSettingsRepo->create([
+                    ...$submissionSettings,
+                    'assessment_id' => $newAssessment->id,
+                    'time_limit_seconds' => (int) $submissionSettings['time_limit_seconds']
+                ]);
+
                 $newChapterContent = $this->chapterContentRepo->create([
                     ...$formData,
                     'accessibility_settings' => $accessibilitySettings,
@@ -157,32 +151,20 @@ class ChapterContentService
         ]);
 
         if ($chapterContent->contentable_type === Assessment::class && !empty($formData['content'])) {
+            $assessment = $this->assessmentRepo->findById($chapterContent->contentable_id);
             $submissionSettings = $formData['content']['submission_settings'];
-            $timeLimitSeconds = (int) $submissionSettings['time_limit_seconds'];
-            $dueDate = $submissionSettings['due_date'];
-            $afterDueDateBehavior = $submissionSettings['after_due_date_behavior'];
 
-            if (isset($timeLimitSeconds)) {
-                $submissionSettings = [
-                    ...$submissionSettings,
-                    'time_limit_seconds' => $timeLimitSeconds
-                ];
-            }
-
-            if (isset($dueDate)) {
-                $submissionSettings = [
-                    ...$submissionSettings,
-                    'due_date' => $dueDate,
-                    'after_due_date_behavior' => $afterDueDateBehavior
-                ];
-            }
-            $this->assessmentRepo->updateById(
-                $chapterContent->contentable_id,
+            //update submission_settings
+            $this->assessmentSubmissionSettingsRepo->updateById(
+                $assessment->submission_settings->id,
                 [
-                    ...$formData['content'],
-                    'submission_settings' => $submissionSettings
+                    ...$submissionSettings,
+                    'time_limit_seconds' => (int) $submissionSettings['time_limit_seconds']
                 ]
             );
+
+            //update assessment
+            $assessment->update($formData['content']);
         }
         return new ChapterContentResource($this->chapterContentRepo->getFresh($chapterContent));
     }

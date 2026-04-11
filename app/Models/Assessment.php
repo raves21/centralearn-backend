@@ -15,6 +15,10 @@ class Assessment extends Model
         'submission_settings' => 'array'
     ];
 
+    protected $with = [
+        'submissionSettings'
+    ];
+
     public function chapterContent()
     {
         return $this->morphOne(ChapterContent::class, 'contentable');
@@ -33,5 +37,10 @@ class Assessment extends Model
     public function assessmentResults()
     {
         return $this->hasMany(AssessmentResult::class);
+    }
+
+    public function submissionSettings()
+    {
+        return $this->hasOne(AssessmentSubmissionSettings::class);
     }
 }

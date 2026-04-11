@@ -153,9 +153,9 @@ class StudentAssessmentAttemptRepository extends BaseRepository
             abort(400, 'This assessment is closed.');
         }
 
-        $timeLimitSeconds = $assessment->submission_settings['time_limit_seconds'] ?? null;
-        $dueDateStr = $assessment->submission_settings['due_date'] ?? null;
-        $behavior = $assessment->submission_settings['after_due_date_behavior'] ?? null;
+        $timeLimitSeconds = $assessment->submissionSettings->time_limit_seconds ?? null;
+        $dueDateStr = $assessment->submissionSettings->due_date ?? null;
+        $behavior = $assessment->submissionSettings->after_due_date_behavior ?? null;
 
         $deadlineA = null;
         if ($timeLimitSeconds) {
@@ -177,10 +177,16 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         }
 
         if (!$finalDeadline) {
-            return null;
+            return [
+                'hasDeadline' => false,
+                'remainingTimeSeconds' => null
+            ];
         }
 
         $remainingSeconds = (int) now()->diffInSeconds($finalDeadline, false);
-        return $remainingSeconds > 0 ? $remainingSeconds : 0;
+        return [
+            'hasDeadline' => true,
+            'remainingTimeSeconds' => $remainingSeconds > 0 ? $remainingSeconds : 0
+        ];
     }
 }
