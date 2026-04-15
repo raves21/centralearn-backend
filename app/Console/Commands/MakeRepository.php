@@ -9,12 +9,23 @@ use Illuminate\Support\Str;
 
 class MakeRepository extends Command
 {
-    protected $signature = 'make:repository {name} {--repo-only : Skip service and resource} {--all : Generate all basic crud in service and make resource}';
+    protected $signature = 'make:repository {name} ' .
+        '{--service : Create a service for the repository} ' .
+        '{--resource : Create a resource for the model} ' .
+        '{--controller : Create a controller that uses the service} ' .
+        '{--all : Create repository, service, resource, and controller} ' .
+        '{--repo-only : Create only the repository}';
 
-    protected $description = 'Create a new repository class';
+    protected $description = 'Create a new repository class and optional related components';
 
     public function handle()
     {
+        // Ensure BaseRepository exists
+        if (!File::exists(app_path('Http/Repositories/BaseRepository.php'))) {
+            $this->info('BaseRepository not found. Creating it...');
+            Artisan::call('make:base-repository');
+        }
+
         $name = $this->argument('name');
         $name = str_replace(['/', '\\'], '/', $name);
         $parts = explode('/', $name);
@@ -22,7 +33,7 @@ class MakeRepository extends Command
         $subDir = count($parts) > 0 ? implode('/', $parts) : '';
 
         // Determine Model Name
-        $model = str_replace('Repository', '', $baseName);
+        $model = Str::replaceLast('Repository', '', $baseName);
         $modelClass = "App\\Models\\{$model}";
 
         if (!class_exists($modelClass)) {
@@ -31,6 +42,13 @@ class MakeRepository extends Command
         }
 
         $this->info("Model resolved: {$model}");
+
+        // Options
+        $isAll = $this->option('all');
+        $repoOnly = $this->option('repo-only');
+        $makeService = ($isAll || $this->option('service')) && !$repoOnly;
+        $makeResource = ($isAll || $this->option('resource')) && !$repoOnly;
+        $makeController = ($isAll || $this->option('controller')) && !$repoOnly;
 
         // Repository Name and Path
         $repositoryName = str_ends_with($baseName, 'Repository') ? $baseName : "{$baseName}Repository";
@@ -56,8 +74,13 @@ class MakeRepository extends Command
             $this->info("Repository {$repositoryName} created successfully in {$repositoryNamespace}.");
         }
 
-        if ($this->option('repo-only')) {
-            return;
+        // Resource Creation
+        $resourceName = "{$model}Resource";
+        $resourceNamespace = "App\\Http\\Resources" . ($subDir ? "\\" . str_replace('/', "\\", $subDir) : "");
+        if ($makeResource) {
+            $resourceFullName = ($subDir ? "{$subDir}/" : "") . $resourceName;
+            Artisan::call('make:resource', ['name' => $resourceFullName]);
+            $this->info("Resource {$resourceName} created successfully.");
         }
 
         // Service Creation
@@ -65,37 +88,103 @@ class MakeRepository extends Command
         $serviceNamespace = "App\\Http\\Services" . ($subDir ? "\\" . str_replace('/', "\\", $subDir) : "");
         $servicePath = app_path("Http/Services/" . ($subDir ? "{$subDir}/" : "") . "{$serviceName}.php");
 
-        if (File::exists($servicePath)) {
-            $this->error("Service already exists!");
-            return;
+        if ($makeService) {
+            if (File::exists($servicePath)) {
+                $this->error("Service already exists!");
+            } else {
+                if ($makeResource) {
+                    $serviceTemplate = file_get_contents(__DIR__ . '/stubs/service-generate-all.stub');
+                    $repoVarName = Str::camel($model) . "Repo";
+                    
+                    $serviceTemplate = str_replace(
+                        ['{{ namespace }}', '{{ serviceName }}', '{{ repository_import }}', '{{ resource_import }}', '{{ model }}', '{{ repoVarName }}'],
+                        [$serviceNamespace, $serviceName, "use {$repositoryNamespace}\\{$repositoryName};", "use {$resourceNamespace}\\{$resourceName};", $model, $repoVarName],
+                        $serviceTemplate
+                    );
+                } else {
+                    $serviceTemplate = file_get_contents(__DIR__ . '/stubs/service.stub');
+                    $repoVarName = Str::camel($model) . "Repo";
+                    
+                    $content = "    public function __construct(\n" .
+                               "        private {$repositoryName} \${$repoVarName}\n" .
+                               "    ) {}";
+
+                    $serviceTemplate = str_replace(
+                        ['{{ namespace }}', '{{ serviceName }}', '{{ repository_import }}', '{{ content }}'],
+                        [$serviceNamespace, $serviceName, "use {$repositoryNamespace}\\{$repositoryName};", $content],
+                        $serviceTemplate
+                    );
+                }
+
+                File::ensureDirectoryExists(dirname($servicePath));
+                File::put($servicePath, $serviceTemplate);
+                $this->info("Service {$serviceName} created successfully.");
+            }
         }
 
-        if ($this->option('all')) {
-            $resourceName = ($subDir ? "{$subDir}/" : "") . "{$model}Resource";
-            Artisan::call('make:resource ' . $resourceName);
-            $this->info("{$resourceName} created successfully.");
-            
-            $serviceTemplate = file_get_contents(__DIR__ . '/stubs/service-generate-all.stub');
-            $repoVarName = Str::camel($model) . "Repo";
-            $resourceNamespace = "App\\Http\\Resources" . ($subDir ? "\\" . str_replace('/', "\\", $subDir) : "");
-            
-            $serviceTemplate = str_replace(
-                ['{{ namespace }}', '{{ serviceName }}', '{{ repository_import }}', '{{ resource_import }}', '{{ model }}', '{{ repoVarName }}'],
-                [$serviceNamespace, $serviceName, "use {$repositoryNamespace}\\{$repositoryName};", "use {$resourceNamespace}\\{$model}Resource;", $model, $repoVarName],
-                $serviceTemplate
-            );
-        } else {
-            $serviceTemplate = file_get_contents(__DIR__ . '/stubs/service.stub');
-            $serviceTemplate = str_replace(
-                ['{{ namespace }}', '{{ serviceName }}', '{{ repository_import }}'],
-                [$serviceNamespace, $serviceName, "use {$repositoryNamespace}\\{$repositoryName};"],
-                $serviceTemplate
-            );
+        // Controller Creation
+        if ($makeController) {
+            $controllerName = "{$model}Controller";
+            $controllerNamespace = "App\\Http\\Controllers" . ($subDir ? "\\" . str_replace('/', "\\", $subDir) : "");
+            $controllerPath = app_path("Http/Controllers/" . ($subDir ? "{$subDir}/" : "") . "{$controllerName}.php");
+
+            if (File::exists($controllerPath)) {
+                $this->error("Controller already exists!");
+            } else {
+                $controllerTemplate = file_get_contents(__DIR__ . '/stubs/controller.stub');
+                
+                $serviceImport = '';
+                $constructor = '';
+                $indexContent = "        // TODO: Implement index";
+                $storeContent = "        // TODO: Implement store";
+                $showContent = "        // TODO: Implement show";
+                $updateContent = "        // TODO: Implement update";
+                $destroyContent = "        // TODO: Implement destroy";
+
+                if ($makeService) {
+                    $serviceImport = "use {$serviceNamespace}\\{$serviceName};";
+                    $serviceVarName = Str::camel($serviceName);
+                    $constructor = "    public function __construct(\n" .
+                                   "        private {$serviceName} \${$serviceVarName}\n" .
+                                   "    ) {}";
+                    
+                    $indexContent = "        return \$this->{$serviceVarName}->getAll();";
+                    $storeContent = "        return \$this->{$serviceVarName}->create(\$request->validated());";
+                    $showContent = "        return \$this->{$serviceVarName}->findById(\$id);";
+                    $updateContent = "        return \$this->{$serviceVarName}->updateById(\$id, \$request->validated());";
+                    $destroyContent = "        return \$this->{$serviceVarName}->deleteById(\$id);";
+                }
+
+                $controllerTemplate = str_replace(
+                    [
+                        '{{ namespace }}', 
+                        '{{ controllerName }}', 
+                        '{{ service_import }}', 
+                        '{{ constructor }}',
+                        '{{ index_content }}',
+                        '{{ store_content }}',
+                        '{{ show_content }}',
+                        '{{ update_content }}',
+                        '{{ destroy_content }}'
+                    ],
+                    [
+                        $controllerNamespace, 
+                        $controllerName, 
+                        $serviceImport, 
+                        $constructor,
+                        $indexContent,
+                        $storeContent,
+                        $showContent,
+                        $updateContent,
+                        $destroyContent
+                    ],
+                    $controllerTemplate
+                );
+
+                File::ensureDirectoryExists(dirname($controllerPath));
+                File::put($controllerPath, $controllerTemplate);
+                $this->info("Controller {$controllerName} created successfully.");
+            }
         }
-
-        File::ensureDirectoryExists(dirname($servicePath));
-        File::put($servicePath, $serviceTemplate);
-
-        $this->info("Service {$serviceName} created successfully in {$serviceNamespace}.");
     }
 }

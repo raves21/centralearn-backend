@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
 
 class MakeService extends Command
 {
@@ -32,7 +33,8 @@ class MakeService extends Command
 
         // Try to find a repository to import
         $repositoryImport = '';
-        $modelName = str_replace('Service', '', $baseName);
+        $content = '';
+        $modelName = Str::replaceLast('Service', '', $baseName);
         $repoName = "{$modelName}Repository";
         
         // Look for repository in same subfolder first
@@ -40,12 +42,17 @@ class MakeService extends Command
         if (File::exists($potentialRepoPath)) {
              $repoNamespace = "App\\Http\\Repositories" . ($subDir ? "\\" . str_replace('/', "\\", $subDir) : "");
              $repositoryImport = "use {$repoNamespace}\\{$repoName};";
+             
+             $repoVarName = Str::camel($modelName) . "Repo";
+             $content = "    public function __construct(\n" .
+                        "        private {$repoName} \${$repoVarName}\n" .
+                        "    ) {}";
         }
 
         // Replace placeholders in the stub
         $template = str_replace(
-            ['{{ namespace }}', '{{ serviceName }}', '{{ repository_import }}'],
-            [$serviceNamespace, $serviceName, $repositoryImport],
+            ['{{ namespace }}', '{{ serviceName }}', '{{ repository_import }}', '{{ content }}'],
+            [$serviceNamespace, $serviceName, $repositoryImport, $content],
             $template
         );
 

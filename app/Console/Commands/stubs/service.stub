@@ -6,5 +6,5 @@ namespace {{ namespace }};
 
 class {{ serviceName }}
 {
-
+{{ content }}
 }

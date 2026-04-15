@@ -1,0 +1,37 @@
+<?php
+
+namespace {{ namespace }};
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+{{ service_import }}
+
+class {{ controllerName }} extends Controller
+{
+{{ constructor }}
+
+    public function index()
+    {
+{{ index_content }}
+    }
+
+    public function store(Request $request)
+    {
+{{ store_content }}
+    }
+
+    public function show(string $id)
+    {
+{{ show_content }}
+    }
+
+    public function update(Request $request, string $id)
+    {
+{{ update_content }}
+    }
+
+    public function destroy(string $id)
+    {
+{{ destroy_content }}
+    }
+}

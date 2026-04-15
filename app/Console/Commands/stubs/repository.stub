@@ -7,8 +7,9 @@ use App\Http\Repositories\BaseRepository;
 
 class {{ repository }} extends BaseRepository
 {
-    public function __construct({{ modelName }} ${{ modelVarName }})
-    {
+    public function __construct(
+        private {{ modelName }} ${{ modelVarName }}
+    ) {
         parent::__construct(${{ modelVarName }});
     }
 }

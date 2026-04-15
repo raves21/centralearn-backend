@@ -7,12 +7,9 @@ namespace {{ namespace }};
 
 class {{ serviceName }}
 {
-    private ${{ repoVarName }};
-
-    public function __construct({{ model }}Repository ${{ repoVarName }})
-    {
-        $this->{{ repoVarName }} = ${{ repoVarName }};
-    }
+    public function __construct(
+        private {{ model }}Repository ${{ repoVarName }}
+    ) {}
 
     public function getAll()
     {
