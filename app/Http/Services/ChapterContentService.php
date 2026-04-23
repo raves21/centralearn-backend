@@ -189,7 +189,7 @@ class ChapterContentService
     public function reorderBulk(array $formData)
     {
         try {
-            DB::transaction();
+            DB::beginTransaction();
             // First pass: set to temporary negative order to avoid unique constraint violations
             foreach ($formData['contents'] as $content) {
                 // Use a negative value derived from the new order to ensure temporary uniqueness
@@ -203,8 +203,8 @@ class ChapterContentService
                 $this->chapterContentRepo->updateById($content['id'], ['order' => $content['new_order']]);
             }
 
-            return ['message' => 'reorder bulk success.'];
             DB::commit();
+            return ['message' => 'reorder bulk success.'];
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
