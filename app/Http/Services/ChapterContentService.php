@@ -156,7 +156,7 @@ class ChapterContentService
 
             //update submission_settings
             $this->assessmentSubmissionSettingsRepo->updateById(
-                $assessment->submission_settings->id,
+                $assessment->submissionSettings->id,
                 [
                     ...$submissionSettings,
                     'time_limit_seconds' => (int) $submissionSettings['time_limit_seconds']

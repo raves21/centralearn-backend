@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('student_assessment_attempts', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('student_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('assessment_version_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('assessment_result_id')->constrained()->cascadeOnDelete();
             $table->json('answers'); //raw answers
             $table->integer('attempt_number');
             $table->enum('status', ['ongoing', 'submitted']);
@@ -28,7 +28,7 @@ return new class extends Migration
             $table->double('total_score')->nullable();
             $table->timestamps();
 
-            $table->unique(['student_id', 'assessment_version_id', 'attempt_number'], 'stu_assess_ver_attempt_uniq');
+            $table->unique(['student_id', 'assessment_result_id', 'attempt_number'], 'stu_assess_result_attempt_uniq');
         });
     }
 

@@ -5,23 +5,17 @@ namespace App\Http\Services;
 use App\Http\Repositories\AssessmentMaterialQuestionRepository;
 use App\Http\Repositories\AssessmentMaterialRepository;
 use App\Http\Repositories\AssessmentRepository;
-use App\Http\Repositories\AssessmentVersionRepository;
-use App\Http\Repositories\ChapterContentRepository;
 use App\Http\Repositories\EssayItemRepository;
 use App\Http\Repositories\FileAttachmentRepository;
 use App\Http\Repositories\IdentificationItemRepository;
 use App\Http\Repositories\OptionBasedItemOptionRepository;
 use App\Http\Repositories\OptionBasedItemRepository;
-use App\Http\Repositories\StudentAssessmentAttemptRepository;
 use App\Http\Resources\AssessmentMaterialResource;
-use App\Models\Assessment;
 use App\Models\AssessmentMaterial;
-use App\Models\ChapterContent;
 use App\Models\EssayItem;
 use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
 use App\Models\OptionBasedItemOption;
-use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
@@ -36,9 +30,6 @@ class AssessmentMaterialService
         private OptionBasedItemOptionRepository $optionBasedItemOptionRepo,
         private FileAttachmentRepository $fileAttachmentRepo,
         private AssessmentRepository $assessmentRepo,
-        private StudentAssessmentAttemptRepository $studentAssessmentAttemptRepo,
-        private AssessmentVersionRepository $assessmentVersionRepo,
-        private ChapterContentRepository $chapterContentRepo
     ) {}
 
     public function getAll(array $filters)
@@ -211,20 +202,21 @@ class AssessmentMaterialService
             //retrieve fresh instance (with new asmt materials) from db
             $assessment = $this->assessmentRepo->getFresh($assessment);
 
-            //update max achievable score after everything is done
+            //update max achievable score
             $this->assessmentRepo->updateMaxAchievableScore($assessment);
 
-            //get chaptercontent
-            $chapterContent = $this->chapterContentRepo->findByFilter(['contentable_id' => $assessment->id]);
+            //build the answer key
+            $answerKey = $this->assessmentRepo->buildAnswerKey($assessment);
+
+            //update assessment with new answer key
+            $this->assessmentRepo->updateByRecord($assessment, [
+                'answer_key' => $answerKey
+            ]);
 
             //update assessment_materials_hash since we updated the assessment materials
-
             $this->assessmentRepo->updateByRecord($assessment, [
                 'assessment_materials_hash' => $this->createExistingAssessmentMaterialsHash($assessment->assessmentMaterials->toArray())['hash']
             ]);
-
-            //edit the version 1 or create a new assessment version
-            $this->syncAssessmentVersion($assessment, $chapterContent);
 
             DB::commit();
 
@@ -616,33 +608,5 @@ class AssessmentMaterialService
             return true;
         }
         return false;
-    }
-
-    private function syncAssessmentVersion(Assessment $assessment, ChapterContent $chapterContent)
-    {
-        //if this is an update of assessmentMaterials
-        if ($assessment->assessmentVersions()->exists()) {
-            $assessmentTotalOngoingAttempts = $this->studentAssessmentAttemptRepo->countAssessmentOngoingAttempts($assessment->id);
-            $isAccessible = ChapterContentService::isAccessible($chapterContent->id);
-
-            //if assessment is closed
-            if (!$isAccessible) {
-                //edit the version 1 questionnaire and answer key
-                $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment->id);
-            }
-            //if assessment is open and there are no ongoing attempts yet
-            elseif ($isAccessible && $assessmentTotalOngoingAttempts === 0) {
-                //edit the version 1 questionnaire and answer key
-                $this->assessmentVersionRepo->editVersion1QuestionnaireAndAnswerKey($assessment->id);
-            } else {
-                //if there are already ongoing attempts, create a new version
-                $this->assessmentVersionRepo->createFromAssessment(assessmentId: $assessment->id, isVersion1: false);
-            }
-        }
-
-        //if this is the first time the assessment will have assessmentMaterials, create version 1
-        else {
-            $this->assessmentVersionRepo->createFromAssessment(assessmentId: $assessment->id, isVersion1: true);
-        }
     }
 }

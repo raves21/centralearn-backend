@@ -2,12 +2,13 @@
 
 namespace App\Http\Repositories;
 
+use App\Http\Resources\AssessmentMaterialResource;
+use App\Http\Services\ChapterContentService;
 use App\Models\Assessment;
-use App\Models\AssessmentVersion;
+use App\Models\AssessmentResult;
 use App\Models\EssayItem;
 use App\Models\IdentificationItem;
 use App\Models\OptionBasedItem;
-use App\Models\Student;
 use App\Models\StudentAssessmentAttempt;
 use Carbon\Carbon;
 
@@ -20,18 +21,20 @@ class StudentAssessmentAttemptRepository extends BaseRepository
 
     public function getAttemptsByStudentAndAssessment(string $studentId, string $assessmentId)
     {
-        return StudentAssessmentAttempt::where('student_id', $studentId)
-            ->whereHas('assessmentVersion', function ($q) use ($assessmentId) {
-                $q->where('assessment_id', $assessmentId);
+        return StudentAssessmentAttempt::query()
+            ->where('student_id', $studentId)
+            ->whereHas('assessmentResult', function ($query) use ($assessmentId) {
+                $query->where('assessment_id', $assessmentId);
             })
             ->get();
     }
 
     public function countAssessmentOngoingAttempts(string $assessmentId)
     {
-        return StudentAssessmentAttempt::where('status', 'ongoing')
-            ->whereHas('assessmentVersion', function ($q) use ($assessmentId) {
-                $q->where('assessment_id', $assessmentId);
+        return StudentAssessmentAttempt::query()
+            ->where('status', 'ongoing')
+            ->whereHas('assessmentResult', function ($query) use ($assessmentId) {
+                $query->where('assessment_id', $assessmentId);
             })
             ->distinct('student_id')
             ->count();
@@ -43,18 +46,20 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         $maxAttempts = $assessment->max_attempts;
 
         //count student attempts for this assessment
-        $studentAttemptCount = StudentAssessmentAttempt::where('student_id', $studentId)
-            ->whereHas('assessmentVersion', function ($q) use ($assessmentId) {
-                $q->where('assessment_id', $assessmentId);
+        $studentAttemptCount = StudentAssessmentAttempt::query()
+            ->where('student_id', $studentId)
+            ->whereHas('assessmentResult', function ($query) use ($assessmentId) {
+                $query->where('assessment_id', $assessmentId);
             })
             ->count();
 
         //get latest ongoing attempt
-        $studentLatestOngoingAttempt = StudentAssessmentAttempt::where('student_id', $studentId)
-            ->whereHas('assessmentVersion', function ($q) use ($assessmentId) {
-                $q->where('assessment_id', $assessmentId);
-            })
+        $studentLatestOngoingAttempt = StudentAssessmentAttempt::query()
+            ->where('student_id', $studentId)
             ->where('status', 'ongoing')
+            ->whereHas('assessmentResult', function ($query) use ($assessmentId) {
+                $query->where('assessment_id', $assessmentId);
+            })
             ->latest()
             ->first();
 
@@ -87,9 +92,10 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         $maxAttempts = $assessment->max_attempts;
 
         //count student attempts for this assessment
-        $studentAttemptCount = StudentAssessmentAttempt::where('student_id', $studentId)
-            ->whereHas('assessmentVersion', function ($q) use ($assessmentId) {
-                $q->where('assessment_id', $assessmentId);
+        $studentAttemptCount = StudentAssessmentAttempt::query()
+            ->where('student_id', $studentId)
+            ->whereHas('assessmentResult', function ($query) use ($assessmentId) {
+                $query->where('assessment_id', $assessmentId);
             })
             ->count();
 
@@ -99,11 +105,12 @@ class StudentAssessmentAttemptRepository extends BaseRepository
         }
 
         //retrieve ongoing student attempts for this assesment
-        $hasOngoingAttempts = StudentAssessmentAttempt::where('student_id', $studentId)
-            ->whereHas('assessmentVersion', function ($q) use ($assessmentId) {
-                $q->where('assessment_id', $assessmentId);
-            })
+        $hasOngoingAttempts = StudentAssessmentAttempt::query()
+            ->where('student_id', $studentId)
             ->where('status', 'ongoing')
+            ->whereHas('assessmentResult', function ($query) use ($assessmentId) {
+                $query->where('assessment_id', $assessmentId);
+            })
             ->exists();
 
         //restrict if student still has an ongoing attempt for this assessment
@@ -111,14 +118,13 @@ class StudentAssessmentAttemptRepository extends BaseRepository
             abort(403, 'Student still has has ongoing attempt for this assessment.');
         }
 
-        //get latest assessment version
-        $latestAssessmentVersion = AssessmentVersion::where('assessment_id', $assessmentId)->latest()->first();
+        $asmtMaterials = $assessment->assessmentMaterials()->orderBy('order', 'asc')->get();
 
         //initialize answers
-        $initialAnswers = collect($latestAssessmentVersion->questionnaire_snapshot)->map(function ($item) {
+        $initialAnswers = $asmtMaterials->map(function ($asmtMaterial) {
             return [
-                'asmt_material_id' => $item['id'],
-                'material_type' => match ($item['materialType']) {
+                'asmt_material_id' => $asmtMaterial->id,
+                'material_type' => match ($asmtMaterial->materialable_type) {
                     EssayItem::class => 'essay_item',
                     IdentificationItem::class => 'identification_item',
                     OptionBasedItem::class => 'option_based_item'
@@ -127,16 +133,31 @@ class StudentAssessmentAttemptRepository extends BaseRepository
             ];
         })->toArray();
 
+        //if no attempts yet, create AssessmentResult, otherwise, use existing
+        if ($studentAttemptCount > 0) {
+            $assessmentResult = StudentAssessmentAttempt::query()
+                ->where('student_id', $studentId)
+                ->whereHas('assessmentResult', function ($query) use ($assessmentId) {
+                    $query->where('assessment_id', $assessmentId);
+                })
+                ->first()
+                ->assessmentResult;
+        } else {
+            $assessmentResult = AssessmentResult::create([
+                'student_id' => $studentId,
+                'assessment_id' => $assessmentId,
+                'final_score' => null
+            ]);
+        }
+
         $newAttempt = StudentAssessmentAttempt::create([
             'student_id' => $studentId,
-            'assessment_version_id' => $latestAssessmentVersion->id,
+            'assessment_result_id' => $assessmentResult->id,
             'attempt_number' => $studentAttemptCount + 1,
             'status' => 'ongoing',
             'answers' => $initialAnswers,
             'started_at' => now()
         ]);
-
-        $newAttempt->load(['assessmentVersion']);
 
         return $newAttempt;
     }
@@ -145,9 +166,9 @@ class StudentAssessmentAttemptRepository extends BaseRepository
     {
         $attempt = StudentAssessmentAttempt::findOrFail($attemptId);
 
-        $assessment = $attempt->assessmentVersion->assessment;
+        $assessment = $attempt->assessmentResult->assessment;
 
-        $isAccessible = \App\Http\Services\ChapterContentService::isAccessible($assessment->chapterContent->id);
+        $isAccessible = ChapterContentService::isAccessible($assessment->chapterContent->id);
 
         if (!$isAccessible) {
             abort(400, 'This assessment is closed.');

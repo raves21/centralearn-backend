@@ -4,10 +4,7 @@ namespace App\Http\Services;
 
 use App\Http\Repositories\AssessmentResultRepository;
 use App\Http\Repositories\StudentAssessmentAttemptRepository;
-use App\Http\Resources\AssessmentResource;
-use App\Http\Resources\ChapterContentResource;
 use App\Http\Resources\StudentAssessmentAttemptResource;
-use App\Models\StudentAssessmentAttempt;
 
 class StudentAssessmentAttemptService
 {
@@ -23,27 +20,12 @@ class StudentAssessmentAttemptService
 
     public function findById(string $id)
     {
-        $attempt = $this->studentAssessmentAttemptRepo->findById($id, ['assessmentVersion']);
-        $attemptAssessment = $attempt->assessmentVersion->assessment;
-        $attemptAssessmentChapterContent = $attemptAssessment->chapterContent;
-        $attemptAssessmentChapterContentChapter = $attemptAssessment->chapterContent->chapter;
-
-        $assessmentSubmissionSettings = $attemptAssessment->submission_settings;
-        return new StudentAssessmentAttemptResource($attempt)
-            ->additional([
-                'assessment' => [
-                    'id' => $attemptAssessment->id,
-                    'timeLimitSeconds' => $attemptAssessment->submissionSettings->time_limit_seconds,
-                    'chapterContent' => [
-                        'id' => $attemptAssessmentChapterContent->id,
-                        'name' => $attemptAssessmentChapterContent->name,
-                        'chapter' => [
-                            'id' => $attemptAssessmentChapterContentChapter->id,
-                            'name' => $attemptAssessmentChapterContentChapter->name
-                        ]
-                    ]
-                ]
-            ]);
+        $attempt = $this->studentAssessmentAttemptRepo->findById($id, relationships: [
+            'assessmentResult.assessment.chapterContent',
+            'assessmentResult.assessment.chapterContent.chapter',
+            'student'
+        ]);
+        return new StudentAssessmentAttemptResource($attempt);
     }
 
     public function create(array $formData)
@@ -63,9 +45,9 @@ class StudentAssessmentAttemptService
 
     public function submitAttempt(array $formData)
     {
-        $attempt = $this->studentAssessmentAttemptRepo->findById($formData['attempt_id'], ['assessmentVersion.assessment.chapterContent']);
+        $attempt = $this->studentAssessmentAttemptRepo->findById($formData['attempt_id'], ['assessmentResult.assessment.chapterContent']);
 
-        $answerKey = $attempt->assessmentVersion->answer_key;
+        $answerKey = $attempt->assessmentResult->assessment->answer_key;
         $answers = $formData['answers'];
 
         $submissionSummary = [];
@@ -129,10 +111,10 @@ class StudentAssessmentAttemptService
         ]);
 
         $attemptsTotalScores = $this->studentAssessmentAttemptRepo
-            ->getAttemptsByStudentAndAssessment($attempt->student_id, $attempt->assessmentVersion->assessment_id)
+            ->getAttemptsByStudentAndAssessment($attempt->student_id, $attempt->assessmentResult->assessment_id)
             ->pluck('total_score');
 
-        $assessment = $attempt->assessmentVersion->assessment;
+        $assessment = $attempt->assessmentResult->assessment;
         $assessmentResult = $this->assessmentResultRepo->findByFilter([
             'assessment_id' => $assessment->id,
             'student_id' => $attempt->student_id
@@ -140,32 +122,16 @@ class StudentAssessmentAttemptService
 
         //if has attempt with null total score, final score will be decided later (after instructor grades the essay item/s)
         if ($attemptsTotalScores->containsStrict(null)) {
-            if (!$assessmentResult) {
-                $this->assessmentResultRepo->create([
-                    'student_id' => $attempt->student_id,
-                    'assessment_id' => $assessment->id,
-                    'final_score' => null
+            $assessmentResult->update([
+                'final_score' => null
+            ]);
+        } else {
+            if ($assessment->max_attempts > 1) {
+                $assessmentResult->update([
+                    'final_score' => $assessment->multi_attempt_grading_type === 'avg_score' ? $attemptsTotalScores->avg() : $attemptsTotalScores->max()
                 ]);
             } else {
                 $assessmentResult->update([
-                    'final_score' => null
-                ]);
-            }
-        } else {
-            if ($assessmentResult) {
-                if ($assessment->max_attempts > 1) {
-                    $assessmentResult->update([
-                        'final_score' => $assessment->multi_attempt_grading_type === 'avg_score' ? $attemptsTotalScores->avg() : $attemptsTotalScores->max()
-                    ]);
-                } else {
-                    $assessmentResult->update([
-                        'final_score' => $totalPointsEarned
-                    ]);
-                }
-            } else {
-                $this->assessmentResultRepo->create([
-                    'student_id' => $attempt->student_id,
-                    'assessment_id' => $assessment->id,
                     'final_score' => $totalPointsEarned
                 ]);
             }

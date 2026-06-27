@@ -16,8 +16,8 @@ class StudentAssessmentAttemptResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'studentId' => $this->student_id,
-            'assessmentVersion' => new AssessmentVersionResource($this->whenLoaded('assessmentVersion')),
+            'student' => new StudentResource($this->whenLoaded('student')),
+            'assessmentResult' => new AssessmentResultResource($this->whenLoaded('assessmentResult')),
             'attemptNumber' => $this->attempt_number,
             'answers' => $this->answers,
             'submissionSummary' => $this->submission_summary,

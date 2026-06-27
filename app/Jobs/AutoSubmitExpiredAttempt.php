@@ -26,13 +26,13 @@ class AutoSubmitExpiredAttempt implements ShouldQueue
      */
     public function handle(StudentAssessmentAttemptService $studentAssessmentAttemptService): void
     {
-        $attempt = StudentAssessmentAttempt::with('assessmentVersion.assessment.submissionSettings')->find($this->attemptId);
+        $attempt = StudentAssessmentAttempt::with('assessmentResult.assessment.submissionSettings')->find($this->attemptId);
 
         if (!$attempt || $attempt->status !== 'ongoing') {
             return;
         }
 
-        $settings = $attempt->assessmentVersion->assessment->submissionSettings;
+        $settings = $attempt->assessmentResult->assessment->submissionSettings;
         $now = now();
 
         // Re-verify expiry to avoid a race condition where the student

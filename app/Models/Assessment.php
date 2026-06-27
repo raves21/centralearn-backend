@@ -12,7 +12,8 @@ class Assessment extends Model
     protected $guarded = ['id'];
 
     protected $casts = [
-        'submission_settings' => 'array'
+        'submission_settings' => 'array',
+        'answer_key' => 'array'
     ];
 
     protected $with = [
@@ -27,11 +28,6 @@ class Assessment extends Model
     public function assessmentMaterials()
     {
         return $this->hasMany(AssessmentMaterial::class);
-    }
-
-    public function assessmentVersions()
-    {
-        return $this->hasMany(AssessmentVersion::class);
     }
 
     public function assessmentResults()

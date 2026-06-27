@@ -16,9 +16,10 @@ class AssessmentResultResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'studentId' => $this->student_id,
-            'assessmentId' => $this->assessment_id,
-            'finalScore' => $this->final_score
+            'student' => new StudentResource($this->whenLoaded('student')),
+            'assessment' => new AssessmentResource($this->whenLoaded('assessment')),
+            'finalScore' => $this->final_score,
+            'attempts' => StudentAssessmentAttemptResource::collection($this->whenLoaded('attempts'))
         ];
     }
 }

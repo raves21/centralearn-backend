@@ -13,8 +13,9 @@ return new class extends Migration {
         Schema::create('assessments', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('assessment_materials_hash')->nullable();
-            $table->float('max_achievable_score')->nullable();
+            $table->double('max_achievable_score')->nullable();
             $table->boolean('is_answers_viewable_after_submit');
+            $table->json('answer_key')->nullable();
             $table->boolean('is_score_viewable_after_submit');
             $table->integer('max_attempts')->default(1);
             $table->enum('multi_attempt_grading_type', ['avg_score', 'highest_score'])->nullable();
