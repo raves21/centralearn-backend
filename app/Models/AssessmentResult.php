@@ -20,4 +20,9 @@ class AssessmentResult extends Model
     {
         return $this->belongsTo(Assessment::class);
     }
+
+    public function attempts()
+    {
+        return $this->hasMany(StudentAssessmentAttempt::class);
+    }
 }

@@ -23,10 +23,10 @@ class AutoSubmitExpiredAttempts extends Command
 
         StudentAssessmentAttempt::query()
             ->where('status', 'ongoing')
-            ->with('assessmentVersion.assessment.submissionSettings')
+            ->with('assessment.submissionSettings')
             ->get()
             ->filter(function ($attempt) use ($now) {
-                $settings = $attempt->assessmentVersion->assessment->submissionSettings;
+                $settings = $attempt->assessmentResult->assesment->submissionSettings;
 
                 //Case 1: Time limit expired
                 if ($settings->time_limit_seconds !== null) {

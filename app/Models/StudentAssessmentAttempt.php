@@ -23,8 +23,8 @@ class StudentAssessmentAttempt extends Model
         return $this->belongsTo(Student::class);
     }
 
-    public function assessmentVersion()
+    public function assessmentResult()
     {
-        return $this->belongsTo(AssessmentVersion::class);
+        return $this->belongsTo(AssessmentResult::class);
     }
 }

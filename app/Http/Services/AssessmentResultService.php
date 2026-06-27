@@ -7,12 +7,7 @@ use App\Http\Resources\AssessmentResultResource;
 
 class AssessmentResultService
 {
-    private $assessmentResultRepo;
-
-    public function __construct(AssessmentResultRepository $assessmentResultRepo)
-    {
-        $this->assessmentResultRepo = $assessmentResultRepo;
-    }
+    public function __construct(private AssessmentResultRepository $assessmentResultRepo) {}
 
     public function getAll()
     {
