@@ -37,8 +37,8 @@ class StudentRepository extends BaseRepository
 
         if (!empty($searchQueryFilter)) {
             $query->whereHas('user', function ($q) use ($searchQueryFilter) {
-                $q->whereRaw('LOWER(first_name) LIKE ?', "%{$searchQueryFilter}%")
-                    ->orWhereRaw('LOWER(last_name) LIKE ?', "%{$searchQueryFilter}%");
+                $q->where('first_name', 'LIKE', "%{$searchQueryFilter}%")
+                    ->orWhere('last_name', 'LIKE', "%{$searchQueryFilter}%");
             });
         }
 

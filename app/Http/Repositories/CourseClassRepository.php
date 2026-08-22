@@ -28,8 +28,8 @@ class CourseClassRepository extends BaseRepository
         // Apply query filter (course name/code search)
         $query->when($filters['query'] ?? null, function ($q) use ($filters) {
             $q->whereHas('course', function ($q) use ($filters) {
-                $q->whereRaw('LOWER(name) LIKE ?', ["%{$filters['query']}%"])
-                    ->orWhereRaw('LOWER(code) LIKE ?', ["%{$filters['query']}%"]);
+                $q->where('name', 'LIKE', "%{$filters['query']}%")
+                    ->orWhere('code', 'LIKE', "%{$filters['query']}%");
             });
         });
 
@@ -84,8 +84,8 @@ class CourseClassRepository extends BaseRepository
             ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
             ->when($searchQueryFilter, function ($q) use ($searchQueryFilter) {
                 $q->whereHas('course', function ($q) use ($searchQueryFilter) {
-                    $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchQueryFilter}%"])
-                        ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
+                    $q->where('name', 'LIKE', "%{$searchQueryFilter}%")
+                        ->orWhere('code', 'LIKE', "%{$searchQueryFilter}%");
                 });
             })
             ->with(['course.departments:id,name,code', 'semester', 'section']);
@@ -115,8 +115,8 @@ class CourseClassRepository extends BaseRepository
             ->when($statusFilter, fn($q) => $q->where('status', $statusFilter))
             ->when($searchQueryFilter, function ($q) use ($searchQueryFilter) {
                 $q->whereHas('course', function ($q) use ($searchQueryFilter) {
-                    $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchQueryFilter}%"])
-                        ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
+                    $q->where('name', 'LIKE', "%{$searchQueryFilter}%")
+                        ->orWhere('code', 'LIKE', "%{$searchQueryFilter}%");
                 });
             })
             ->with(['course.departments:id,name,code', 'semester', 'section']);

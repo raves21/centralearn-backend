@@ -27,8 +27,8 @@ class DepartmentRepository extends BaseRepository
 
         if (!empty($searchQueryFilter)) {
             $query->where(function ($q) use ($searchQueryFilter) {
-                $q->whereRaw('LOWER(name) LIKE ?', ["%{$searchQueryFilter}%"])
-                    ->orWhereRaw('LOWER(code) LIKE ?', ["%{$searchQueryFilter}%"]);
+                $q->where('name', 'LIKE', "%{$searchQueryFilter}%")
+                    ->orWhere('code', 'LIKE', "%{$searchQueryFilter}%");
             });
         }
 
