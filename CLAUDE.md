@@ -116,12 +116,23 @@ High-level shape:
 - Two independent access-control concerns on assessments — see
   `.mds/assessment_accessibility_and_submission_settings_doc.md` for the full rules:
   - `ChapterContent.accessibility_settings` (JSON): whether a student can see/open the content at
-    all (`visible` true/false, or a `custom` time window with `access_from`/`access_until`).
+    all. Shape is `{ "visible": true|false|null, "custom": null }` or
+    `{ "visible": null, "custom": { "access_from": "...", "access_until": "..."|null } }` —
+    `visible` and `custom` are mutually exclusive (one set, the other `null`). `access_from` is
+    required inside `custom`; `access_until` of `null` means open-ended access starting from
+    `access_from`. `accessibility_settings` itself is required (not nullable) — every
+    `ChapterContent` must specify either `visible` or `custom`.
   - `AssessmentSubmissionSettings` (dedicated table, `Assessment::submissionSettings()` hasOne,
-    eager-loaded via `$with`): `due_date` + `after_due_date_behavior`
-    (`auto_submit` / `block_new_attempts` / `allow_all`) governing attempt behavior once inside.
+    eager-loaded via `$with`): `time_limit_seconds` (required, per-attempt cap) plus `due_date` +
+    `after_due_date_behavior` (`auto_submit` / `block_new_attempts` / `allow_all`) governing attempt
+    behavior once inside. `due_date` and `after_due_date_behavior` are coupled — both `null` or both
+    set, never one without the other. `auto_submit` force-submits ongoing attempts at the due date
+    and blocks new ones; `block_new_attempts` lets ongoing attempts finish but blocks new ones;
+    `allow_all` blocks nothing past the due date.
   - These interact but are independent — a student can be able to *open* an assessment past its
-    submission due date; what happens next depends on `after_due_date_behavior`.
+    submission due date (if `accessibility_settings.custom.access_until` is later than
+    `due_date`, or access is unrestricted) — what happens once inside then depends on
+    `after_due_date_behavior`. All timestamps in both settings are stored/interpreted as UTC.
 - `AutoSubmitExpiredAttempt` (queued job, dispatched via the `AutoSubmitExpiredAttempts` console
   command) force-submits attempts that have exceeded their time limit or due-date behavior — this is
   why the `queue` worker/service matters even in local dev.

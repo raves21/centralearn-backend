@@ -51,7 +51,7 @@ Access is restricted to a defined time window. `access_from` marks when the cont
 ### Rules
 
 - `visible` and `custom` are mutually exclusive. If one has a value, the other must be `null`.
-- If `accessibility_settings` itself is `null`, the content is treated as **hidden** (`visible: false`) by default.
+- `accessibility_settings` is **required** (not nullable) on `chapter_contents` — every row must specify either `visible` or `custom`.
 - All timestamps are stored and interpreted as **UTC**.
 
 ---
