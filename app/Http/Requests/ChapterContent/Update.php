@@ -100,7 +100,7 @@ class Update extends FormRequest
 
                 // submission settings
                 'content.submission_settings' => ['nullable', 'array'],
-                'content.submission_settings.time_limit_seconds' => ['nullable', 'integer', 'min:1'],
+                'content.submission_settings.time_limit_seconds' => ['nullable', 'integer'],
                 'content.submission_settings.due_date' => ['nullable', 'date'],
                 'content.submission_settings.after_due_date_behavior' => [
                     'nullable',
